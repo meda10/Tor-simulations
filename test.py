@@ -1,8 +1,8 @@
 import binascii
+import math
 import os
 import random
 import sys
-import math
 
 try:
     import stem
@@ -230,8 +230,8 @@ if __name__ == '__main__':
     # if len(sys.argv) < 2 or not sys.argv[1].isdigit():
     #     print('We need a numeric argument indicating how many descriptors to make.')
     #    sys.exit(1)
-    
-    # make_descriptors(5, 5, 5)
+
+    make_descriptors(5, 5, 5)
     parse_out()
     # create_server_descriptors()
     # create_consensus()
