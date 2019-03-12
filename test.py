@@ -19,13 +19,30 @@ except ImportError:
     print('Creating descriptors requires stem (https://stem.torproject.org/)')
     sys.exit(1)
 
-if not hasattr(stem.descriptor, 'create_signing_key'):
-    print('This requires stem version 1.6 or later, you are running version %s' % stem.__version__)
-    sys.exit(1)
-
 OUTPUT_DIR = os.path.join(os.getcwd(), 'generated_descriptors')
 
 
+def run_simulation_1(guard_nodes=5, middle_nodes=5, exit_nodes=5, n_samples=5):
+    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
+    run_tor_path_simulator(n_samples)
+    paths = get_paths()
+    generate_simple_graph(routers, paths)
+
+
+def run_simulation_2(guard_nodes=1, middle_nodes=20, exit_nodes=20, n_samples=25):
+    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
+    run_tor_path_simulator(n_samples)
+    paths = get_paths()
+    generate_simple_graph(routers, paths)
+
+
+def run_simulation_3(guard_nodes=3, middle_nodes=20, exit_nodes=20, n_samples=25):
+    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
+    run_tor_path_simulator(n_samples)
+    paths = get_paths()
+    generate_simple_graph(routers, paths)
+    
+    
 def make_output_dir():
     if not os.path.exists(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
@@ -79,10 +96,10 @@ def parse_out():
             exit_node.append(lines[i].split()[4])
         if not lines[i].split()[2].__eq__('Guard'):
             path.append((lines[i].split()[2], lines[i].split()[3], lines[i].split()[4]))
-    
-    print(guard_node)
-    print(middle_node)
-    print(exit_node)
+
+    # print(guard_node)
+    # print(middle_node)
+    # print(exit_node)
     
     return path
 
@@ -275,50 +292,88 @@ def generate_graph(routers, paths):
     dot.render('test-output/simple_simulation.gv', view=False)
 
 
-def graph_test_generator(routers, paths):
+def generate_simple_graph(routers, paths):
     guard_node = []
     middle_node = []
     exit_node = []
+
+    colors = ['aquamarine', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
+              'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen',
+              'darkkhaki', 'darkolivegreen', 'darkorange', 'darkorchid', 'darksalmon', 'darkseagreen', 'darkslateblue',
+              'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgrey', 'dodgerblue',
+              'firebrick', 'forestgreen', 'gold', 'goldenrod', 'green', 'greenyellow', 'hotpink', 'indianred', 'indigo',
+              'lawngreen', 'magenta', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue',
+              'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'navajowhite', 'olivedrab',
+              'orange', 'orangered', 'orchid', 'paleturquoise', 'palevioletred', 'peru', 'plum', 'purple', 'red',
+              'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'sienna', 'slateblue', 'slategrey', 'springgreen',
+              'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
     
     # graph = Digraph(comment='Nodes')
     graph = Digraph('test', format='png')
-    
+
+    graph.attr(rankdir='TB', fontsize='10', fontname='Verdana')
+    #     graph.node_attr(height='4', fontname='Verdana', fontsize='10')
     subgraph_guards = Digraph('subgraph_guards')
     subgraph_middles = Digraph('subgraph_middles')
     subgraph_exits = Digraph('subgraph_exits')
-    
+    subgraph_legend = Digraph('cluster_legend')
+
     subgraph_guards.graph_attr.update(rank='same')
     subgraph_middles.graph_attr.update(rank='same')
     subgraph_exits.graph_attr.update(rank='same')
-    
+
+    subgraph_legend.graph_attr.update(size='2')
+
     for r in routers:
         if "Guard" in r.flags:
-            # guard_node.append(r.address)
-            subgraph_guards.node(str(r.address), color='red')
+            guard_node.append(r.address)
+            # subgraph_guards.node(str(r.address), color='red')
+            subgraph_guards.node(str(r.address), shape='box', fontsize='10', fontname='Verdana', height='0.4')
         elif "Exit" in r.flags:
-            # exit_node.append(r.address)
-            subgraph_exits.node(str(r.address), color='green')
+            exit_node.append(r.address)
+            # subgraph_exits.node(str(r.address), color='green')
+            subgraph_exits.node(str(r.address), shape='hexagon', fontsize='10', fontname='Verdana', height='0.4')
         else:
-            # middle_node.append(r.address)
-            subgraph_middles.node(str(r.address), color='blue')
-    
-    for path in paths:
-        graph.edge(path[0], path[1])
-        graph.edge(path[1], path[2])
-    
+            middle_node.append(r.address)
+            # subgraph_middles.node(str(r.address), color='blue')
+            subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana', height='0.4')
+
+    subgraph_legend.attr(label='Key')
+    subgraph_legend.node('GM', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4')
+    subgraph_legend.node('M', 'Middle', shape='ellipse', fontsize='10', fontname='Verdana', height='0.4')
+    subgraph_legend.node('E', 'Exit', shape='hexagon', fontsize='10', fontname='Verdana', height='0.4')
+    subgraph_legend.edge('GM', 'M', style='invis')
+    subgraph_legend.edge('M', 'E', style='invis')
+
+    graph.subgraph(subgraph_legend)
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
     graph.subgraph(subgraph_exits)
-    
+
+    for path in paths:
+        color = random.randint(0, 73)
+        graph.edge(path[0], path[1], color="{}".format(colors[color]))
+        graph.edge(path[1], path[2], color="{}".format(colors[color]))
+
+    for i in range(0, len(guard_node)):
+        for j in range(0, len(middle_node)):
+            if i is j:
+                graph.edge(guard_node[i], middle_node[j], style='invis')
+
+    for i in range(0, len(middle_node)):
+        for j in range(0, len(exit_node)):
+            if i is j:
+                graph.edge(middle_node[i], exit_node[j], style='invis')
+
     graph.render('test-output/simple_simulation.gv', view=True)
 
 
-def run_simulation():
+def run_tor_path_simulator(n_samples=5):
     dir_path = '//home//petr//TorPs//out//network-state-2019-02'
     output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
-    num_samples = '5'
+    num_samples = n_samples
     tracefile = '//home//petr//TorPs//in//users2-processed.traces.pickle'
-    usermodel = 'simple=6000'
+    usermodel = 'simple=60000'
     format_arg = 'normal'
     adv_guard_bw = '0'
     adv_exit_bw = '0'
@@ -349,24 +404,41 @@ def run_simulation():
               "--num_adv_guards {} --num_adv_exits {} --num_guards {} --guard_expiration {} --loglevel {} {} > {}"
               .format(dir_path, num_samples, tracefile, usermodel, format_arg, adv_guard_bw, adv_exit_bw, adv_time,
                       num_adv_guards, num_adv_exits, num_guards, gard_expiration, loglevel, path_alg, output_file_path))
+
+
+def get_paths():
+    output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
+    with open(output_file_path, 'r+') as fh:
+        lines = fh.readlines()
+        fh.close()
     
+    guard_node = ['Guard']
+    middle_node = ['Middle']
+    exit_node = ['Exit']
+    path = []
+    
+    for i in range(0, len(lines)):
+        if lines[i].split()[2] not in guard_node and not lines[i].split()[2].__eq__('Guard'):
+            guard_node.append(lines[i].split()[2])
+        if lines[i].split()[3] not in middle_node and not lines[i].split()[3].__eq__('IP'):
+            middle_node.append(lines[i].split()[3])
+        if lines[i].split()[4] not in exit_node and not lines[i].split()[4].__eq__('Middle'):
+            exit_node.append(lines[i].split()[4])
+        if not lines[i].split()[2].__eq__('Guard'):
+            x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
+            if x not in path:
+                path.append(x)
     """
-    os.system("python //home//petr//TorPs//pathsim.py simulate "
-              "--nsf_dir //home//petr//TorPs//out//network-state-2019-02 --num_samples 1 "
-              "--user_model simple=600 --format normal tor")
+    print(guard_node)
+    print(middle_node)
+    print(exit_node)
+    print(len(path))
+    print(path)
     """
+    
+    return path
 
 
 if __name__ == '__main__':
-    # if len(sys.argv) < 2 or not sys.argv[1].isdigit():
-    #     print('We need a numeric argument indicating how many descriptors to make.')
-    #    sys.exit(1)
-
-    routers = make_descriptors(1, 5, 1)
-    run_simulation()
-    paths = parse_out()
-    graph_test_generator(routers, paths)
-    # generate_graph(routers, paths)
     
-    # create_server_descriptors()
-    # create_consensus()
+    run_simulation_3()
