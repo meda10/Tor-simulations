@@ -75,8 +75,7 @@ def write_descriptor(desc, filename):
             descriptor_file.write(str(desc))
 
 
-def parse_out():
-    # output_file_path = '//home//petr//TorPs//output'
+def get_paths():
     output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
     with open(output_file_path, 'r+') as fh:
         lines = fh.readlines()
@@ -95,11 +94,16 @@ def parse_out():
         if lines[i].split()[4] not in exit_node and not lines[i].split()[4].__eq__('Middle'):
             exit_node.append(lines[i].split()[4])
         if not lines[i].split()[2].__eq__('Guard'):
-            path.append((lines[i].split()[2], lines[i].split()[3], lines[i].split()[4]))
-
-    # print(guard_node)
-    # print(middle_node)
-    # print(exit_node)
+            x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
+            if x not in path:
+                path.append(x)
+    """
+    print(guard_node)
+    print(middle_node)
+    print(exit_node)
+    print(len(path))
+    print(path)
+    """
     
     return path
 
@@ -253,45 +257,6 @@ def make_descriptors(guard_node=0, middle_node=0, exit_node=0):
     return consensus_entries
 
 
-def generate_graph(routers, paths):
-    MyStruct = namedtuple("path", "guard middle exit")
-    x = MyStruct(guard=('Unnamed1548', '214.215.85.37'),
-                 middle=('Unnamed1549', '192.255.55.25'),
-                 exit=('Unnamed1550', '87.84.85.37'))
-    
-    guard_node = []
-    middle_node = []
-    exit_node = []
-    
-    dot = Digraph(comment='Nodes')
-    
-    for r in routers:
-        if "Guard" in r.flags:
-            guard_node.append(r.address)
-        elif "Exit" in r.flags:
-            exit_node.append(r.address)
-        else:
-            middle_node.append(r.address)
-        dot.node(r.address, r.address)
-    
-    for g in guard_node:
-        print(g)
-    
-    g = ('; '.join(str(g) for g in guard_node))
-    e = ('; '.join(str(e) for e in exit_node))
-    m = ('; '.join(str(m) for m in middle_node))
-    
-    dot.attr(rank="same; " + g)
-    dot.attr(rank="same; " + e)
-    dot.attr(rank="same; " + m)
-    
-    for path in paths:
-        dot.edge(path[0], path[1])
-        dot.edge(path[1], path[2])
-    
-    dot.render('test-output/simple_simulation.gv', view=False)
-
-
 def generate_simple_graph(routers, paths):
     guard_node = []
     middle_node = []
@@ -404,39 +369,6 @@ def run_tor_path_simulator(n_samples=5):
               "--num_adv_guards {} --num_adv_exits {} --num_guards {} --guard_expiration {} --loglevel {} {} > {}"
               .format(dir_path, num_samples, tracefile, usermodel, format_arg, adv_guard_bw, adv_exit_bw, adv_time,
                       num_adv_guards, num_adv_exits, num_guards, gard_expiration, loglevel, path_alg, output_file_path))
-
-
-def get_paths():
-    output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
-    with open(output_file_path, 'r+') as fh:
-        lines = fh.readlines()
-        fh.close()
-    
-    guard_node = ['Guard']
-    middle_node = ['Middle']
-    exit_node = ['Exit']
-    path = []
-    
-    for i in range(0, len(lines)):
-        if lines[i].split()[2] not in guard_node and not lines[i].split()[2].__eq__('Guard'):
-            guard_node.append(lines[i].split()[2])
-        if lines[i].split()[3] not in middle_node and not lines[i].split()[3].__eq__('IP'):
-            middle_node.append(lines[i].split()[3])
-        if lines[i].split()[4] not in exit_node and not lines[i].split()[4].__eq__('Middle'):
-            exit_node.append(lines[i].split()[4])
-        if not lines[i].split()[2].__eq__('Guard'):
-            x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            if x not in path:
-                path.append(x)
-    """
-    print(guard_node)
-    print(middle_node)
-    print(exit_node)
-    print(len(path))
-    print(path)
-    """
-    
-    return path
 
 
 if __name__ == '__main__':
