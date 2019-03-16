@@ -10,6 +10,7 @@ try:
     import stem.util.str_tools
     import ntor
     from graphviz import Digraph
+    from graphviz import Graph
     from collections import namedtuple
     from stem.descriptor.server_descriptor import RelayDescriptor, _truncated_b64encode
     from stem.descriptor.extrainfo_descriptor import RelayExtraInfoDescriptor
@@ -33,16 +34,16 @@ def run_simulation_2(guard_nodes=1, middle_nodes=20, exit_nodes=20, n_samples=25
     routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
     run_tor_path_simulator(n_samples)
     paths = get_paths()
-    generate_simple_graph(routers, paths)
+    generate_large_graph(routers, paths)
 
 
 def run_simulation_3(guard_nodes=3, middle_nodes=20, exit_nodes=20, n_samples=25):
     routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
     run_tor_path_simulator(n_samples)
     paths = get_paths()
-    generate_simple_graph(routers, paths)
-    
-    
+    generate_large_graph(routers, paths)
+
+
 def make_output_dir():
     if not os.path.exists(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
@@ -69,10 +70,12 @@ def write_descriptor(desc, filename):
         with open(output_desc_path, 'w') as descriptor_file:
             descriptor_file.write('@type server-descriptor 1.0\n')
             descriptor_file.write(str(desc))
+            descriptor_file.close()
     elif filename == 'consensus':
         with open(output_consensus_path, 'w') as descriptor_file:
             descriptor_file.write('@type network-status-consensus-3 1.0\n')
             descriptor_file.write(str(desc))
+            descriptor_file.close()
 
 
 def get_paths():
@@ -104,6 +107,8 @@ def get_paths():
     print(len(path))
     print(path)
     """
+    for p in path:
+        print(p)
     
     return path
 
@@ -262,7 +267,7 @@ def generate_simple_graph(routers, paths):
     middle_node = []
     exit_node = []
 
-    colors = ['aquamarine', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
+    colors = ['aquamarine', 'black', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
               'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen',
               'darkkhaki', 'darkolivegreen', 'darkorange', 'darkorchid', 'darksalmon', 'darkseagreen', 'darkslateblue',
               'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgrey', 'dodgerblue',
@@ -274,9 +279,19 @@ def generate_simple_graph(routers, paths):
               'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
     
     # graph = Digraph(comment='Nodes')
-    graph = Digraph('test', format='png')
+    graph = Digraph('test', format='svg')
 
-    graph.attr(rankdir='TB', fontsize='10', fontname='Verdana')
+    graph.attr(rankdir='TB')
+    graph.attr(fontsize='10')
+    graph.attr(fontname='Verdana')
+
+    layers = []
+    for i in range(0, len(paths)):
+        layers.append("path{}:".format(i))
+
+    graph.attr(layers=''.join(layers)[:-1])
+
+    # graph.node_attr(leyer="all")
     #     graph.node_attr(height='4', fontname='Verdana', fontsize='10')
     subgraph_guards = Digraph('subgraph_guards')
     subgraph_middles = Digraph('subgraph_middles')
@@ -315,22 +330,178 @@ def generate_simple_graph(routers, paths):
     graph.subgraph(subgraph_middles)
     graph.subgraph(subgraph_exits)
 
-    for path in paths:
-        color = random.randint(0, 73)
-        graph.edge(path[0], path[1], color="{}".format(colors[color]))
-        graph.edge(path[1], path[2], color="{}".format(colors[color]))
-
+    for index, path in enumerate(paths, start=0):
+        color = random.randint(0, 72)
+        graph.edge(path[0], path[1], color="{}".format(colors[color]), layer="path{}".format(index))
+        graph.edge(path[1], path[2], color="{}".format(colors[color]), layer="path{}".format(index))
+    
     for i in range(0, len(guard_node)):
         for j in range(0, len(middle_node)):
-            if i is j:
-                graph.edge(guard_node[i], middle_node[j], style='invis')
-
+            if len(guard_node) == len(middle_node):
+                if i is j:
+                    graph.edge(guard_node[i], middle_node[j], style='invis')
+            elif len(guard_node) < len(middle_node):
+                if i is j:
+                    graph.edge(guard_node[i], middle_node[j], style='invis')
+                if len(guard_node) - 1 == i and j > i:
+                    graph.edge(guard_node[i], middle_node[j], style='invis')
+            else:
+                if i is j:
+                    graph.edge(guard_node[i], middle_node[j], style='invis')
+                if len(middle_node) - 1 == j and i > j:
+                    graph.edge(guard_node[i], middle_node[j], style='invis')
+    
     for i in range(0, len(middle_node)):
         for j in range(0, len(exit_node)):
-            if i is j:
-                graph.edge(middle_node[i], exit_node[j], style='invis')
+            if len(middle_node) == len(exit_node):
+                if i is j:
+                    graph.edge(middle_node[i], exit_node[j], style='invis')
+            elif len(middle_node) < len(exit_node):
+                if i is j:
+                    graph.edge(middle_node[i], exit_node[j], style='invis')
+                if len(middle_node) - 1 == i and j > i:
+                    graph.edge(middle_node[i], exit_node[j], style='invis')
+            else:
+                if i is j:
+                    graph.edge(middle_node[i], exit_node[j], style='invis')
+                if len(exit_node) - 1 == j and i > j:
+                    graph.edge(middle_node[i], exit_node[j], style='invis')
 
-    graph.render('test-output/simple_simulation.gv', view=True)
+    graph.render('test-output/simulation.dot', view=False)
+
+
+def generate_large_graph(routers, paths):
+    guard_node = []
+    middle_node = []
+    exit_node = []
+    
+    colors = ['aquamarine', 'black', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
+              'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen',
+              'darkkhaki', 'darkolivegreen', 'darkorange', 'darkorchid', 'darksalmon', 'darkseagreen', 'darkslateblue',
+              'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgrey', 'dodgerblue',
+              'firebrick', 'forestgreen', 'gold', 'goldenrod', 'green', 'greenyellow', 'hotpink', 'indianred', 'indigo',
+              'lawngreen', 'magenta', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue',
+              'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'navajowhite', 'olivedrab',
+              'orange', 'orangered', 'orchid', 'paleturquoise', 'palevioletred', 'peru', 'plum', 'purple', 'red',
+              'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'sienna', 'slateblue', 'slategrey', 'springgreen',
+              'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
+    
+    graph = Digraph('test', format='svg')
+    
+    graph.attr(layout='twopi')  # neato twopi
+    graph.attr(ranksep='4 1.5 1.5')
+    graph.attr(root='PC')
+    graph.attr(size="5.75,8.25")
+    graph.attr(overlap="false")
+    graph.attr(splines="true")
+    # graph.attr(concentrate="true")
+    
+    layers = []
+    for i in range(0, len(paths)):
+        layers.append("path{}:".format(i))
+    
+    graph.attr(layers=''.join(layers)[:-1])
+    
+    subgraph_guards = Digraph('subgraph_guards')
+    subgraph_middles = Digraph('subgraph_middles')
+    subgraph_exits = Digraph('subgraph_exits')
+    
+    subgraph_guards.graph_attr.update(rank='same')
+    subgraph_middles.graph_attr.update(rank='same')
+    subgraph_exits.graph_attr.update(rank='same')
+    
+    graph.node("PC", label="", style='filled', fillcolor="black", shape='circle')
+    
+    for index, r in enumerate(routers, start=0):
+        if "Guard" in r.flags:
+            guard_node.append(r.address)
+            subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='box',
+                                 height='0.3', width='0.3')
+        elif "Exit" in r.flags:
+            exit_node.append(r.address)
+            subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='hexagon',
+                                height='0.3', width='0.3')
+        else:
+            middle_node.append(r.address)
+            subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='ellipse',
+                                  height='0.3', width='0.3')
+    
+    graph.subgraph(subgraph_guards)
+    graph.subgraph(subgraph_middles)
+    graph.subgraph(subgraph_exits)
+    
+    for i in range(0, len(guard_node)):
+        graph.edge("PC", guard_node[i], style="invis")
+    
+    if len(middle_node) > len(guard_node):
+        div = len(middle_node) / len(guard_node)
+        x = 0
+        for i in range(0, len(guard_node)):
+            for j in range(x, round(div) + x):
+                if j < len(middle_node):
+                    graph.edge(guard_node[i], middle_node[j], style="invis")
+            x = x + round(div)
+            if i == (len(guard_node) - 1) and div != round(div):
+                for j in range(x, len(middle_node)):
+                    graph.edge(guard_node[i], middle_node[j], style="invis")
+    else:
+        for i in range(0, len(guard_node)):
+            for j in range(0, len(middle_node)):
+                if i == j:
+                    graph.edge(guard_node[i], middle_node[j], style="invis")
+    
+    if len(exit_node) > len(middle_node):
+        div = len(exit_node) / len(middle_node)
+        x = 0
+        for i in range(0, len(middle_node)):
+            for j in range(x, round(div) + x):
+                if j < len(exit_node):
+                    graph.edge(middle_node[i], exit_node[j], style="invis")
+            x = x + round(div)
+            if i == (len(middle_node) - 1) and div != round(div):
+                for j in range(x, len(exit_node)):
+                    graph.edge(middle_node[i], exit_node[j], style="invis")
+    
+    else:
+        for i in range(0, len(middle_node)):
+            for j in range(0, len(exit_node)):
+                if i == j:
+                    graph.edge(middle_node[i], exit_node[j], style="invis")
+    
+    for index, path in enumerate(paths, start=0):
+        graph.edge("PC", path[0], constraint="false", weight='0', layer="path{}".format(index))
+        graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
+        graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
+    
+    graph.render('test-output/s.dot', view=True)
+
+
+def create_html():
+    output_file = '//home//petr//PycharmProjects//Descriptors//test-output//index.html'
+    # svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//simulation.dot.svg'
+    svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//s.dot.svg'
+    
+    with open(svg_file, 'r') as svg:
+        s = svg.read()
+        svg.close()
+    
+    with open(output_file, 'w') as html_file:
+        html_file.write("<!DOCTYPE html>\n"
+                        "<html lang=\"en\">\n"
+                        "<head>\n"
+                        "<meta charset=\"UTF-8\">\n"
+                        "<title>Title</title>\n"
+                        "<link rel=\"stylesheet\" href=\"animation.css\">\n"
+                        "<script defer=\"\" src=\"animation.js\"></script>\n"
+                        "</head>\n"
+                        "<body>\n"
+                        "<p>Výsledek:</p>\n"
+                        "<ul id=\"link-container\">\n"
+                        "</ul>\n")
+        html_file.write(s)
+        html_file.write("</body>\n"
+                        "</html>\n")
+        html_file.close()
 
 
 def run_tor_path_simulator(n_samples=5):
@@ -373,4 +544,7 @@ def run_tor_path_simulator(n_samples=5):
 
 if __name__ == '__main__':
     
+    # run_simulation_2(20,3,20,50)
+    # run_simulation_2(20, 20, 20, 155)
     run_simulation_3()
+    create_html()
