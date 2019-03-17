@@ -434,8 +434,6 @@ def generate_large_graph(routers, paths, guards_to_generate):
     graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
     graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
                height="1.3", margin="20")
-
-    # graph.edge("PC", "SERVER")
     
     for index, r in enumerate(routers, start=0):
         if "Guard" in r.flags:
@@ -507,12 +505,54 @@ def generate_large_graph(routers, paths, guards_to_generate):
     graph.render('test-output/simulation.dot', view=True)
 
 
+def generate_large_graph_legend():
+    graph = Digraph('test', format='svg')
+    
+    graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")  # neato twopi dot
+    
+    graph.attr(size="3.5,5")
+    
+    subgraph_legend = Digraph('cluster_legend')
+    guard_l = Digraph('cluster_guard_l')
+    middle_l = Digraph('cluster_middle_l')
+    exit_l = Digraph('cluster_exit_l')
+    gu_mi_l = Digraph('cluster_gu_mi_l')
+    gu_ex_l = Digraph('cluster_gu_ex_l')
+    
+    subgraph_legend.attr(label="Key")
+    guard_l.attr(label="Guard", penwidth="0")
+    middle_l.attr(label="Middle", penwidth="0")
+    exit_l.attr(label="Exit", penwidth="0")
+    gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
+    gu_ex_l.attr(label="Guard\nExit", penwidth="0")
+    
+    guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='box', height='0.3', width='0.3')
+    exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='hexagon', height='0.3', width='0.3')
+    middle_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='ellipse', height='0.3', width='0.3')
+    gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="darkorchid1", shape='box', height='0.3', width='0.3')
+    gu_ex_l.node("GU_EX", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3', width='0.3')
+    
+    subgraph_legend.subgraph(gu_mi_l)
+    subgraph_legend.subgraph(gu_ex_l)
+    subgraph_legend.subgraph(exit_l)
+    subgraph_legend.subgraph(middle_l)
+    subgraph_legend.subgraph(guard_l)
+    graph.subgraph(subgraph_legend)
+    
+    graph.render('test-output/legend.dot', view=True)
+
+
 def create_html():
     output_file = '//home//petr//PycharmProjects//Descriptors//test-output//index.html'
     svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//simulation.dot.svg'
+    svg_file_legend = '//home//petr//PycharmProjects//Descriptors//test-output//legend.dot.svg'
     
     with open(svg_file, 'r') as svg:
         s = svg.read()
+        svg.close()
+
+    with open(svg_file_legend, 'r') as svg:
+        l = svg.read()
         svg.close()
     
     with open(output_file, 'w') as html_file:
@@ -529,6 +569,8 @@ def create_html():
                         "<ul id=\"link-container\">\n"
                         "</ul>\n")
         html_file.write(s)
+        html_file.write("<br>\n")
+        html_file.write(l)
         html_file.write("</body>\n"
                         "</html>\n")
         html_file.close()
@@ -573,12 +615,14 @@ def run_tor_path_simulator(n_samples=5):
 
 
 if __name__ == '__main__':
+    # generate_large_graph_legend()
     
     # run_simulation_2(20,3,20,50)
     # run_simulation_1(8,3,5,19)
-    run_simulation_0(10, 30, 8, 20)
+    
+    run_simulation_2(10, 30, 8, 20)
     create_html()
-
+    
     # todo generate exit/Guard - parse flags
     # todo generate IP
     # todo configfile
