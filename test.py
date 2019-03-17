@@ -23,6 +23,13 @@ except ImportError:
 OUTPUT_DIR = os.path.join(os.getcwd(), 'generated_descriptors')
 
 
+def run_simulation_0(guard_nodes=20, middle_nodes=20, exit_nodes=20, n_samples=25, fake_guards=0):
+    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
+    run_tor_path_simulator(n_samples)
+    paths = get_paths()
+    generate_large_graph(routers, paths, fake_guards)
+
+
 def run_simulation_1(guard_nodes=5, middle_nodes=5, exit_nodes=5, n_samples=5):
     routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
     run_tor_path_simulator(n_samples)
@@ -31,17 +38,11 @@ def run_simulation_1(guard_nodes=5, middle_nodes=5, exit_nodes=5, n_samples=5):
 
 
 def run_simulation_2(guard_nodes=1, middle_nodes=20, exit_nodes=20, n_samples=25):
-    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
-    run_tor_path_simulator(n_samples)
-    paths = get_paths()
-    generate_large_graph(routers, paths)
+    run_simulation_0(1, middle_nodes, exit_nodes, n_samples, guard_nodes - 1)
 
 
 def run_simulation_3(guard_nodes=3, middle_nodes=20, exit_nodes=20, n_samples=25):
-    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
-    run_tor_path_simulator(n_samples)
-    paths = get_paths()
-    generate_large_graph(routers, paths)
+    run_simulation_0(3, middle_nodes, exit_nodes, n_samples, guard_nodes - 3)
 
 
 def make_output_dir():
@@ -278,12 +279,14 @@ def generate_simple_graph(routers, paths):
               'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'sienna', 'slateblue', 'slategrey', 'springgreen',
               'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
     
-    # graph = Digraph(comment='Nodes')
     graph = Digraph('test', format='svg')
 
     graph.attr(rankdir='TB')
     graph.attr(fontsize='10')
-    graph.attr(fontname='Verdana')
+
+    if len(paths) > 20:
+        graph.attr(overlap="false")
+        graph.attr(splines='false')
 
     layers = []
     for i in range(0, len(paths)):
@@ -291,9 +294,9 @@ def generate_simple_graph(routers, paths):
 
     graph.attr(layers=''.join(layers)[:-1])
 
-    # graph.node_attr(leyer="all")
-    #     graph.node_attr(height='4', fontname='Verdana', fontsize='10')
     subgraph_guards = Digraph('subgraph_guards')
+    subgraph_pc = Digraph('subgraph_pc')
+    subgraph_server = Digraph('subgraph_server')
     subgraph_middles = Digraph('subgraph_middles')
     subgraph_exits = Digraph('subgraph_exits')
     subgraph_legend = Digraph('cluster_legend')
@@ -301,40 +304,67 @@ def generate_simple_graph(routers, paths):
     subgraph_guards.graph_attr.update(rank='same')
     subgraph_middles.graph_attr.update(rank='same')
     subgraph_exits.graph_attr.update(rank='same')
+    subgraph_pc.graph_attr.update(rank='same')
+    subgraph_server.graph_attr.update(rank='same')
 
     subgraph_legend.graph_attr.update(size='2')
+
+    computer_icon_path = "resources//computer.png"
+    server_icon_path = "resources//server.svg"
+    subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true",
+                     width="0.6", height="0.6")
+    subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true",
+                         width="0.7", height="0.7", margin="20")
 
     for r in routers:
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            # subgraph_guards.node(str(r.address), color='red')
-            subgraph_guards.node(str(r.address), shape='box', fontsize='10', fontname='Verdana', height='0.4')
+            subgraph_guards.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            # subgraph_exits.node(str(r.address), color='green')
-            subgraph_exits.node(str(r.address), shape='hexagon', fontsize='10', fontname='Verdana', height='0.4')
+            subgraph_exits.node(str(r.address), shape='hexagon', fontsize='10', fontname='Verdana')
         else:
             middle_node.append(r.address)
-            # subgraph_middles.node(str(r.address), color='blue')
-            subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana', height='0.4')
+            subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
 
     subgraph_legend.attr(label='Key')
+    subgraph_legend.node('X1', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4',
+                         style='invis')
+    subgraph_legend.node('X2', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4',
+                         style='invis')
     subgraph_legend.node('GM', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4')
     subgraph_legend.node('M', 'Middle', shape='ellipse', fontsize='10', fontname='Verdana', height='0.4')
     subgraph_legend.node('E', 'Exit', shape='hexagon', fontsize='10', fontname='Verdana', height='0.4')
+
+    subgraph_legend.edge('X1', 'GM', style='invis')
     subgraph_legend.edge('GM', 'M', style='invis')
     subgraph_legend.edge('M', 'E', style='invis')
+    subgraph_legend.edge('E', 'X2', style='invis')
 
     graph.subgraph(subgraph_legend)
+    graph.subgraph(subgraph_pc)
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
     graph.subgraph(subgraph_exits)
+    graph.subgraph(subgraph_server)
 
+    for guard in guard_node:
+        graph.edge("PC", guard, style='invis')
+
+    for exit_n in exit_node:
+        graph.edge(exit_n, "SERVER", style='invis')
+    
     for index, path in enumerate(paths, start=0):
         color = random.randint(0, 72)
-        graph.edge(path[0], path[1], color="{}".format(colors[color]), layer="path{}".format(index))
-        graph.edge(path[1], path[2], color="{}".format(colors[color]), layer="path{}".format(index))
-    
+        graph.edge("PC", path[0], color="{}".format(colors[color]), constraint="false", weight='0',
+                   layer="path{}".format(index))
+        graph.edge(path[0], path[1], color="{}".format(colors[color]), constraint="false", weight='0',
+                   layer="path{}".format(index))
+        graph.edge(path[1], path[2], color="{}".format(colors[color]), constraint="false", weight='0',
+                   layer="path{}".format(index))
+        graph.edge(path[2], "SERVER", color="{}".format(colors[color]), constraint="false", weight='0',
+                   layer="path{}".format(index))
+
     for i in range(0, len(guard_node)):
         for j in range(0, len(middle_node)):
             if len(guard_node) == len(middle_node):
@@ -367,31 +397,20 @@ def generate_simple_graph(routers, paths):
                 if len(exit_node) - 1 == j and i > j:
                     graph.edge(middle_node[i], exit_node[j], style='invis')
 
-    graph.render('test-output/simulation.dot', view=False)
+    graph.render('test-output/simulation.dot', view=True)
 
 
-def generate_large_graph(routers, paths):
+def generate_large_graph(routers, paths, guards_to_generate):
     guard_node = []
     middle_node = []
     exit_node = []
-    
-    colors = ['aquamarine', 'black', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
-              'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen',
-              'darkkhaki', 'darkolivegreen', 'darkorange', 'darkorchid', 'darksalmon', 'darkseagreen', 'darkslateblue',
-              'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgrey', 'dodgerblue',
-              'firebrick', 'forestgreen', 'gold', 'goldenrod', 'green', 'greenyellow', 'hotpink', 'indianred', 'indigo',
-              'lawngreen', 'magenta', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue',
-              'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'navajowhite', 'olivedrab',
-              'orange', 'orangered', 'orchid', 'paleturquoise', 'palevioletred', 'peru', 'plum', 'purple', 'red',
-              'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'sienna', 'slateblue', 'slategrey', 'springgreen',
-              'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
     
     graph = Digraph('test', format='svg')
     
     graph.attr(layout='twopi')  # neato twopi
     graph.attr(ranksep='4 1.5 1.5')
     graph.attr(root='PC')
-    graph.attr(size="5.75,8.25")
+    graph.attr(size="6.75,9.25")
     graph.attr(overlap="false")
     graph.attr(splines="true")
     # graph.attr(concentrate="true")
@@ -409,8 +428,14 @@ def generate_large_graph(routers, paths):
     subgraph_guards.graph_attr.update(rank='same')
     subgraph_middles.graph_attr.update(rank='same')
     subgraph_exits.graph_attr.update(rank='same')
-    
-    graph.node("PC", label="", style='filled', fillcolor="black", shape='circle')
+
+    computer_icon_path = "resources//computer.png"
+    server_icon_path = "resources//server.svg"
+    graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
+    graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
+               height="1.3", margin="20")
+
+    # graph.edge("PC", "SERVER")
     
     for index, r in enumerate(routers, start=0):
         if "Guard" in r.flags:
@@ -425,6 +450,11 @@ def generate_large_graph(routers, paths):
             middle_node.append(r.address)
             subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='ellipse',
                                   height='0.3', width='0.3')
+
+    for i in range(0, guards_to_generate):
+        guard_node.append("XX{}".format(i))
+        subgraph_guards.node("XX{}".format(i), label="", style='filled', fillcolor="coral2", shape='box',
+                             height='0.3', width='0.3')
     
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
@@ -472,14 +502,14 @@ def generate_large_graph(routers, paths):
         graph.edge("PC", path[0], constraint="false", weight='0', layer="path{}".format(index))
         graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
         graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
-    
-    graph.render('test-output/s.dot', view=True)
+        graph.edge(path[2], "SERVER", constraint="false", layer="path{}".format(index))
+
+    graph.render('test-output/simulation.dot', view=True)
 
 
 def create_html():
     output_file = '//home//petr//PycharmProjects//Descriptors//test-output//index.html'
-    # svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//simulation.dot.svg'
-    svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//s.dot.svg'
+    svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//simulation.dot.svg'
     
     with open(svg_file, 'r') as svg:
         s = svg.read()
@@ -545,6 +575,10 @@ def run_tor_path_simulator(n_samples=5):
 if __name__ == '__main__':
     
     # run_simulation_2(20,3,20,50)
-    # run_simulation_2(20, 20, 20, 155)
-    run_simulation_3()
+    # run_simulation_1(8,3,5,19)
+    run_simulation_0(10, 30, 8, 20)
     create_html()
+
+    # todo generate exit/Guard - parse flags
+    # todo generate IP
+    # todo configfile
