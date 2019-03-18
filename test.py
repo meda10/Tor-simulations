@@ -26,31 +26,69 @@ except ImportError:
 def parse_config_file():
     config = configparser.ConfigParser(allow_no_value=True)
     config.read('config.ini')
-    print(config.sections())
-    for key in config['node0']:
-        print(key)
-        
 
-def run_simulation_0(guard_nodes=20, middle_nodes=20, exit_nodes=20, n_samples=25, fake_guards=0):
-    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
-    run_tor_path_simulator(n_samples)
-    paths = get_paths()
-    generate_large_graph(routers, paths, fake_guards)
+    conf = []
+    all_nodes = []
+
+    dic = {'guard': config['general']['guard'],
+           'middle': config['general']['middle'],
+           'exit': config['general']['exit'],
+           'number_of_simulations': config['general']['number_of_simulations'],
+           'simulation_size': config['general']['simulation_size'],
+           'simulation_type': config['general']['simulation_type'],
+           'remove_duplicit_paths': config['general']['remove_duplicit_paths'],
+           'generate_graph': config['general']['generate_graph'],
+           'create_html': config['general']['create_html'],
+           'path': config['general']['path'],
+           }
+
+    conf.append(dic)
+
+    for n in config.sections():
+        node = {}
+        if 'node' in n:
+            node['type'] = config[n]['type']
+            node['name'] = config[n]['name']
+            node['ip'] = config[n]['ip']
+            node['port'] = config[n]['port']
+            node['bandwidth'] = config[n]['bandwidth']
+            all_nodes.append(node)
+
+    conf.append(all_nodes)
+    return conf
 
 
-def run_simulation_1(guard_nodes=5, middle_nodes=5, exit_nodes=5, n_samples=5):
-    routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
-    run_tor_path_simulator(n_samples)
-    paths = get_paths()
-    generate_simple_graph(routers, paths)
-
-
-def run_simulation_2(guard_nodes=1, middle_nodes=20, exit_nodes=20, n_samples=25):
-    run_simulation_0(1, middle_nodes, exit_nodes, n_samples, guard_nodes - 1)
-
-
-def run_simulation_3(guard_nodes=3, middle_nodes=20, exit_nodes=20, n_samples=25):
-    run_simulation_0(3, middle_nodes, exit_nodes, n_samples, guard_nodes - 3)
+def run_simulation():
+    config = parse_config_file()
+    if config[0]['simulation_size'] == 'large':
+        if config[0]['simulation_type'] == 'random':
+            routers = make_descriptors(int(config[0]['guard']), int(config[0]['middle']),
+                                       int(config[0]['exit']))  # config[1]
+            run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+            paths = get_paths(config[0]['remove_duplicit_paths'])
+            if config[0]['generate_graph'].upper() == 'TRUE':
+                generate_large_graph(routers, paths, 0)
+        elif config[0]['simulation_type'] == '1_guard':
+            routers = make_descriptors(1, int(config[0]['middle']), int(config[0]['exit']))  # config[1]
+            run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+            paths = get_paths(config[0]['remove_duplicit_paths'])
+            if config[0]['generate_graph'].upper() == 'TRUE':
+                generate_large_graph(routers, paths, int(config[0]['guard']) - 1)
+        elif config[0]['simulation_type'] == '3_guards':
+            routers = make_descriptors(3, int(config[0]['middle']), int(config[0]['exit']))  # config[1]
+            run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+            paths = get_paths(config[0]['remove_duplicit_paths'])
+            if config[0]['generate_graph'].upper() == 'TRUE':
+                generate_large_graph(routers, paths, int(config[0]['guard']) - 3)
+    elif config[0]['simulation_size'] == 'small':
+        routers = make_descriptors(int(config[0]['guard']), int(config[0]['middle']), int(config[0]['exit']))
+        run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+        paths = get_paths(config[0]['remove_duplicit_paths'])
+        if config[0]['generate_graph'].upper() == 'TRUE':
+            generate_simple_graph(routers, paths)
+    
+    if config[0]['create_html'].upper() == 'TRUE' and config[0]['generate_graph'].upper() == 'TRUE':
+        create_html()
 
 
 def write_descriptors(descs, filename):
@@ -95,7 +133,7 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_paths():
+def get_paths(remove_duplicit_paths):
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
@@ -114,9 +152,11 @@ def get_paths():
             exit_node.append(lines[i].split()[4])
         if not lines[i].split()[2].__eq__('Guard'):
             x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            if x not in path:
+            if x not in path and remove_duplicit_paths.upper() == 'TRUE':
                 path.append(x)
-    
+            elif remove_duplicit_paths.upper() == 'FALSE':
+                path.append(x)
+                
     # print(guard_node)
     # print(middle_node)
     # print(exit_node)
@@ -588,7 +628,7 @@ def create_html():
         html_file.close()
 
 
-def run_tor_path_simulator(n_samples=5):
+def run_tor_path_simulator(path, n_samples=5):
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/network-state-2019-02')
     simulation_folder = Path(cwd + '/torps/out/simulation')
@@ -600,14 +640,12 @@ def run_tor_path_simulator(n_samples=5):
         simulation_folder.mkdir(parents=True)
     
     simulation_file = simulation_folder / "output"
-    
-    xxx = '/home/petr/TorPs'
-    
-    torps_path = Path(xxx + '/pathsim.py')
+
+    torps_path = Path(path + '/pathsim.py')
     dir_path = output_folder
     output_file_path = simulation_file
     num_samples = n_samples
-    tracefile = Path(xxx + '/in/users2-processed.traces.pickle')
+    tracefile = Path(path + '/in/users2-processed.traces.pickle')
     usermodel = 'simple=60000'
     format_arg = 'normal'
     adv_guard_bw = '0'
@@ -650,8 +688,8 @@ if __name__ == '__main__':
     # run_simulation_2(20,3,20,50)
     # run_simulation_1(8,3,5,19)
 
-    run_simulation_0(2, 5, 8, 150)
-    create_html()
+    # parse_config_file()
+    run_simulation()
     
     # todo generate exit/Guard - parse flags
     # todo generate IP
