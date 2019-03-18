@@ -9,7 +9,9 @@ try:
     import stem.descriptor
     import stem.util.str_tools
     import ntor
+    import configparser
     from graphviz import Digraph
+    from pathlib import Path
     from graphviz import Graph
     from collections import namedtuple
     from stem.descriptor.server_descriptor import RelayDescriptor, _truncated_b64encode
@@ -20,8 +22,14 @@ except ImportError:
     print('Creating descriptors requires stem (https://stem.torproject.org/)')
     sys.exit(1)
 
-OUTPUT_DIR = os.path.join(os.getcwd(), 'generated_descriptors')
 
+def parse_config_file():
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read('config.ini')
+    print(config.sections())
+    for key in config['node0']:
+        print(key)
+        
 
 def run_simulation_0(guard_nodes=20, middle_nodes=20, exit_nodes=20, n_samples=25, fake_guards=0):
     routers = make_descriptors(guard_nodes, middle_nodes, exit_nodes)
@@ -45,45 +53,52 @@ def run_simulation_3(guard_nodes=3, middle_nodes=20, exit_nodes=20, n_samples=25
     run_simulation_0(3, middle_nodes, exit_nodes, n_samples, guard_nodes - 3)
 
 
-def make_output_dir():
-    if not os.path.exists(OUTPUT_DIR):
-        os.mkdir(OUTPUT_DIR)
-
-
 def write_descriptors(descs, filename):
-    output_desc_path = '//home//petr//TorPs//in//server-descriptors-2019-02//2019-02-23-12-05-01-server-descriptors'
+    cwd = os.getcwd()
+    output_folder = Path(cwd + '/torps/in/server-descriptors-2019-02')
+    
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True)
+    
+    output_file = output_folder / "2019-02-23-12-05-01-server-descriptors"
     
     if filename == 'server-descriptors':
-        with open(output_desc_path, 'w') as descriptor_file:
+        with open(output_file, 'w') as file:
             for descriptor in descs:
-                descriptor_file.write('@type server-descriptor 1.0\n')
-                descriptor_file.write(str(descriptor))
-            descriptor_file.flush()
-
+                file.write('@type server-descriptor 1.0\n')
+                file.write(str(descriptor))
+            file.flush()
+            
 
 def write_descriptor(desc, filename):
-    # make_output_dir()
+    cwd = os.getcwd()
+    output_folder_desc = Path(cwd + '/torps/in/server-descriptors-2019-02')
+    output_folder_cons = Path(cwd + '/torps/in/consensuses-2019-02')
     
-    output_desc_path = '//home//petr//TorPs//in//server-descriptors-2019-02//2019-02-23-12-05-01-server-descriptors'
-    output_consensus_path = '//home//petr//TorPs//in//consensuses-2019-02//2019-02-23-12-00-00-consensus'
+    if not output_folder_desc.exists():
+        output_folder_desc.mkdir(parents=True)
+    
+    if not output_folder_cons.exists():
+        output_folder_cons.mkdir(parents=True)
+    
+    output_file_desc = output_folder_desc / "2019-02-23-12-05-01-server-descriptors"
+    output_file_cons = output_folder_cons / "2019-02-23-12-00-00-consensus"
     
     if filename == 'server-descriptors':
-        with open(output_desc_path, 'w') as descriptor_file:
-            descriptor_file.write('@type server-descriptor 1.0\n')
-            descriptor_file.write(str(desc))
-            descriptor_file.close()
+        with open(output_file_desc, 'w') as file:
+            file.write('@type server-descriptor 1.0\n')
+            file.write(str(desc))
+            
     elif filename == 'consensus':
-        with open(output_consensus_path, 'w') as descriptor_file:
-            descriptor_file.write('@type network-status-consensus-3 1.0\n')
-            descriptor_file.write(str(desc))
-            descriptor_file.close()
+        with open(output_file_cons, 'w') as file:
+            file.write('@type network-status-consensus-3 1.0\n')
+            file.write(str(desc))
 
 
 def get_paths():
-    output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
-    with open(output_file_path, 'r+') as fh:
-        lines = fh.readlines()
-        fh.close()
+    output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
+    with open(output_file_path, 'r+') as file:
+        lines = file.readlines()
     
     guard_node = ['Guard']
     middle_node = ['Middle']
@@ -101,15 +116,19 @@ def get_paths():
             x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
             if x not in path:
                 path.append(x)
-    """
-    print(guard_node)
-    print(middle_node)
-    print(exit_node)
-    print(len(path))
-    print(path)
-    """
-    for p in path:
-        print(p)
+    
+    # print(guard_node)
+    # print(middle_node)
+    # print(exit_node)
+    # print(len(path))
+    # print(path)
+    
+    # for g in guard_node:
+    # if g in exit_node:
+    # print("______{}".format(g))
+    
+    # for p in path:
+    # print(p)
     
     return path
 
@@ -196,7 +215,7 @@ def generate_ntor_key():
     return public_ntor_key
 
 
-def make_descriptors(guard_node=0, middle_node=0, exit_node=0):
+def make_descriptors(guard_node=0, middle_node=0, exit_node=0, allow_guard_exit=True):
     consensus_entries = []
     server_descriptors = []
     
@@ -244,8 +263,8 @@ def make_descriptors(guard_node=0, middle_node=0, exit_node=0):
                                                                           generate_port().__str__()),
                                               }, validate=True, sign=True, signing_key=signing_key)
         server_descriptors.append(server_desc)
+
         consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
-        
         write_descriptor(server_desc, 'server_descriptor_%i' % i)
     
     consensus = NetworkStatusDocumentV3.create({'valid-after': '2019-03-04 14:00:00',
@@ -299,15 +318,12 @@ def generate_simple_graph(routers, paths):
     subgraph_server = Digraph('subgraph_server')
     subgraph_middles = Digraph('subgraph_middles')
     subgraph_exits = Digraph('subgraph_exits')
-    subgraph_legend = Digraph('cluster_legend')
 
     subgraph_guards.graph_attr.update(rank='same')
     subgraph_middles.graph_attr.update(rank='same')
     subgraph_exits.graph_attr.update(rank='same')
     subgraph_pc.graph_attr.update(rank='same')
     subgraph_server.graph_attr.update(rank='same')
-
-    subgraph_legend.graph_attr.update(size='2')
 
     computer_icon_path = "resources//computer.png"
     server_icon_path = "resources//server.svg"
@@ -327,21 +343,6 @@ def generate_simple_graph(routers, paths):
             middle_node.append(r.address)
             subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
 
-    subgraph_legend.attr(label='Key')
-    subgraph_legend.node('X1', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4',
-                         style='invis')
-    subgraph_legend.node('X2', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4',
-                         style='invis')
-    subgraph_legend.node('GM', 'Guard/Middle', shape='box', fontsize='10', fontname='Verdana', height='0.4')
-    subgraph_legend.node('M', 'Middle', shape='ellipse', fontsize='10', fontname='Verdana', height='0.4')
-    subgraph_legend.node('E', 'Exit', shape='hexagon', fontsize='10', fontname='Verdana', height='0.4')
-
-    subgraph_legend.edge('X1', 'GM', style='invis')
-    subgraph_legend.edge('GM', 'M', style='invis')
-    subgraph_legend.edge('M', 'E', style='invis')
-    subgraph_legend.edge('E', 'X2', style='invis')
-
-    graph.subgraph(subgraph_legend)
     graph.subgraph(subgraph_pc)
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
@@ -397,7 +398,8 @@ def generate_simple_graph(routers, paths):
                 if len(exit_node) - 1 == j and i > j:
                     graph.edge(middle_node[i], exit_node[j], style='invis')
 
-    graph.render('test-output/simulation.dot', view=True)
+    graph.render('graph/simulation.dot', view=False)
+    generate_graph_legend("small")
 
 
 def generate_large_graph(routers, paths, guards_to_generate):
@@ -502,10 +504,11 @@ def generate_large_graph(routers, paths, guards_to_generate):
         graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
         graph.edge(path[2], "SERVER", constraint="false", layer="path{}".format(index))
 
-    graph.render('test-output/simulation.dot', view=True)
+    graph.render('graph/simulation.dot', view=False)
+    generate_graph_legend("large")
 
 
-def generate_large_graph_legend():
+def generate_graph_legend(graph_type="large"):
     graph = Digraph('test', format='svg')
     
     graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")  # neato twopi dot
@@ -514,38 +517,47 @@ def generate_large_graph_legend():
     
     subgraph_legend = Digraph('cluster_legend')
     guard_l = Digraph('cluster_guard_l')
-    middle_l = Digraph('cluster_middle_l')
+    mid_l = Digraph('cluster_middle_l')
     exit_l = Digraph('cluster_exit_l')
     gu_mi_l = Digraph('cluster_gu_mi_l')
     gu_ex_l = Digraph('cluster_gu_ex_l')
     
     subgraph_legend.attr(label="Key")
     guard_l.attr(label="Guard", penwidth="0")
-    middle_l.attr(label="Middle", penwidth="0")
+    mid_l.attr(label="Middle", penwidth="0")
     exit_l.attr(label="Exit", penwidth="0")
     gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
     gu_ex_l.attr(label="Guard\nExit", penwidth="0")
-    
-    guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='box', height='0.3', width='0.3')
-    exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='hexagon', height='0.3', width='0.3')
-    middle_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='ellipse', height='0.3', width='0.3')
-    gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="darkorchid1", shape='box', height='0.3', width='0.3')
-    gu_ex_l.node("GU_EX", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3', width='0.3')
-    
+
+    if graph_type is "large":
+        # guard_l.node("GU", label="", style='filled', fillcolor="darkorchid1", shape='box', height='0.3', width='0.3')
+        gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="coral2", shape='box', height='0.3', width='0.3')
+        exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='hexagon', height='0.3', width='0.3')
+        mid_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='ellipse', height='0.3', width='0.3')
+        # gu_ex_l.node("GU_EX", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3', width='0.3')
+    else:
+        # guard_l.node("GU", label="", shape='box', height='0.3', width='0.3')
+        gu_mi_l.node("GU_MI", label="", shape='box', height='0.3', width='0.3')
+        exit_l.node("EX", label="", shape='hexagon', height='0.3', width='0.3')
+        mid_l.node("MI", label="", shape='ellipse', height='0.3', width='0.3')
+        # gu_ex_l.node("GU_EX", label="", shape='box', height='0.3', width='0.3')
+        
     subgraph_legend.subgraph(gu_mi_l)
     subgraph_legend.subgraph(gu_ex_l)
     subgraph_legend.subgraph(exit_l)
-    subgraph_legend.subgraph(middle_l)
+    subgraph_legend.subgraph(mid_l)
     subgraph_legend.subgraph(guard_l)
     graph.subgraph(subgraph_legend)
-    
-    graph.render('test-output/legend.dot', view=True)
+
+    graph.render('graph/legend.dot', view=False)
 
 
 def create_html():
-    output_file = '//home//petr//PycharmProjects//Descriptors//test-output//index.html'
-    svg_file = '//home//petr//PycharmProjects//Descriptors//test-output//simulation.dot.svg'
-    svg_file_legend = '//home//petr//PycharmProjects//Descriptors//test-output//legend.dot.svg'
+    cwd = os.getcwd()
+    
+    output_file = Path(cwd + '/index.html')
+    svg_file = Path(cwd + '/graph/simulation.dot.svg')
+    svg_file_legend = Path(cwd + '/graph/legend.dot.svg')
     
     with open(svg_file, 'r') as svg:
         s = svg.read()
@@ -561,8 +573,8 @@ def create_html():
                         "<head>\n"
                         "<meta charset=\"UTF-8\">\n"
                         "<title>Title</title>\n"
-                        "<link rel=\"stylesheet\" href=\"animation.css\">\n"
-                        "<script defer=\"\" src=\"animation.js\"></script>\n"
+                        "<link rel=\"stylesheet\" href=\"resources//animation.css\">\n"
+                        "<script defer=\"\" src=\"resources//animation.js\"></script>\n"
                         "</head>\n"
                         "<body>\n"
                         "<p>Výsledek:</p>\n"
@@ -577,10 +589,25 @@ def create_html():
 
 
 def run_tor_path_simulator(n_samples=5):
-    dir_path = '//home//petr//TorPs//out//network-state-2019-02'
-    output_file_path = '//home//petr//PycharmProjects//Descriptors//generator_out//output'
+    cwd = os.getcwd()
+    output_folder = Path(cwd + '/torps/out/network-state-2019-02')
+    simulation_folder = Path(cwd + '/torps/out/simulation')
+    
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True)
+    
+    if not simulation_folder.exists():
+        simulation_folder.mkdir(parents=True)
+    
+    simulation_file = simulation_folder / "output"
+    
+    xxx = '/home/petr/TorPs'
+    
+    torps_path = Path(xxx + '/pathsim.py')
+    dir_path = output_folder
+    output_file_path = simulation_file
     num_samples = n_samples
-    tracefile = '//home//petr//TorPs//in//users2-processed.traces.pickle'
+    tracefile = Path(xxx + '/in/users2-processed.traces.pickle')
     usermodel = 'simple=60000'
     format_arg = 'normal'
     adv_guard_bw = '0'
@@ -597,21 +624,24 @@ def run_tor_path_simulator(n_samples=5):
     end_year = '2019'
     start_month = '2'
     end_month = '2'
-    in_dir = '//home//petr//TorPs//in'
-    out_dir = '//home//petr//TorPs//out'
-    initial_descriptors_dir = '//home//petr//TorPs//in//server-descriptors-2019-02'
+    in_dir = Path(cwd + '/torps/in')
+    out_dir = Path(cwd + '/torps/out')
+    initial_descriptors_dir = Path(cwd + '/torps/in/server-descriptors-2019-02')
     
-    # os.system("python //home//petr//TorPs//pathsim.py simulate --help")
+    os.system("python {} process --start_year {} --start_month {} --end_year {} --end_month {} --in_dir {} "
+              "--out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1".format(torps_path, start_year, start_month,
+                                                                                 end_year, end_month, in_dir, out_dir,
+                                                                                 initial_descriptors_dir))
     
-    os.system("python //home//petr//TorPs//pathsim.py process --start_year {} --start_month {} --end_year {} "
-              "--end_month {} --in_dir {} --out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1"
-              .format(start_year, start_month, end_year, end_month, in_dir, out_dir, initial_descriptors_dir))
-    
-    os.system("python //home//petr//TorPs//pathsim.py simulate --nsf_dir {} --num_samples {} --trace_file {} "
-              "--user_model {} --format {} --adv_guard_cons_bw {} --adv_exit_cons_bw {} --adv_time {} "
-              "--num_adv_guards {} --num_adv_exits {} --num_guards {} --guard_expiration {} --loglevel {} {} > {}"
-              .format(dir_path, num_samples, tracefile, usermodel, format_arg, adv_guard_bw, adv_exit_bw, adv_time,
-                      num_adv_guards, num_adv_exits, num_guards, gard_expiration, loglevel, path_alg, output_file_path))
+    os.system("python {} simulate --nsf_dir {} --num_samples {} --trace_file {} --user_model {} --format {} "
+              "--adv_guard_cons_bw {} --adv_exit_cons_bw {} --adv_time {} --num_adv_guards {} --num_adv_exits {} "
+              "--num_guards {} --guard_expiration {} --loglevel {} {} > {}".format(torps_path, dir_path, num_samples,
+                                                                                   tracefile, usermodel, format_arg,
+                                                                                   adv_guard_bw, adv_exit_bw, adv_time,
+                                                                                   num_adv_guards, num_adv_exits,
+                                                                                   num_guards, gard_expiration,
+                                                                                   loglevel, path_alg,
+                                                                                   output_file_path))
 
 
 if __name__ == '__main__':
@@ -619,8 +649,8 @@ if __name__ == '__main__':
     
     # run_simulation_2(20,3,20,50)
     # run_simulation_1(8,3,5,19)
-    
-    run_simulation_2(10, 30, 8, 20)
+
+    run_simulation_0(2, 5, 8, 150)
     create_html()
     
     # todo generate exit/Guard - parse flags
