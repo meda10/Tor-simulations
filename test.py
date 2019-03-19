@@ -6,6 +6,7 @@ import sys
 
 try:
     import stem
+    import socket
     import stem.descriptor
     import stem.util.str_tools
     import ntor
@@ -262,19 +263,20 @@ def make_node(x, y, params):
     consensus_entries = []
     
     for i in range(x, y):
+        server_desc = None
         signing_key = stem.descriptor.create_signing_key()
         if params[i - x]['type'] == 'exit':
             server_desc = RelayDescriptor.create({'published': '2019-03-04 13:37:39',
                                                   'reject': '0.0.0.0/8:*',
                                                   'accept': '*:*',
+                                                  'ntor-onion-key': '%s' % generate_ntor_key(),
+                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
                                                   'router': '%s %s %s 0 0' % (params[i - x]['name'],
                                                                               params[i - x]['ip'],
                                                                               params[i - x]['port']),
                                                   }, validate=True, sign=True, signing_key=signing_key)
     
-            server_descriptors.append(server_desc)
             consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
-            write_descriptor(server_desc, 'server_descriptor_%i' % i)
         elif params[i - x]['type'] == 'middle':
             server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
                                                                               params[i - x]['ip'],
@@ -286,9 +288,7 @@ def make_node(x, y, params):
                                                   'reject': '*:*',
                                                   }, validate=True, sign=True, signing_key=signing_key)
     
-            server_descriptors.append(server_desc)
             consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Running Stable Valid'))
-            write_descriptor(server_desc, 'server_descriptor_%i' % i)
         elif params[i - x]['type'] == 'guard':
             server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
                                                                               params[i - x]['ip'],
@@ -297,14 +297,14 @@ def make_node(x, y, params):
                                                   'platform': 'Tor 0.2.4.8 on Linux',
                                                   'bandwidth': '%s' % (params[i - x]['bandwidth']),
                                                   'published': '2019-03-04 13:37:39',
-                                                  'uptime': '26963362',
                                                   'reject': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
                                                   }, validate=True, sign=True, signing_key=signing_key)
     
-            server_descriptors.append(server_desc)
             consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Guard Running Stable Valid'))
-            write_descriptor(server_desc, 'server_descriptor_%i' % i)
+    
+        server_descriptors.append(server_desc)
+        write_descriptor(server_desc, 'server_descriptor_%i' % i)
     
     node.append(server_descriptors)
     node.append(consensus_entries)
@@ -334,19 +334,51 @@ def make_descriptors(params):
     return consensus_entries
 
 
-def valid_node(node):
+def valid_node(node, names, ip):
+    if node['name'] not in names:
+        names.append(node['name'])
+    else:
+        node['name'] = generate_nickname()
+        names.append(node['name'])
+    
+    try:
+        socket.inet_aton(node['ip'])
+        if node['ip'] in ip:
+            node['ip'] = generate_ipv4_address()
+    except socket.error:
+        node['ip'] = generate_ipv4_address()
+    finally:
+        ip.append(node['ip'])
+    
+    try:
+        if int(node['port']) not in range(0, 65535):
+            node['port'] = generate_port()
+    except ValueError:
+        node['port'] = generate_port()
+    
+    try:
+        bandwidth = node['bandwidth'].split(' ')
+        if len(bandwidth) == 3:
+            for b in bandwidth:
+                if int(b) <= 0:
+                    node['bandwidth'] = generate_bandwidth()
+    except ValueError:
+        node['bandwidth'] = generate_bandwidth()
+    
     return True
 
 
 def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
+    names = []
+    ip = []
     guard_node = []
     middle_node = []
     exit_node = []
     if params is not None:
         for node in params:
-            guard_node.append(node) if node['type'] == 'guard' and valid_node(node) else None
-            middle_node.append(node) if node['type'] == 'middle' and valid_node(node) else None
-            exit_node.append(node) if node['type'] == 'exit' and valid_node(node) else None
+            guard_node.append(node) if node['type'] == 'guard' and valid_node(node, names, ip) else None
+            middle_node.append(node) if node['type'] == 'middle' and valid_node(node, names, ip) else None
+            exit_node.append(node) if node['type'] == 'exit' and valid_node(node, names, ip) else None
     for i in range(0, guard_count - len(guard_node)):
         node = {'type': 'guard',
                 'name': '{}'.format(generate_nickname()),
@@ -368,10 +400,6 @@ def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
                 'port': '{}'.format(generate_port()),
                 'bandwidth': '{}'.format(generate_bandwidth())}
         exit_node.append(node)
-    
-    # print(guard_node[:guard_count])
-    # print(middle_node[:middle_count])
-    # print(exit_node[:exit_count])
     
     data = [guard_node[:guard_count], middle_node[:middle_count], exit_node[:exit_count]]
     
@@ -739,10 +767,4 @@ def run_tor_path_simulator(path, n_samples=5):
 
 
 if __name__ == '__main__':
-    # generate_large_graph_legend()
-    
-    # run_simulation_2(20,3,20,50)
-    # run_simulation_1(8,3,5,19)
-
-    # parse_config_file()
     run_simulation()
