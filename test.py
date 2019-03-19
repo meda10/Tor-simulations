@@ -62,26 +62,27 @@ def run_simulation():
     config = parse_config_file()
     if config[0]['simulation_size'] == 'large':
         if config[0]['simulation_type'] == 'random':
-            routers = make_descriptors(int(config[0]['guard']), int(config[0]['middle']),
-                                       int(config[0]['exit']))  # config[1]
+            routers = make_descriptors(check_params(int(config[0]['guard']), int(config[0]['middle']),
+                                                    int(config[0]['exit']), config[1]))
             run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
             paths = get_paths(config[0]['remove_duplicit_paths'])
             if config[0]['generate_graph'].upper() == 'TRUE':
                 generate_large_graph(routers, paths, 0)
         elif config[0]['simulation_type'] == '1_guard':
-            routers = make_descriptors(1, int(config[0]['middle']), int(config[0]['exit']))  # config[1]
+            routers = make_descriptors(check_params(1, int(config[0]['middle']), int(config[0]['exit']), config[1]))
             run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
             paths = get_paths(config[0]['remove_duplicit_paths'])
             if config[0]['generate_graph'].upper() == 'TRUE':
                 generate_large_graph(routers, paths, int(config[0]['guard']) - 1)
         elif config[0]['simulation_type'] == '3_guards':
-            routers = make_descriptors(3, int(config[0]['middle']), int(config[0]['exit']))  # config[1]
+            routers = make_descriptors(check_params(3, int(config[0]['middle']), int(config[0]['exit']), config[1]))
             run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
             paths = get_paths(config[0]['remove_duplicit_paths'])
             if config[0]['generate_graph'].upper() == 'TRUE':
                 generate_large_graph(routers, paths, int(config[0]['guard']) - 3)
     elif config[0]['simulation_size'] == 'small':
-        routers = make_descriptors(int(config[0]['guard']), int(config[0]['middle']), int(config[0]['exit']))
+        routers = make_descriptors(check_params(int(config[0]['guard']), int(config[0]['middle']),
+                                                int(config[0]['exit']), config[1]))
         run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
         paths = get_paths(config[0]['remove_duplicit_paths'])
         if config[0]['generate_graph'].upper() == 'TRUE':
@@ -255,57 +256,68 @@ def generate_ntor_key():
     return public_ntor_key
 
 
-def make_descriptors(guard_node=0, middle_node=0, exit_node=0, allow_guard_exit=True):
-    consensus_entries = []
+def make_node(x, y, params):
+    node = []
     server_descriptors = []
+    consensus_entries = []
     
-    for i in range(0, guard_node):
+    for i in range(x, y):
         signing_key = stem.descriptor.create_signing_key()
-        server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (generate_nickname(),
-                                                                          generate_ipv4_address(),
-                                                                          generate_port().__str__()),
-                                              'protocols': 'Link 1 2 Circuit 1',
-                                              'platform': 'Tor 0.2.4.8 on Linux',
-                                              'bandwidth': '%s' % (generate_bandwidth()),
-                                              'published': '2019-03-04 13:37:39',
-                                              'uptime': '26963362',
-                                              'reject': '*:*',
-                                              'ntor-onion-key': '%s' % generate_ntor_key(),
-                                              }, validate=True, sign=True, signing_key=signing_key)
-        server_descriptors.append(server_desc)
-        
-        consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Guard Running Stable Valid'))
-        write_descriptor(server_desc, 'server_descriptor_%i' % i)
+        if params[i - x]['type'] == 'exit':
+            server_desc = RelayDescriptor.create({'published': '2019-03-04 13:37:39',
+                                                  'reject': '0.0.0.0/8:*',
+                                                  'accept': '*:*',
+                                                  'router': '%s %s %s 0 0' % (params[i - x]['name'],
+                                                                              params[i - x]['ip'],
+                                                                              params[i - x]['port']),
+                                                  }, validate=True, sign=True, signing_key=signing_key)
     
-    for i in range(guard_node, guard_node + middle_node):
-        signing_key = stem.descriptor.create_signing_key()
-        server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (generate_nickname(),
-                                                                          generate_ipv4_address(),
-                                                                          generate_port().__str__()),
-                                              'protocols': 'Link 1 2 Circuit 1',
-                                              'platform': 'Tor 0.2.4.8 on Linux',
-                                              'bandwidth': '%s' % (generate_bandwidth()),
-                                              'published': '2019-03-04 13:37:39',
-                                              'reject': '*:*',
-                                              }, validate=True, sign=True, signing_key=signing_key)
-        server_descriptors.append(server_desc)
-        
-        consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Running Stable Valid'))
-        write_descriptor(server_desc, 'server_descriptor_%i' % i)
+            server_descriptors.append(server_desc)
+            consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
+            write_descriptor(server_desc, 'server_descriptor_%i' % i)
+        elif params[i - x]['type'] == 'middle':
+            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
+                                                                              params[i - x]['ip'],
+                                                                              params[i - x]['port']),
+                                                  'protocols': 'Link 1 2 Circuit 1',
+                                                  'platform': 'Tor 0.2.4.8 on Linux',
+                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
+                                                  'published': '2019-03-04 13:37:39',
+                                                  'reject': '*:*',
+                                                  }, validate=True, sign=True, signing_key=signing_key)
     
-    for i in range(guard_node + middle_node, guard_node + middle_node + exit_node):
-        signing_key = stem.descriptor.create_signing_key()
-        server_desc = RelayDescriptor.create({'published': '2019-03-04 13:37:39',
-                                              'reject': '0.0.0.0/8:*',
-                                              'accept': '*:*',
-                                              'router': '%s %s %s 0 0' % (generate_nickname(),
-                                                                          generate_ipv4_address(),
-                                                                          generate_port().__str__()),
-                                              }, validate=True, sign=True, signing_key=signing_key)
-        server_descriptors.append(server_desc)
+            server_descriptors.append(server_desc)
+            consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Running Stable Valid'))
+            write_descriptor(server_desc, 'server_descriptor_%i' % i)
+        elif params[i - x]['type'] == 'guard':
+            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
+                                                                              params[i - x]['ip'],
+                                                                              params[i - x]['port']),
+                                                  'protocols': 'Link 1 2 Circuit 1',
+                                                  'platform': 'Tor 0.2.4.8 on Linux',
+                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
+                                                  'published': '2019-03-04 13:37:39',
+                                                  'uptime': '26963362',
+                                                  'reject': '*:*',
+                                                  'ntor-onion-key': '%s' % generate_ntor_key(),
+                                                  }, validate=True, sign=True, signing_key=signing_key)
+    
+            server_descriptors.append(server_desc)
+            consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Guard Running Stable Valid'))
+            write_descriptor(server_desc, 'server_descriptor_%i' % i)
+    
+    node.append(server_descriptors)
+    node.append(consensus_entries)
+    return node
 
-        consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
-        write_descriptor(server_desc, 'server_descriptor_%i' % i)
+
+def make_descriptors(params):
+    guard_n = make_node(0, len(params[0]), params[0])
+    middle_n = make_node(len(params[0]), len(params[0]) + len(params[1]), params[1])
+    exit_n = make_node(len(params[0]) + len(params[1]), len(params[0]) + len(params[1]) + len(params[2]), params[2])
+    
+    server_descriptors = guard_n[0] + middle_n[0] + exit_n[0]
+    consensus_entries = guard_n[1] + middle_n[1] + exit_n[1]
     
     consensus = NetworkStatusDocumentV3.create({'valid-after': '2019-03-04 14:00:00',
                                                 'fresh-until': '2019-03-04 15:00:00',
@@ -320,6 +332,50 @@ def make_descriptors(guard_node=0, middle_node=0, exit_node=0, allow_guard_exit=
     write_descriptors(server_descriptors, 'server-descriptors')
 
     return consensus_entries
+
+
+def valid_node(node):
+    return True
+
+
+def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
+    guard_node = []
+    middle_node = []
+    exit_node = []
+    if params is not None:
+        for node in params:
+            guard_node.append(node) if node['type'] == 'guard' and valid_node(node) else None
+            middle_node.append(node) if node['type'] == 'middle' and valid_node(node) else None
+            exit_node.append(node) if node['type'] == 'exit' and valid_node(node) else None
+    for i in range(0, guard_count - len(guard_node)):
+        node = {'type': 'guard',
+                'name': '{}'.format(generate_nickname()),
+                'ip': '{}'.format(generate_ipv4_address()),
+                'port': '{}'.format(generate_port()),
+                'bandwidth': '{}'.format(generate_bandwidth())}
+        guard_node.append(node)
+    for i in range(0, middle_count - len(middle_node)):
+        node = {'type': 'middle',
+                'name': '{}'.format(generate_nickname()),
+                'ip': '{}'.format(generate_ipv4_address()),
+                'port': '{}'.format(generate_port()),
+                'bandwidth': '{}'.format(generate_bandwidth())}
+        middle_node.append(node)
+    for i in range(0, exit_count - len(exit_node)):
+        node = {'type': 'exit',
+                'name': '{}'.format(generate_nickname()),
+                'ip': '{}'.format(generate_ipv4_address()),
+                'port': '{}'.format(generate_port()),
+                'bandwidth': '{}'.format(generate_bandwidth())}
+        exit_node.append(node)
+    
+    # print(guard_node[:guard_count])
+    # print(middle_node[:middle_count])
+    # print(exit_node[:exit_count])
+    
+    data = [guard_node[:guard_count], middle_node[:middle_count], exit_node[:exit_count]]
+    
+    return data
 
 
 def generate_simple_graph(routers, paths):
@@ -690,7 +746,3 @@ if __name__ == '__main__':
 
     # parse_config_file()
     run_simulation()
-    
-    # todo generate exit/Guard - parse flags
-    # todo generate IP
-    # todo configfile
