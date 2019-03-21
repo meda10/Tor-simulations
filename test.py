@@ -164,11 +164,19 @@ def get_paths(remove_duplicit_paths):
     # print(exit_node)
     # print(len(path))
     # print(path)
-    
-    # for g in guard_node:
-    # if g in exit_node:
-    # print("______{}".format(g))
-    
+    """
+    for g in guard_node:
+        if g in exit_node:
+            print("GU_EX______{}".format(g))
+            
+    for e in exit_node:
+        if e in middle_node:
+            print("EX_MI______{}".format(e))
+            
+    for g in guard_node:
+        if g in middle_node:
+            print("GU_MI______{}".format(g))
+    """
     # for p in path:
     # print(p)
     
@@ -364,8 +372,6 @@ def valid_node(node, names, ip):
                     node['bandwidth'] = generate_bandwidth()
     except ValueError:
         node['bandwidth'] = generate_bandwidth()
-    
-    return True
 
 
 def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
@@ -376,9 +382,10 @@ def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
     exit_node = []
     if params is not None:
         for node in params:
-            guard_node.append(node) if node['type'] == 'guard' and valid_node(node, names, ip) else None
-            middle_node.append(node) if node['type'] == 'middle' and valid_node(node, names, ip) else None
-            exit_node.append(node) if node['type'] == 'exit' and valid_node(node, names, ip) else None
+            valid_node(node, names, ip)
+            guard_node.append(node) if node['type'] == 'guard' else None
+            middle_node.append(node) if node['type'] == 'middle' else None
+            exit_node.append(node) if node['type'] == 'exit' else None
     for i in range(0, guard_count - len(guard_node)):
         node = {'type': 'guard',
                 'name': '{}'.format(generate_nickname()),
@@ -398,7 +405,7 @@ def check_params(guard_count=0, middle_count=0, exit_count=0, params=None):
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
                 'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth())}
+                'bandwidth': '{}'.format(generate_bandwidth())}  # todo function
         exit_node.append(node)
     
     data = [guard_node[:guard_count], middle_node[:middle_count], exit_node[:exit_count]]
@@ -603,8 +610,26 @@ def generate_large_graph(routers, paths, guards_to_generate):
             for j in range(0, len(middle_node)):
                 if i == j:
                     graph.edge(guard_node[i], middle_node[j], style="invis")
-    
-    if len(exit_node) > len(middle_node):
+
+    if len(middle_node) == 0:
+        if len(exit_node) > len(guard_node):
+            div = len(exit_node) / len(guard_node)
+            x = 0
+            for i in range(0, len(guard_node)):
+                for j in range(x, round(div) + x):
+                    if j < len(exit_node):
+                        graph.edge(guard_node[i], exit_node[j], style="invis")
+                x = x + round(div)
+                if i == (len(guard_node) - 1) and div != round(div):
+                    for j in range(x, len(exit_node)):
+                        graph.edge(guard_node[i], exit_node[j], style="invis")
+        else:
+            for i in range(0, len(guard_node)):
+                for j in range(0, len(exit_node)):
+                    if i == j:
+                        graph.edge(guard_node[i], exit_node[j], style="invis")
+
+    elif len(exit_node) > len(middle_node):
         div = len(exit_node) / len(middle_node)
         x = 0
         for i in range(0, len(middle_node)):
@@ -615,7 +640,6 @@ def generate_large_graph(routers, paths, guards_to_generate):
             if i == (len(middle_node) - 1) and div != round(div):
                 for j in range(x, len(exit_node)):
                     graph.edge(middle_node[i], exit_node[j], style="invis")
-    
     else:
         for i in range(0, len(middle_node)):
             for j in range(0, len(exit_node)):
@@ -632,7 +656,7 @@ def generate_large_graph(routers, paths, guards_to_generate):
     generate_graph_legend("large")
 
 
-def generate_graph_legend(graph_type="large"):
+def generate_graph_legend(graph_type):
     graph = Digraph('test', format='svg')
     
     graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")  # neato twopi dot
@@ -730,7 +754,7 @@ def run_tor_path_simulator(path, n_samples=5):
     output_file_path = simulation_file
     num_samples = n_samples
     tracefile = Path(path + '/in/users2-processed.traces.pickle')
-    usermodel = 'simple=60000'
+    usermodel = 'simple=600000000'
     format_arg = 'normal'
     adv_guard_bw = '0'
     adv_exit_bw = '0'
@@ -768,3 +792,11 @@ def run_tor_path_simulator(path, n_samples=5):
 
 if __name__ == '__main__':
     run_simulation()
+
+    # run_tor_path_simulator('/home/petr/TorPs', 50)
+    # get_paths('True')
+
+    # todo color GU_MI EX_MI
+    # todo 3 and 1 sim
+    # todo valid name in config file _
+    # todo grapph size in config file
