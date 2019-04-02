@@ -1,8 +1,9 @@
 import binascii
-import math
 import os
 import random
 import sys
+
+import math
 
 try:
     import stem
@@ -31,16 +32,19 @@ def parse_config_file():
     conf = []
     all_nodes = []
 
-    dic = {'guard': config['general']['guard'],
-           'middle': config['general']['middle'],
-           'exit': config['general']['exit'],
-           'number_of_simulations': config['general']['number_of_simulations'],
-           'simulation_size': config['general']['simulation_size'],
-           'simulation_type': config['general']['simulation_type'],
-           'remove_duplicit_paths': config['general']['remove_duplicit_paths'],
-           'generate_graph': config['general']['generate_graph'],
-           'create_html': config['general']['create_html'],
+    dic = {'guard': config['path_simulation']['guard'],
+           'middle': config['path_simulation']['middle'],
+           'exit': config['path_simulation']['exit'],
+           'number_of_simulations': config['path_simulation']['number_of_simulations'],
+           'simulation_size': config['path_simulation']['simulation_size'],
+           'path_selection': config['path_simulation']['path_selection'],
+           'remove_duplicit_paths': config['general']['remove_duplicit_paths'].upper() in ['TRUE'],
+           'generate_graph': config['general']['generate_graph'].upper() in ['TRUE'],
+           'create_html': config['general']['create_html'].upper() in ['TRUE'],
            'path': config['general']['path'],
+           'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
+           'simulation_type': config['general']['simulation_type'],
+           'nodes': config['hiden_service_simulation']['nodes']
            }
 
     conf.append(dic)
@@ -49,7 +53,10 @@ def parse_config_file():
         node = {}
         if 'node' in n:
             node['type'] = config[n]['type']
-            node['name'] = config[n]['name']
+            if config[n]['name'].isalpha():
+                node['name'] = config[n]['name']
+            else:
+                node['name'] = ''
             node['ip'] = config[n]['ip']
             node['port'] = config[n]['port']
             node['bandwidth'] = config[n]['bandwidth']
@@ -57,6 +64,19 @@ def parse_config_file():
 
     conf.append(all_nodes)
 
+    if conf[0]['simulation_type'] == 'hidden_service':
+        conf[0]['number_of_simulations'] = '8'
+        try:
+            nodes = int(conf[0]['nodes'])
+            conf[0]['guard'] = round(nodes / 2)
+            conf[0]['middle'] = '0'
+            conf[0]['exit'] = nodes - round(nodes / 2)
+    
+        except ValueError:
+            print('Value of nodes have to be number')
+        
+        
+    
     try:
         if int(conf[0]['guard']) == 0:
             print('Number of guards have to be > 1')
@@ -82,35 +102,34 @@ def parse_config_file():
         sys.exit(1)
 
     try:
-        if conf[0]['simulation_type'] == '3_guards':
+        if conf[0]['path_selection'] == '3_guards':
             if int(conf[0]['guard']) < 3:
                 print('Number of guards have to be > 3')
                 sys.exit(1)
     except ValueError:
         print('Number of guards have to be > 3')
         sys.exit(1)
-        
+
     return conf
 
 
 def run_simulation():
     config = parse_config_file()
-    if config[0]['simulation_size'] == 'large':
-        routers = make_descriptors(check_params(config[0]['simulation_type'], int(config[0]['guard']),
-                                                int(config[0]['middle']), int(config[0]['exit']), config[1]))
-        run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
-        paths = get_paths(config[0]['remove_duplicit_paths'])
-        if config[0]['generate_graph'].upper() == 'TRUE':
-            generate_large_graph(routers, paths, config[0]['simulation_type'], int(config[0]['guard']))
-    elif config[0]['simulation_size'] == 'small':
-        routers = make_descriptors(check_params(config[0]['simulation_type'], int(config[0]['guard']),
-                                                int(config[0]['middle']), int(config[0]['exit']), config[1]))
-        run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
-        paths = get_paths(config[0]['remove_duplicit_paths'])
-        if config[0]['generate_graph'].upper() == 'TRUE':
+    routers = make_descriptors(check_params(config[0]['path_selection'], int(config[0]['guard']),
+                                            int(config[0]['middle']), int(config[0]['exit']),
+                                            config[0]['same_bandwidth'], config[1]))
+    run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+    paths = get_paths(config[0]['remove_duplicit_paths'])
+
+    if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
+        generate_hiden_service_graph(routers, paths)
+    elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
+        if config[0]['simulation_size'] == 'large':
+            generate_large_graph(routers, paths, config[0]['path_selection'], int(config[0]['guard']))
+        elif config[0]['simulation_size'] == 'small':
             generate_simple_graph(routers, paths)
-    
-    if config[0]['create_html'].upper() == 'TRUE' and config[0]['generate_graph'].upper() == 'TRUE':
+
+    if config[0]['create_html'] and config[0]['generate_graph']:
         create_html()
 
 
@@ -129,7 +148,7 @@ def write_descriptors(descs, filename):
                 file.write('@type server-descriptor 1.0\n')
                 file.write(str(descriptor))
             file.flush()
-            
+
 
 def write_descriptor(desc, filename):
     cwd = os.getcwd()
@@ -149,7 +168,7 @@ def write_descriptor(desc, filename):
         with open(output_file_desc, 'w') as file:
             file.write('@type server-descriptor 1.0\n')
             file.write(str(desc))
-            
+
     elif filename == 'consensus':
         with open(output_file_cons, 'w') as file:
             file.write('@type network-status-consensus-3 1.0\n')
@@ -175,12 +194,12 @@ def get_paths(remove_duplicit_paths):
             exit_node.append(lines[i].split()[4])
         if not lines[i].split()[2].__eq__('Guard'):
             x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            if x not in path and remove_duplicit_paths.upper() == 'TRUE':
+            if x not in path and remove_duplicit_paths:
                 path.append(x)
-            elif remove_duplicit_paths.upper() == 'FALSE':
+            elif not remove_duplicit_paths:
                 path.append(x)
-                
-    # print(guard_node)
+
+    print(guard_node)
     # print(middle_node)
     # print(exit_node)
     # print(len(path))
@@ -259,7 +278,10 @@ def generate_port():
     return '%i' % (random.randint(1, 65535))
 
 
-def generate_bandwidth(variance=30):
+def generate_bandwidth(same_bandwidth, variance=30):
+    if same_bandwidth:
+        bandwidth = "229311978 259222236 199401720"
+        return bandwidth
     observed = random.randint(20 * 2 ** 10, 2 * 2 ** 30)
     percentage = float(variance) / 100.
     burst = int(observed + math.ceil(observed * percentage))
@@ -304,7 +326,7 @@ def make_node(x, y, params):
                                                                               params[i - x]['ip'],
                                                                               params[i - x]['port']),
                                                   }, validate=True, sign=True, signing_key=signing_key)
-    
+
             consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
         elif params[i - x]['type'] == 'middle':
             server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
@@ -317,7 +339,7 @@ def make_node(x, y, params):
                                                   'reject': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
                                                   }, validate=True, sign=True, signing_key=signing_key)
-    
+
             consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Running Stable Valid'))
         elif params[i - x]['type'] == 'guard':
             server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
@@ -330,9 +352,9 @@ def make_node(x, y, params):
                                                   'reject': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
                                                   }, validate=True, sign=True, signing_key=signing_key)
-    
+
             consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Guard Running Stable Valid'))
-    
+
         server_descriptors.append(server_desc)
         write_descriptor(server_desc, 'server_descriptor_%i' % i)
     
@@ -364,8 +386,8 @@ def make_descriptors(params):
     return consensus_entries
 
 
-def valid_node(node, names, ip):
-    if node['name'] not in names:
+def valid_node(node, names, ip, same_bandwidth):
+    if node['name'] not in names and node['name'] != '':
         names.append(node['name'])
     else:
         node['name'] = generate_nickname()
@@ -386,19 +408,22 @@ def valid_node(node, names, ip):
     except ValueError:
         node['port'] = generate_port()
     
-    try:
-        bandwidth = node['bandwidth'].split(' ')
-        if len(bandwidth) == 3:
-            for b in bandwidth:
-                if int(b) <= 0:
-                    node['bandwidth'] = generate_bandwidth()
-        else:
-            node['bandwidth'] = generate_bandwidth()
-    except ValueError:
-        node['bandwidth'] = generate_bandwidth()
+    if same_bandwidth:
+        node['bandwidth'] = generate_bandwidth(same_bandwidth)
+    else:
+        try:
+            bandwidth = node['bandwidth'].split(' ')
+            if len(bandwidth) == 3:
+                for b in bandwidth:
+                    if int(b) <= 0:
+                        node['bandwidth'] = generate_bandwidth(same_bandwidth)
+            else:
+                node['bandwidth'] = generate_bandwidth(same_bandwidth)
+        except ValueError:
+            node['bandwidth'] = generate_bandwidth(same_bandwidth)
 
 
-def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, params=None):
+def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, same_bandwidth=False, params=None):
     names = []
     ip = []
     guard_node = []
@@ -406,7 +431,7 @@ def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, params=Non
     exit_node = []
     if params is not None:
         for node in params:
-            valid_node(node, names, ip)
+            valid_node(node, names, ip, same_bandwidth)
             guard_node.append(node) if node['type'] == 'guard' else None
             middle_node.append(node) if node['type'] == 'middle' else None
             exit_node.append(node) if node['type'] == 'exit' else None
@@ -415,30 +440,27 @@ def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, params=Non
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
                 'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth())}
+                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
         guard_node.append(node)
     for i in range(0, middle_count - len(middle_node)):
         node = {'type': 'middle',
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
                 'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth())}
+                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
         middle_node.append(node)
     for i in range(0, exit_count - len(exit_node)):
         node = {'type': 'exit',
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
                 'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth())}  # todo function
+                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}  # todo function
         exit_node.append(node)
 
     if s_type == '1_guard':
         for node in guard_node[1:guard_count]:
             node['type'] = 'middle'
         middle_node = guard_node[1:guard_count] + middle_node[:middle_count]
-        print(middle_node)
-        print(guard_node[1:guard_count])
-        print(guard_node[:1])
         data = [guard_node[:1], middle_node, exit_node[:exit_count]]
         return data
     elif s_type == '3_guards':
@@ -568,7 +590,7 @@ def generate_simple_graph(routers, paths):
                         graph.edge(guard_node[i], middle_node[j], style='invis')
                     if len(middle_node) - 1 == j and i > j:
                         graph.edge(guard_node[i], middle_node[j], style='invis')
-        
+
     for i in range(0, len(middle_node)):
         for j in range(0, len(exit_node)):
             if len(middle_node) == len(exit_node):
@@ -619,7 +641,7 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     subgraph_exits.graph_attr.update(rank='same')
 
     computer_icon_path = "resources//computer.png"
-    server_icon_path = "resources//server.svg"
+    server_icon_path = "resources//SE.svg"
     graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
     graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
                height="1.3", margin="20")
@@ -643,7 +665,6 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
         else:
             if fake_guards < x:
                 fake_guards = fake_guards + 1
-                print(fake_guards)
                 guard_node.append(r.address)
                 subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='box',
                                      height='0.3', width='0.3')
@@ -721,6 +742,117 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     generate_graph_legend("large")
 
 
+def generate_hiden_service_graph(routers, paths):
+    graph = Digraph('test', format='svg')
+    
+    graph.attr(layout='neato')  # neato twopi
+    graph.attr(size="8.5")
+    graph.attr(sep="-0.5")
+    graph.attr(overlap="scalexy")
+    graph.attr(splines="true")
+    
+    # graph.attr(mode="hier")
+    # graph.attr(pad="0.1")
+    # graph.attr(nodesep="-3")
+    # graph.attr(ranksep='5')
+    # graph.attr(concentrate="true")
+    
+    layers = []
+    for i in range(0, len(paths)):
+        layers.append("path{}:".format(i))
+    
+    graph.attr(layers=''.join(layers)[:-1])
+    
+    pc_icon_path = "resources//PC.png"
+    rp_icon_path = "resources//RP.png"
+    ip_icon_path = "resources//IP.png"
+    hs_icon_path = "resources//HS.png"
+    dir_icon_path = "resources//DIR.png"
+    graph.node("NODE", label="", shape="none")
+    graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="true", width="1", height="1")
+    graph.node("HS", label="", shape="none", image=hs_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("IP1", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("IP2", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("IP3", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("DIR", label="", shape="none", image=dir_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("RP", label="", shape="none", image=rp_icon_path, fixedsize="shape", width="1", height="1")
+    
+    for index, r in enumerate(routers, start=0):
+        graph.node(str(r.address), label="", shape='box', height='0.3', width='0.3')
+        graph.edge("NODE", str(r.address), style="invis", constraint="false")
+    
+    graph.edge("NODE", "PC", style="invis", len="1.1", constraint="false")
+    graph.edge("NODE", "HS", style="invis", len="0.1", constraint="false")
+    graph.edge("NODE", "IP1", style="invis", len="1", constraint="false")
+    graph.edge("NODE", "IP2", style="invis", len="1", constraint="false")
+    graph.edge("NODE", "IP3", style="invis", len="1", constraint="false")
+    graph.edge("NODE", "DIR", style="invis", len="1", constraint="false")
+    graph.edge("NODE", "RP", style="invis", len="1", constraint="false")
+    
+    graph.edge("HS", paths[0][0], layer="path0", color="red", penwidth="1.8")
+    graph.edge(paths[0][0], paths[0][1], layer="path0", color="red", penwidth="1.8")
+    graph.edge(paths[0][1], paths[0][2], layer="path0", color="red", penwidth="1.8")
+    graph.edge(paths[0][2], "IP1", layer="path0", color="red", penwidth="1.8")
+    
+    graph.edge("HS", paths[1][0], layer="path0", color="navy", penwidth="1.8")
+    graph.edge(paths[1][0], paths[1][1], layer="path0", color="navy", penwidth="1.8")
+    graph.edge(paths[1][1], paths[1][2], layer="path0", color="navy", penwidth="1.8")
+    graph.edge(paths[1][2], "IP2", layer="path0", color="navy", penwidth="1.8")
+    
+    graph.edge("HS", paths[2][0], layer="path0", color="black", penwidth="1.8")
+    graph.edge(paths[2][0], paths[2][1], layer="path0", color="black", penwidth="1.8")
+    graph.edge(paths[2][1], paths[2][2], layer="path0", color="black", penwidth="1.8")
+    graph.edge(paths[2][2], "IP3", layer="path0", color="black", penwidth="1.8")
+    
+    graph.edge("HS", paths[7][0], layer="path1", penwidth="1.8")
+    graph.edge(paths[7][0], paths[7][1], layer="path1", penwidth="1.8")
+    graph.edge(paths[7][1], paths[7][2], layer="path1", penwidth="1.8")
+    graph.edge(paths[7][2], "DIR", layer="path1", penwidth="1.8")
+    
+    graph.edge("PC", paths[4][0], layer="path2", penwidth="1.8")
+    graph.edge(paths[4][0], paths[4][1], layer="path2", penwidth="1.8")
+    graph.edge(paths[4][1], paths[4][2], layer="path2", penwidth="1.8")
+    graph.edge(paths[4][2], "DIR", layer="path2", penwidth="1.8")
+    
+    graph.edge("PC", paths[3][0], layer="path3", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path3", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path3", color="red", penwidth="2.3")
+    
+    graph.edge("PC", paths[3][0], layer="path4", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path4", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path4", color="red", penwidth="2.3")
+    graph.edge("PC", paths[5][0], layer="path4", penwidth="1.8")
+    graph.edge(paths[5][0], paths[5][1], layer="path4", penwidth="1.8")
+    graph.edge(paths[5][1], paths[5][2], layer="path4", penwidth="1.8")
+    graph.edge(paths[5][2], "IP3", layer="path4", penwidth="1.8")
+    
+    graph.edge("PC", paths[3][0], layer="path5", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path5", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path5", color="red", penwidth="2.3")
+    graph.edge(paths[2][0], "HS", layer="path5", penwidth="1.8")
+    graph.edge(paths[2][1], paths[2][0], layer="path5", penwidth="1.8")
+    graph.edge(paths[2][2], paths[2][1], layer="path5", penwidth="1.8")
+    graph.edge("IP3", paths[2][2], layer="path5", penwidth="1.8")
+    
+    graph.edge("PC", paths[3][0], layer="path6", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path6", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path6", color="red", penwidth="2.3")
+    graph.edge("HS", paths[6][0], layer="path6", color="black", penwidth="2.3")
+    graph.edge(paths[6][0], paths[6][1], layer="path6", color="black", penwidth="2.3")
+    graph.edge(paths[6][1], paths[6][2], layer="path6", color="black", penwidth="2.3")
+    graph.edge(paths[6][2], "RP", layer="path6", color="black", penwidth="2.3")
+    
+    graph.edge("PC", paths[3][0], layer="path7", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path7", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path7", color="red", penwidth="2.3")
+    graph.edge("RP", paths[6][2], layer="path7", color="red", penwidth="2.3")
+    graph.edge(paths[6][2], paths[6][1], layer="path7", color="red", penwidth="2.3")
+    graph.edge(paths[6][1], paths[6][0], layer="path7", color="red", penwidth="2.3")
+    graph.edge(paths[6][0], "HS", layer="path7", color="red", penwidth="2.3")
+    
+    graph.render('graph/simulation.dot', view=False)
+
+
 def generate_graph_legend(graph_type):
     graph = Digraph('test', format='svg')
     
@@ -754,7 +886,7 @@ def generate_graph_legend(graph_type):
         exit_l.node("EX", label="", shape='hexagon', height='0.3', width='0.3')
         mid_l.node("MI", label="", shape='ellipse', height='0.3', width='0.3')
         # gu_ex_l.node("GU_EX", label="", shape='box', height='0.3', width='0.3')
-        
+
     subgraph_legend.subgraph(gu_mi_l)
     subgraph_legend.subgraph(gu_ex_l)
     subgraph_legend.subgraph(exit_l)
@@ -827,7 +959,7 @@ def run_tor_path_simulator(path, n_samples=5):
     num_adv_guards = '0'
     num_adv_exits = '0'
     num_guards = '1'
-    gard_expiration = '80000000'
+    gard_expiration = '1'
     loglevel = 'INFO'
     path_alg = 'tor'
     
@@ -843,6 +975,7 @@ def run_tor_path_simulator(path, n_samples=5):
               "--out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1".format(torps_path, start_year, start_month,
                                                                                  end_year, end_month, in_dir, out_dir,
                                                                                  initial_descriptors_dir))
+    # os.system("python {} simulate -h".format(torps_path))
     
     os.system("python {} simulate --nsf_dir {} --num_samples {} --trace_file {} --user_model {} --format {} "
               "--adv_guard_cons_bw {} --adv_exit_cons_bw {} --adv_time {} --num_adv_guards {} --num_adv_exits {} "
@@ -862,5 +995,5 @@ if __name__ == '__main__':
     # get_paths('True')
 
     # todo color GU_MI EX_MI
-    # todo valid name in config file _
     # todo grapph size in config file
+    # todo same badwidth
