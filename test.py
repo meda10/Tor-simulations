@@ -38,7 +38,7 @@ def parse_config_file():
            'number_of_simulations': config['path_simulation']['number_of_simulations'],
            'simulation_size': config['path_simulation']['simulation_size'],
            'path_selection': config['path_simulation']['path_selection'],
-           'remove_duplicit_paths': config['general']['remove_duplicit_paths'].upper() in ['TRUE'],
+           'remove_duplicate_paths': config['general']['remove_duplicate_paths'].upper() in ['TRUE'],
            'generate_graph': config['general']['generate_graph'].upper() in ['TRUE'],
            'create_html': config['general']['create_html'].upper() in ['TRUE'],
            'path': config['general']['path'],
@@ -74,8 +74,6 @@ def parse_config_file():
     
         except ValueError:
             print('Value of nodes have to be number')
-        
-        
     
     try:
         if int(conf[0]['guard']) == 0:
@@ -119,7 +117,7 @@ def run_simulation():
                                             int(config[0]['middle']), int(config[0]['exit']),
                                             config[0]['same_bandwidth'], config[1]))
     run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
-    paths = get_paths(config[0]['remove_duplicit_paths'])
+    paths = get_paths(config[0]['remove_duplicate_paths'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         generate_hiden_service_graph(routers, paths)
@@ -175,53 +173,57 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_paths(remove_duplicit_paths):
+def get_paths(remove_duplicate_paths):
+    path = []
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
     
-    guard_node = ['Guard']
-    middle_node = ['Middle']
-    exit_node = ['Exit']
-    path = []
-    
     for i in range(0, len(lines)):
-        if lines[i].split()[2] not in guard_node and not lines[i].split()[2].__eq__('Guard'):
-            guard_node.append(lines[i].split()[2])
-        if lines[i].split()[3] not in middle_node and not lines[i].split()[3].__eq__('IP'):
-            middle_node.append(lines[i].split()[3])
-        if lines[i].split()[4] not in exit_node and not lines[i].split()[4].__eq__('Middle'):
-            exit_node.append(lines[i].split()[4])
         if not lines[i].split()[2].__eq__('Guard'):
             x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            if x not in path and remove_duplicit_paths:
+            if x not in path and remove_duplicate_paths:
                 path.append(x)
-            elif not remove_duplicit_paths:
+            elif not remove_duplicate_paths:
                 path.append(x)
 
-    print(guard_node)
-    # print(middle_node)
-    # print(exit_node)
-    # print(len(path))
-    # print(path)
-    """
-    for g in guard_node:
-        if g in exit_node:
-            print("GU_EX______{}".format(g))
-            
-    for e in exit_node:
-        if e in middle_node:
-            print("EX_MI______{}".format(e))
-            
-    for g in guard_node:
-        if g in middle_node:
-            print("GU_MI______{}".format(g))
-    """
-    # for p in path:
-    # print(p)
-    
     return path
 
+
+def get_multipurpose_nodes(routers, paths, fake_guards):
+    path_middle_node = []
+    all_guard_node = []
+    all_exit_node = []
+    
+    gu_mi_node = []
+    ex_mi_node = []
+    
+    for path in paths:
+        if path[1] not in path_middle_node:
+            path_middle_node.append(path[1])
+    
+    i = 0
+    for r in routers:
+        if "Guard" in r.flags:
+            all_guard_node.append(str(r.address))
+        elif "Exit" in r.flags:
+            all_exit_node.append(str(r.address))
+        else:
+            if i < fake_guards:
+                i = i + 1
+                all_guard_node.append(r.address)
+    
+    for guard_n in all_guard_node:
+        if guard_n in path_middle_node:
+            gu_mi_node.append(guard_n)
+    
+    for exit_n in all_exit_node:
+        if exit_n in path_middle_node:
+            ex_mi_node.append(exit_n)
+    
+    output = [gu_mi_node, ex_mi_node]
+    return output
+    
 
 def generate_router_status_entry(self, flags='Fast Running Stable Valid'):
     """
@@ -478,26 +480,17 @@ def generate_simple_graph(routers, paths):
     guard_node = []
     middle_node = []
     exit_node = []
-
-    colors = ['aquamarine', 'black', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue',
-              'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'crimson', 'cyan', 'darkgoldenrod', 'darkgreen',
-              'darkkhaki', 'darkolivegreen', 'darkorange', 'darkorchid', 'darksalmon', 'darkseagreen', 'darkslateblue',
-              'darkslategray', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgrey', 'dodgerblue',
-              'firebrick', 'forestgreen', 'gold', 'goldenrod', 'green', 'greenyellow', 'hotpink', 'indianred', 'indigo',
-              'lawngreen', 'magenta', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue',
-              'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'navajowhite', 'olivedrab',
-              'orange', 'orangered', 'orchid', 'paleturquoise', 'palevioletred', 'peru', 'plum', 'purple', 'red',
-              'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'sienna', 'slateblue', 'slategrey', 'springgreen',
-              'steelblue', 'tan', 'tomato', 'turquoise', 'violet', 'yellowgreen']
     
     graph = Digraph('test', format='svg')
 
+    graph.attr(layout="dot")
     graph.attr(rankdir='TB')
     graph.attr(fontsize='10')
 
-    if len(paths) > 20:
-        graph.attr(overlap="false")
+    if len(paths) >= 15:
         graph.attr(splines='false')
+    else:
+        graph.attr(splines="true")
 
     layers = []
     for i in range(0, len(paths)):
@@ -518,22 +511,34 @@ def generate_simple_graph(routers, paths):
     subgraph_server.graph_attr.update(rank='same')
 
     computer_icon_path = "resources//computer.png"
-    server_icon_path = "resources//server.svg"
+    server_icon_path = "resources//SE.svg"
     subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true",
                      width="0.6", height="0.6")
     subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true",
                          width="0.7", height="0.7", margin="20")
 
+    multi_nodes = get_multipurpose_nodes(routers, paths)
+
     for r in routers:
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            subgraph_guards.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
+            if str(r.address) in multi_nodes[0]:
+                subgraph_guards.node(str(r.address), shape='box', color="darkred", fillcolor="white",
+                                     fontsize='10', fontname='Verdana')
+            else:
+                subgraph_guards.node(str(r.address), shape='ellipse', color="darkred", fillcolor="white",
+                                     fontsize='10', fontname='Verdana')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            subgraph_exits.node(str(r.address), shape='hexagon', fontsize='10', fontname='Verdana')
+            if str(r.address) in multi_nodes[1]:
+                subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white",
+                                    fontsize='10', fontname='Verdana')
+            else:
+                subgraph_exits.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
+                                    fontsize='10', fontname='Verdana')
         else:
             middle_node.append(r.address)
-            subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
+            subgraph_middles.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
 
     graph.subgraph(subgraph_pc)
     graph.subgraph(subgraph_guards)
@@ -548,15 +553,10 @@ def generate_simple_graph(routers, paths):
         graph.edge(exit_n, "SERVER", style='invis')
     
     for index, path in enumerate(paths, start=0):
-        color = random.randint(0, 72)
-        graph.edge("PC", path[0], color="{}".format(colors[color]), constraint="false", weight='0',
-                   layer="path{}".format(index))
-        graph.edge(path[0], path[1], color="{}".format(colors[color]), constraint="false", weight='0',
-                   layer="path{}".format(index))
-        graph.edge(path[1], path[2], color="{}".format(colors[color]), constraint="false", weight='0',
-                   layer="path{}".format(index))
-        graph.edge(path[2], "SERVER", color="{}".format(colors[color]), constraint="false", weight='0',
-                   layer="path{}".format(index))
+        graph.edge("PC", path[0], constraint="false", weight='0', layer="path{}".format(index))
+        graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
+        graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
+        graph.edge(path[2], "SERVER", constraint="false", weight='0', layer="path{}".format(index))
 
     if len(middle_node) == 0:
         for i in range(0, len(guard_node)):
@@ -617,8 +617,8 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     exit_node = []
     
     graph = Digraph('test', format='svg')
-    
-    graph.attr(layout='twopi')  # neato twopi
+
+    graph.attr(layout='twopi')
     graph.attr(ranksep='4 1.5 1.5')
     graph.attr(root='PC')
     graph.attr(size="6.75,9.25")
@@ -649,28 +649,44 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     x = 0
     if guards_to_generate == '3_guards':
         x = guard_len - 3
+        multi_nodes = get_multipurpose_nodes(routers, paths, x)
     elif guards_to_generate == '1_guard':
         x = guard_len - 1
+        multi_nodes = get_multipurpose_nodes(routers, paths, x)
+    else:
+        multi_nodes = get_multipurpose_nodes(routers, paths, 0)
 
     fake_guards = 0
     for index, r in enumerate(routers, start=0):
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='box',
-                                 height='0.3', width='0.3')
+            if str(r.address) in multi_nodes[0]:
+                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="darkorchid1", shape='circle',
+                                     height='0.3', width='0.3')
+            else:
+                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='circle',
+                                     height='0.3', width='0.3')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='hexagon',
-                                height='0.3', width='0.3')
+            if str(r.address) in multi_nodes[1]:
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="lawngreen", shape='circle',
+                                    height='0.3', width='0.3')
+            else:
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='circle',
+                                    height='0.3', width='0.3')
         else:
             if fake_guards < x:
                 fake_guards = fake_guards + 1
                 guard_node.append(r.address)
-                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='box',
-                                     height='0.3', width='0.3')
+                if str(r.address) in multi_nodes[0]:
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="darkorchid1",
+                                         shape='circle', height='0.3', width='0.3')
+                else:
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2",
+                                         shape='circle', height='0.3', width='0.3')
             else:
                 middle_node.append(r.address)
-                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='ellipse',
+                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='circle',
                                       height='0.3', width='0.3')
 
     graph.subgraph(subgraph_guards)
@@ -744,18 +760,12 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
 
 def generate_hiden_service_graph(routers, paths):
     graph = Digraph('test', format='svg')
-    
-    graph.attr(layout='neato')  # neato twopi
+
+    graph.attr(layout='neato')
     graph.attr(size="8.5")
     graph.attr(sep="-0.5")
     graph.attr(overlap="scalexy")
     graph.attr(splines="true")
-    
-    # graph.attr(mode="hier")
-    # graph.attr(pad="0.1")
-    # graph.attr(nodesep="-3")
-    # graph.attr(ranksep='5')
-    # graph.attr(concentrate="true")
     
     layers = []
     for i in range(0, len(paths)):
@@ -769,13 +779,13 @@ def generate_hiden_service_graph(routers, paths):
     hs_icon_path = "resources//HS.png"
     dir_icon_path = "resources//DIR.png"
     graph.node("NODE", label="", shape="none")
-    graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="true", width="1", height="1")
-    graph.node("HS", label="", shape="none", image=hs_icon_path, fixedsize="shape", width="1", height="1")
-    graph.node("IP1", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
-    graph.node("IP2", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
-    graph.node("IP3", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="1", height="1")
-    graph.node("DIR", label="", shape="none", image=dir_icon_path, fixedsize="shape", width="1", height="1")
-    graph.node("RP", label="", shape="none", image=rp_icon_path, fixedsize="shape", width="1", height="1")
+    graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="true", width="0.75", height="1")
+    graph.node("HS", label="", shape="none", image=hs_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("IP1", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("IP2", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("IP3", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("DIR", label="", shape="none", image=dir_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("RP", label="", shape="none", image=rp_icon_path, fixedsize="shape", width="0.75", height="1")
     
     for index, r in enumerate(routers, start=0):
         graph.node(str(r.address), label="", shape='box', height='0.3', width='0.3')
@@ -851,47 +861,81 @@ def generate_hiden_service_graph(routers, paths):
     graph.edge(paths[6][0], "HS", layer="path7", color="red", penwidth="2.3")
     
     graph.render('graph/simulation.dot', view=False)
+    generate_graph_legend('hidden_service')
 
 
 def generate_graph_legend(graph_type):
     graph = Digraph('test', format='svg')
-    
-    graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")  # neato twopi dot
-    
+    graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")
     graph.attr(size="3.5,5")
     
     subgraph_legend = Digraph('cluster_legend')
-    guard_l = Digraph('cluster_guard_l')
-    mid_l = Digraph('cluster_middle_l')
-    exit_l = Digraph('cluster_exit_l')
-    gu_mi_l = Digraph('cluster_gu_mi_l')
-    gu_ex_l = Digraph('cluster_gu_ex_l')
-    
     subgraph_legend.attr(label="Key")
-    guard_l.attr(label="Guard", penwidth="0")
-    mid_l.attr(label="Middle", penwidth="0")
-    exit_l.attr(label="Exit", penwidth="0")
-    gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
-    gu_ex_l.attr(label="Guard\nExit", penwidth="0")
 
-    if graph_type is "large":
-        # guard_l.node("GU", label="", style='filled', fillcolor="darkorchid1", shape='box', height='0.3', width='0.3')
-        gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="coral2", shape='box', height='0.3', width='0.3')
-        exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='hexagon', height='0.3', width='0.3')
-        mid_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='ellipse', height='0.3', width='0.3')
-        # gu_ex_l.node("GU_EX", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3', width='0.3')
+    if graph_type is 'hidden_service':
+        dir_l = Digraph('cluster_dir_l')
+        ip_l = Digraph('cluster_ip_l')
+        rp_l = Digraph('cluster_rp_l')
+        hs_l = Digraph('cluster_hs_l')
+    
+        dir_l.attr(label="Directory\nauthority", penwidth="0")
+        rp_l.attr(label="Rendezvous\npoint", penwidth="0")
+        ip_l.attr(label="Introductory\npoint", penwidth="0")
+        hs_l.attr(label="Hidden\nservice", penwidth="0")
+    
+        rp_icon_path = "resources//RP.png"
+        ip_icon_path = "resources//IP.png"
+        hs_icon_path = "resources//HS.png"
+        dir_icon_path = "resources//DIR.png"
+    
+        dir_l.node("DIR_L", label="", shape="none", image=dir_icon_path, fixedsize="true", width="0.75", height="1")
+        ip_l.node("IP_L", label="", shape="none", image=ip_icon_path, fixedsize="true", width="0.75", height="1")
+        rp_l.node("RP_L", label="", shape="none", image=rp_icon_path, fixedsize="true", width="0.75", height="1")
+        hs_l.node("HS_L", label="", shape="none", image=hs_icon_path, fixedsize="true", width="0.75", height="1")
+    
+        subgraph_legend.subgraph(dir_l)
+        subgraph_legend.subgraph(ip_l)
+        subgraph_legend.subgraph(rp_l)
+        subgraph_legend.subgraph(hs_l)
     else:
-        # guard_l.node("GU", label="", shape='box', height='0.3', width='0.3')
-        gu_mi_l.node("GU_MI", label="", shape='box', height='0.3', width='0.3')
-        exit_l.node("EX", label="", shape='hexagon', height='0.3', width='0.3')
-        mid_l.node("MI", label="", shape='ellipse', height='0.3', width='0.3')
-        # gu_ex_l.node("GU_EX", label="", shape='box', height='0.3', width='0.3')
-
-    subgraph_legend.subgraph(gu_mi_l)
-    subgraph_legend.subgraph(gu_ex_l)
-    subgraph_legend.subgraph(exit_l)
-    subgraph_legend.subgraph(mid_l)
-    subgraph_legend.subgraph(guard_l)
+        guard_l = Digraph('cluster_guard_l')
+        mid_l = Digraph('cluster_middle_l')
+        exit_l = Digraph('cluster_exit_l')
+        gu_mi_l = Digraph('cluster_gu_mi_l')
+        ex_mi_l = Digraph('cluster_gu_ex_l')
+    
+        guard_l.attr(label="Guard", penwidth="0")
+        mid_l.attr(label="Middle", penwidth="0")
+        exit_l.attr(label="Exit", penwidth="0")
+        gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
+        ex_mi_l.attr(label="Exit\nMiddle", penwidth="0")
+        if graph_type is "large":
+            guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='circle', height='0.3',
+                         width='0.3')
+            gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="darkorchid1", shape='circle', height='0.3',
+                         width='0.3')
+            exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='circle', height='0.3',
+                        width='0.3')
+            mid_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='circle', height='0.3',
+                       width='0.3')
+            ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='circle', height='0.3',
+                         width='0.3')
+        else:
+            guard_l.node("GU", label="", shape='circle', color="darkred", fillcolor="white", height='0.3', width='0.3',
+                         penwidth="2")
+            gu_mi_l.node("GU_MI", label="", shape='box', color="darkred", fillcolor="white", height='0.3', width='0.3',
+                         penwidth="2")
+            mid_l.node("MI", label="", shape='box', height='0.3', width='0.3', penwidth="2")
+            exit_l.node("EX", label="", shape='circle', color="blue", fillcolor="white", height='0.3', width='0.3',
+                        penwidth="2")
+            ex_mi_l.node("EX_MI", label="", shape='box', color="blue", fillcolor="white", height='0.3', width='0.3',
+                         penwidth="2")
+        subgraph_legend.subgraph(ex_mi_l)
+        subgraph_legend.subgraph(exit_l)
+        subgraph_legend.subgraph(mid_l)
+        subgraph_legend.subgraph(gu_mi_l)
+        subgraph_legend.subgraph(guard_l)
+        
     graph.subgraph(subgraph_legend)
 
     graph.render('graph/legend.dot', view=False)
@@ -909,7 +953,7 @@ def create_html():
         svg.close()
 
     with open(svg_file_legend, 'r') as svg:
-        l = svg.read()
+        legend = svg.read()
         svg.close()
     
     with open(output_file, 'w') as html_file:
@@ -922,12 +966,11 @@ def create_html():
                         "<script defer=\"\" src=\"resources//animation.js\"></script>\n"
                         "</head>\n"
                         "<body>\n"
-                        "<p>Výsledek:</p>\n"
                         "<ul id=\"link-container\">\n"
                         "</ul>\n")
         html_file.write(s)
         html_file.write("<br>\n")
-        html_file.write(l)
+        html_file.write(legend)
         html_file.write("</body>\n"
                         "</html>\n")
         html_file.close()
@@ -992,8 +1035,7 @@ if __name__ == '__main__':
     run_simulation()
 
     # run_tor_path_simulator('/home/petr/TorPs', 50)
-    # get_paths('True')
 
     # todo color GU_MI EX_MI
     # todo grapph size in config file
-    # todo same badwidth
+    # todo chceck path 6 diferent nodes
