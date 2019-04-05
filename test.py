@@ -35,6 +35,7 @@ def parse_config_file():
     dic = {'guard': config['path_simulation']['guard'],
            'middle': config['path_simulation']['middle'],
            'exit': config['path_simulation']['exit'],
+           'guard_exit': config['path_simulation']['guard_exit'],
            'number_of_simulations': config['path_simulation']['number_of_simulations'],
            'simulation_size': config['path_simulation']['simulation_size'],
            'path_selection': config['path_simulation']['path_selection'],
@@ -65,7 +66,7 @@ def parse_config_file():
     conf.append(all_nodes)
 
     if conf[0]['simulation_type'] == 'hidden_service':
-        conf[0]['number_of_simulations'] = '8'
+        conf[0]['number_of_simulations'] = 8
         try:
             nodes = int(conf[0]['nodes'])
             conf[0]['guard'] = round(nodes / 2)
@@ -74,29 +75,34 @@ def parse_config_file():
     
         except ValueError:
             print('Value of nodes have to be number')
-    
-    try:
-        if int(conf[0]['guard']) == 0:
-            print('Number of guards have to be > 1')
-            sys.exit(1)
-    except ValueError:
-        print('Number of guards have to be > 1')
-        sys.exit(1)
 
-    try:
-        if int(conf[0]['exit']) == 0:
-            print('Number of exits have to be > 1')
-            sys.exit(1)
-    except ValueError:
-        print('Number of exits have to be > 1')
-        sys.exit(1)
+    if conf[0]['simulation_size'] == 'small':
+        if conf[0]['path_selection'] != 'random':
+            print('Value of path_selection have to be: random')
 
-    try:
-        if int(conf[0]['exit']) + int(conf[0]['guard']) + int(conf[0]['middle']) < 3:
+    try:  # todo chceck exit guard too
+        conf[0]['exit'] = int(conf[0]['exit'])
+        conf[0]['middle'] = int(conf[0]['middle'])
+        conf[0]['guard'] = int(conf[0]['guard'])
+        conf[0]['guard'] = int(conf[0]['guard'])
+        conf[0]['guard_exit'] = int(conf[0]['guard_exit'])
+        conf[0]['number_of_simulations'] = int(int(conf[0]['number_of_simulations']))
+        if conf[0]['guard'] < 0:
+            print('Number of guards have to be > 0')
+            sys.exit(1)
+        if conf[0]['exit'] < 0:
+            print('Number of exits have to be >0')
+            sys.exit(1)
+        if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
             print('Number of nodes have to be > 3')
             sys.exit(1)
+        if conf[0]['guard_exit'] < 0:
+            print('Number of guard_exit have to be >= 0')
+            sys.exit(1)
     except ValueError:
-        print('Number of nodes have to be > 3')
+        print('Number of nodes have to be > 3\n'
+              'Number of guards have to be > 1\n'
+              'Number of exits have to be > 1')
         sys.exit(1)
 
     try:
@@ -113,19 +119,20 @@ def parse_config_file():
 
 def run_simulation():
     config = parse_config_file()
-    routers = make_descriptors(check_params(config[0]['path_selection'], int(config[0]['guard']),
-                                            int(config[0]['middle']), int(config[0]['exit']),
-                                            config[0]['same_bandwidth'], config[1]))
-    run_tor_path_simulator(config[0]['path'], int(config[0]['number_of_simulations']))
+    routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
+                                            config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
+                                            config[1]))
+    run_tor_path_simulator(config[0]['path'], config[0]['number_of_simulations'])
     paths = get_paths(config[0]['remove_duplicate_paths'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
-        generate_hiden_service_graph(routers, paths)
+        generate_hidden_service_graph(routers, paths)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         if config[0]['simulation_size'] == 'large':
-            generate_large_graph(routers, paths, config[0]['path_selection'], int(config[0]['guard']))
+            generate_large_graph(routers, paths, config[0]['path_selection'], config[0]['guard'],
+                                 config[0]['exit'], config[0]['guard_exit'])
         elif config[0]['simulation_size'] == 'small':
-            generate_simple_graph(routers, paths)
+            generate_simple_graph(routers, paths, config[0]['guard'], config[0]['exit'])
 
     if config[0]['create_html'] and config[0]['generate_graph']:
         create_html()
@@ -425,19 +432,27 @@ def valid_node(node, names, ip, same_bandwidth):
             node['bandwidth'] = generate_bandwidth(same_bandwidth)
 
 
-def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, same_bandwidth=False, params=None):
+def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, gu_ex_count=0, same_bandwidth=False, params=None):
     names = []
     ip = []
     guard_node = []
     middle_node = []
     exit_node = []
+
+    if exit_count == 0:
+        guard_to_generate = round(gu_ex_count / 2)
+        exit_to_generate = gu_ex_count - round(gu_ex_count / 2)
+    else:
+        guard_to_generate = gu_ex_count - round(gu_ex_count / 2)
+        exit_to_generate = round(gu_ex_count / 2)
+    
     if params is not None:
         for node in params:
             valid_node(node, names, ip, same_bandwidth)
             guard_node.append(node) if node['type'] == 'guard' else None
             middle_node.append(node) if node['type'] == 'middle' else None
             exit_node.append(node) if node['type'] == 'exit' else None
-    for i in range(0, guard_count - len(guard_node)):
+    for i in range(0, guard_count - len(guard_node) + guard_to_generate):
         node = {'type': 'guard',
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
@@ -451,32 +466,33 @@ def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, same_bandw
                 'port': '{}'.format(generate_port()),
                 'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
         middle_node.append(node)
-    for i in range(0, exit_count - len(exit_node)):
+    for i in range(0, exit_count - len(exit_node) + exit_to_generate):
         node = {'type': 'exit',
                 'name': '{}'.format(generate_nickname()),
                 'ip': '{}'.format(generate_ipv4_address()),
                 'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}  # todo function
+                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
         exit_node.append(node)
 
     if s_type == '1_guard':
-        for node in guard_node[1:guard_count]:
+        for node in guard_node[1:guard_count + guard_to_generate]:
             node['type'] = 'middle'
-        middle_node = guard_node[1:guard_count] + middle_node[:middle_count]
-        data = [guard_node[:1], middle_node, exit_node[:exit_count]]
+        middle_node = guard_node[1:guard_count + guard_to_generate] + middle_node[:middle_count]
+        data = [guard_node[:1], middle_node, exit_node[:exit_count + exit_to_generate]]
         return data
     elif s_type == '3_guards':
-        for node in guard_node[3:guard_count]:
+        for node in guard_node[3:guard_count + guard_to_generate]:
             node['type'] = 'middle'
-        middle_node = guard_node[3:guard_count] + middle_node[:middle_count]
-        data = [guard_node[:3], middle_node, exit_node[:exit_count]]
+        middle_node = guard_node[3:guard_count + guard_to_generate] + middle_node[:middle_count]
+        data = [guard_node[:3], middle_node, exit_node[:exit_count + exit_to_generate]]
         return data
     else:
-        data = [guard_node[:guard_count], middle_node[:middle_count], exit_node[:exit_count]]
+        data = [guard_node[:guard_count + guard_to_generate], middle_node[:middle_count],
+                exit_node[:exit_count + exit_to_generate]]
         return data
 
 
-def generate_simple_graph(routers, paths):
+def generate_simple_graph(routers, paths, guard_len, exit_len):
     guard_node = []
     middle_node = []
     exit_node = []
@@ -517,28 +533,29 @@ def generate_simple_graph(routers, paths):
     subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true",
                          width="0.7", height="0.7", margin="20")
 
-    multi_nodes = get_multipurpose_nodes(routers, paths)
-
+    guard_count = 0
+    exit_count = 0
     for r in routers:
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            if str(r.address) in multi_nodes[0]:
-                subgraph_guards.node(str(r.address), shape='box', color="darkred", fillcolor="white",
+            if guard_count >= guard_len:
+                subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white",
                                      fontsize='10', fontname='Verdana')
             else:
-                subgraph_guards.node(str(r.address), shape='ellipse', color="darkred", fillcolor="white",
+                guard_count = guard_count + 1
+                subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
                                      fontsize='10', fontname='Verdana')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            if str(r.address) in multi_nodes[1]:
+            if exit_count >= exit_len:
                 subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white",
                                     fontsize='10', fontname='Verdana')
             else:
-                subgraph_exits.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
-                                    fontsize='10', fontname='Verdana')
+                exit_count = exit_count + 1
+                subgraph_exits.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
         else:
             middle_node.append(r.address)
-            subgraph_middles.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
+            subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
 
     graph.subgraph(subgraph_pc)
     graph.subgraph(subgraph_guards)
@@ -611,7 +628,7 @@ def generate_simple_graph(routers, paths):
     generate_graph_legend("small")
 
 
-def generate_large_graph(routers, paths, guards_to_generate, guard_len):
+def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len, guard_exit):
     guard_node = []
     middle_node = []
     exit_node = []
@@ -619,9 +636,9 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     graph = Digraph('test', format='svg')
 
     graph.attr(layout='twopi')
-    graph.attr(ranksep='4 1.5 1.5')
+    graph.attr(ranksep='4 2 2')
     graph.attr(root='PC')
-    graph.attr(size="6.75,9.25")
+    graph.attr(size="7.5")
     graph.attr(overlap="false")
     graph.attr(splines="true")
     # graph.attr(concentrate="true")
@@ -647,46 +664,50 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
                height="1.3", margin="20")
 
     x = 0
+    fill_color = 'dodgerblue'
     if guards_to_generate == '3_guards':
-        x = guard_len - 3
-        multi_nodes = get_multipurpose_nodes(routers, paths, x)
+        x = guard_len - 3 + round(guard_exit / 2)
+        fill_color = 'coral2'
     elif guards_to_generate == '1_guard':
-        x = guard_len - 1
-        multi_nodes = get_multipurpose_nodes(routers, paths, x)
-    else:
-        multi_nodes = get_multipurpose_nodes(routers, paths, 0)
-
+        x = guard_len - 1 + round(guard_exit / 2)
+        fill_color = 'coral2'
+    
     fake_guards = 0
+    guard_generated = 0
+    exits_generated = 0
     for index, r in enumerate(routers, start=0):
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            if str(r.address) in multi_nodes[0]:
-                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="darkorchid1", shape='circle',
-                                     height='0.3', width='0.3')
+            if guard_generated >= guard_len:
+                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
+                                     shape='box', height='0.3', width='0.3')
             else:
-                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2", shape='circle',
-                                     height='0.3', width='0.3')
+                guard_generated = guard_generated + 1
+                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
+                                     shape='circle', height='0.3', width='0.3')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            if str(r.address) in multi_nodes[1]:
-                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="lawngreen", shape='circle',
+            if exits_generated >= exit_len:
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='box',
                                     height='0.3', width='0.3')
             else:
-                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='circle',
+                exits_generated = exits_generated + 1
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="white", shape='box',
                                     height='0.3', width='0.3')
         else:
             if fake_guards < x:
                 fake_guards = fake_guards + 1
                 guard_node.append(r.address)
-                if str(r.address) in multi_nodes[0]:
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="darkorchid1",
-                                         shape='circle', height='0.3', width='0.3')
+                if guard_generated >= guard_len:
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='dodgerblue',
+                                         shape='box', height='0.3', width='0.3')
                 else:
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="coral2",
+                    guard_generated = guard_generated + 1
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="dodgerblue",
                                          shape='circle', height='0.3', width='0.3')
             else:
                 middle_node.append(r.address)
-                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='circle',
+                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="white", shape='circle',
                                       height='0.3', width='0.3')
 
     graph.subgraph(subgraph_guards)
@@ -758,7 +779,7 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len):
     generate_graph_legend("large")
 
 
-def generate_hiden_service_graph(routers, paths):
+def generate_hidden_service_graph(routers, paths):
     graph = Digraph('test', format='svg')
 
     graph.attr(layout='neato')
@@ -768,7 +789,7 @@ def generate_hiden_service_graph(routers, paths):
     graph.attr(splines="true")
     
     layers = []
-    for i in range(0, len(paths)):
+    for i in range(0, 10):
         layers.append("path{}:".format(i))
     
     graph.attr(layers=''.join(layers)[:-1])
@@ -798,67 +819,89 @@ def generate_hiden_service_graph(routers, paths):
     graph.edge("NODE", "IP3", style="invis", len="1", constraint="false")
     graph.edge("NODE", "DIR", style="invis", len="1", constraint="false")
     graph.edge("NODE", "RP", style="invis", len="1", constraint="false")
-    
+
+    # HS -> IP1
     graph.edge("HS", paths[0][0], layer="path0", color="red", penwidth="1.8")
     graph.edge(paths[0][0], paths[0][1], layer="path0", color="red", penwidth="1.8")
     graph.edge(paths[0][1], paths[0][2], layer="path0", color="red", penwidth="1.8")
     graph.edge(paths[0][2], "IP1", layer="path0", color="red", penwidth="1.8")
-    
-    graph.edge("HS", paths[1][0], layer="path0", color="navy", penwidth="1.8")
-    graph.edge(paths[1][0], paths[1][1], layer="path0", color="navy", penwidth="1.8")
-    graph.edge(paths[1][1], paths[1][2], layer="path0", color="navy", penwidth="1.8")
-    graph.edge(paths[1][2], "IP2", layer="path0", color="navy", penwidth="1.8")
-    
-    graph.edge("HS", paths[2][0], layer="path0", color="black", penwidth="1.8")
-    graph.edge(paths[2][0], paths[2][1], layer="path0", color="black", penwidth="1.8")
-    graph.edge(paths[2][1], paths[2][2], layer="path0", color="black", penwidth="1.8")
-    graph.edge(paths[2][2], "IP3", layer="path0", color="black", penwidth="1.8")
-    
-    graph.edge("HS", paths[7][0], layer="path1", penwidth="1.8")
-    graph.edge(paths[7][0], paths[7][1], layer="path1", penwidth="1.8")
-    graph.edge(paths[7][1], paths[7][2], layer="path1", penwidth="1.8")
-    graph.edge(paths[7][2], "DIR", layer="path1", penwidth="1.8")
-    
-    graph.edge("PC", paths[4][0], layer="path2", penwidth="1.8")
-    graph.edge(paths[4][0], paths[4][1], layer="path2", penwidth="1.8")
-    graph.edge(paths[4][1], paths[4][2], layer="path2", penwidth="1.8")
-    graph.edge(paths[4][2], "DIR", layer="path2", penwidth="1.8")
-    
-    graph.edge("PC", paths[3][0], layer="path3", color="red", penwidth="2.3")
-    graph.edge(paths[3][0], paths[3][1], layer="path3", color="red", penwidth="2.3")
-    graph.edge(paths[3][1], "RP", layer="path3", color="red", penwidth="2.3")
-    
-    graph.edge("PC", paths[3][0], layer="path4", color="red", penwidth="2.3")
-    graph.edge(paths[3][0], paths[3][1], layer="path4", color="red", penwidth="2.3")
-    graph.edge(paths[3][1], "RP", layer="path4", color="red", penwidth="2.3")
-    graph.edge("PC", paths[5][0], layer="path4", penwidth="1.8")
-    graph.edge(paths[5][0], paths[5][1], layer="path4", penwidth="1.8")
-    graph.edge(paths[5][1], paths[5][2], layer="path4", penwidth="1.8")
-    graph.edge(paths[5][2], "IP3", layer="path4", penwidth="1.8")
-    
+
+    # HS -> IP1 + HS -> IP2
+    graph.edge("HS", paths[0][0], layer="path1", color="red", penwidth="1.8")
+    graph.edge(paths[0][0], paths[0][1], layer="path1", color="red", penwidth="1.8")
+    graph.edge(paths[0][1], paths[0][2], layer="path1", color="red", penwidth="1.8")
+    graph.edge(paths[0][2], "IP1", layer="path1", color="red", penwidth="1.8")
+    graph.edge("HS", paths[1][0], layer="path1", color="navy", penwidth="1.8")
+    graph.edge(paths[1][0], paths[1][1], layer="path1", color="navy", penwidth="1.8")
+    graph.edge(paths[1][1], paths[1][2], layer="path1", color="navy", penwidth="1.8")
+    graph.edge(paths[1][2], "IP2", layer="path1", color="navy", penwidth="1.8")
+
+    # HS -> IP1 + HS -> IP2 + HS -> IP3
+    graph.edge("HS", paths[0][0], layer="path2", color="red", penwidth="1.8")
+    graph.edge(paths[0][0], paths[0][1], layer="path2", color="red", penwidth="1.8")
+    graph.edge(paths[0][1], paths[0][2], layer="path2", color="red", penwidth="1.8")
+    graph.edge(paths[0][2], "IP1", layer="path2", color="red", penwidth="1.8")
+    graph.edge("HS", paths[1][0], layer="path2", color="navy", penwidth="1.8")
+    graph.edge(paths[1][0], paths[1][1], layer="path2", color="navy", penwidth="1.8")
+    graph.edge(paths[1][1], paths[1][2], layer="path2", color="navy", penwidth="1.8")
+    graph.edge(paths[1][2], "IP2", layer="path2", color="navy", penwidth="1.8")
+    graph.edge("HS", paths[2][0], layer="path2", color="green", penwidth="1.8")
+    graph.edge(paths[2][0], paths[2][1], layer="path2", color="green", penwidth="1.8")
+    graph.edge(paths[2][1], paths[2][2], layer="path2", color="green", penwidth="1.8")
+    graph.edge(paths[2][2], "IP3", layer="path2", color="green", penwidth="1.8")
+
+    # HS -> DIR
+    graph.edge("HS", paths[7][0], layer="path3", penwidth="1.8")
+    graph.edge(paths[7][0], paths[7][1], layer="path3", penwidth="1.8")
+    graph.edge(paths[7][1], paths[7][2], layer="path3", penwidth="1.8")
+    graph.edge(paths[7][2], "DIR", layer="path3", penwidth="1.8")
+
+    # PC -> DIR
+    graph.edge("PC", paths[4][0], layer="path4", penwidth="1.8")
+    graph.edge(paths[4][0], paths[4][1], layer="path4", penwidth="1.8")
+    graph.edge(paths[4][1], paths[4][2], layer="path4", penwidth="1.8")
+    graph.edge(paths[4][2], "DIR", layer="path4", penwidth="1.8")
+
+    # PC -> RP
     graph.edge("PC", paths[3][0], layer="path5", color="red", penwidth="2.3")
     graph.edge(paths[3][0], paths[3][1], layer="path5", color="red", penwidth="2.3")
     graph.edge(paths[3][1], "RP", layer="path5", color="red", penwidth="2.3")
-    graph.edge(paths[2][0], "HS", layer="path5", penwidth="1.8")
-    graph.edge(paths[2][1], paths[2][0], layer="path5", penwidth="1.8")
-    graph.edge(paths[2][2], paths[2][1], layer="path5", penwidth="1.8")
-    graph.edge("IP3", paths[2][2], layer="path5", penwidth="1.8")
-    
+
+    # PC -> RP + PC -> IP3
     graph.edge("PC", paths[3][0], layer="path6", color="red", penwidth="2.3")
     graph.edge(paths[3][0], paths[3][1], layer="path6", color="red", penwidth="2.3")
     graph.edge(paths[3][1], "RP", layer="path6", color="red", penwidth="2.3")
-    graph.edge("HS", paths[6][0], layer="path6", color="black", penwidth="2.3")
-    graph.edge(paths[6][0], paths[6][1], layer="path6", color="black", penwidth="2.3")
-    graph.edge(paths[6][1], paths[6][2], layer="path6", color="black", penwidth="2.3")
-    graph.edge(paths[6][2], "RP", layer="path6", color="black", penwidth="2.3")
-    
+    graph.edge("PC", paths[5][0], layer="path6", penwidth="1.8")
+    graph.edge(paths[5][0], paths[5][1], layer="path6", penwidth="1.8")
+    graph.edge(paths[5][1], paths[5][2], layer="path6", penwidth="1.8")
+    graph.edge(paths[5][2], "IP3", layer="path6", penwidth="1.8")
+
+    # PC -> RP + IP3 -> HS
     graph.edge("PC", paths[3][0], layer="path7", color="red", penwidth="2.3")
     graph.edge(paths[3][0], paths[3][1], layer="path7", color="red", penwidth="2.3")
     graph.edge(paths[3][1], "RP", layer="path7", color="red", penwidth="2.3")
-    graph.edge("RP", paths[6][2], layer="path7", color="red", penwidth="2.3")
-    graph.edge(paths[6][2], paths[6][1], layer="path7", color="red", penwidth="2.3")
-    graph.edge(paths[6][1], paths[6][0], layer="path7", color="red", penwidth="2.3")
-    graph.edge(paths[6][0], "HS", layer="path7", color="red", penwidth="2.3")
+    graph.edge("IP3", paths[2][2], layer="path7", penwidth="1.8")
+    graph.edge(paths[2][2], paths[2][1], layer="path7", penwidth="1.8")
+    graph.edge(paths[2][1], paths[2][0], layer="path7", penwidth="1.8")
+    graph.edge(paths[2][0], "HS", layer="path7", penwidth="1.8")
+
+    # PC -> RP + HS -> RP
+    graph.edge("PC", paths[3][0], layer="path8", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path8", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path8", color="red", penwidth="2.3")
+    graph.edge("HS", paths[6][0], layer="path8", color="black", penwidth="2.3")
+    graph.edge(paths[6][0], paths[6][1], layer="path8", color="black", penwidth="2.3")
+    graph.edge(paths[6][1], paths[6][2], layer="path8", color="black", penwidth="2.3")
+    graph.edge(paths[6][2], "RP", layer="path8", color="black", penwidth="2.3")
+
+    # PC -> RP -> HS
+    graph.edge("PC", paths[3][0], layer="path9", color="red", penwidth="2.3")
+    graph.edge(paths[3][0], paths[3][1], layer="path9", color="red", penwidth="2.3")
+    graph.edge(paths[3][1], "RP", layer="path9", color="red", penwidth="2.3")
+    graph.edge("RP", paths[6][2], layer="path9", color="red", penwidth="2.3")
+    graph.edge(paths[6][2], paths[6][1], layer="path9", color="red", penwidth="2.3")
+    graph.edge(paths[6][1], paths[6][0], layer="path9", color="red", penwidth="2.3")
+    graph.edge(paths[6][0], "HS", layer="path9", color="red", penwidth="2.3")
     
     graph.render('graph/simulation.dot', view=False)
     generate_graph_legend('hidden_service')
@@ -903,13 +946,24 @@ def generate_graph_legend(graph_type):
         exit_l = Digraph('cluster_exit_l')
         gu_mi_l = Digraph('cluster_gu_mi_l')
         ex_mi_l = Digraph('cluster_gu_ex_l')
-    
-        guard_l.attr(label="Guard", penwidth="0")
+
+        guard_l.attr(label="Guard\nMiddle", penwidth="0")
         mid_l.attr(label="Middle", penwidth="0")
-        exit_l.attr(label="Exit", penwidth="0")
+        exit_l.attr(label="Exit\nMiddle", penwidth="0")
         gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
-        ex_mi_l.attr(label="Exit\nMiddle", penwidth="0")
+        ex_mi_l.attr(label="Guard\nExit\nMiddle", penwidth="0")
         if graph_type is "large":
+    
+            guard_l.node("GU", label="", style='filled', fillcolor="dodgerblue", shape='circle', height='0.3',
+                         width='0.3')
+            exit_l.node("EX", label="", style='filled', fillcolor="white", shape='box', height='0.3',
+                        width='0.3')
+            mid_l.node("MI", label="", style='filled', fillcolor="white", shape='circle', height='0.3',
+                       width='0.3')
+            ex_mi_l.node("GU_EX", label="", style='filled', fillcolor="dodgerblue", shape='box', height='0.3',
+                         width='0.3')
+    
+            """
             guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='circle', height='0.3',
                          width='0.3')
             gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="darkorchid1", shape='circle', height='0.3',
@@ -920,20 +974,18 @@ def generate_graph_legend(graph_type):
                        width='0.3')
             ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='circle', height='0.3',
                          width='0.3')
+            """
         else:
-            guard_l.node("GU", label="", shape='circle', color="darkred", fillcolor="white", height='0.3', width='0.3',
+            guard_l.node("GU", label="", shape='circle', color="blue", fillcolor="white", height='0.3', width='0.3',
                          penwidth="2")
-            gu_mi_l.node("GU_MI", label="", shape='box', color="darkred", fillcolor="white", height='0.3', width='0.3',
-                         penwidth="2")
+            exit_l.node("EX", label="", shape='circle', height='0.3', width='0.3', penwidth="2")
             mid_l.node("MI", label="", shape='box', height='0.3', width='0.3', penwidth="2")
-            exit_l.node("EX", label="", shape='circle', color="blue", fillcolor="white", height='0.3', width='0.3',
-                        penwidth="2")
-            ex_mi_l.node("EX_MI", label="", shape='box', color="blue", fillcolor="white", height='0.3', width='0.3',
+            ex_mi_l.node("GU_EX", label="", shape='box', color="blue", fillcolor="white", height='0.3', width='0.3',
                          penwidth="2")
-        subgraph_legend.subgraph(ex_mi_l)
         subgraph_legend.subgraph(exit_l)
         subgraph_legend.subgraph(mid_l)
         subgraph_legend.subgraph(gu_mi_l)
+        subgraph_legend.subgraph(ex_mi_l)
         subgraph_legend.subgraph(guard_l)
         
     graph.subgraph(subgraph_legend)
@@ -996,8 +1048,8 @@ def run_tor_path_simulator(path, n_samples=5):
     tracefile = Path(path + '/in/users2-processed.traces.pickle')
     usermodel = 'simple=600000000'
     format_arg = 'normal'
-    adv_guard_bw = '0'
-    adv_exit_bw = '0'
+    adv_guard_bw = '5444444444'
+    adv_exit_bw = '5444444444'
     adv_time = '0'
     num_adv_guards = '0'
     num_adv_exits = '0'
@@ -1034,8 +1086,5 @@ def run_tor_path_simulator(path, n_samples=5):
 if __name__ == '__main__':
     run_simulation()
 
-    # run_tor_path_simulator('/home/petr/TorPs', 50)
-
-    # todo color GU_MI EX_MI
     # todo grapph size in config file
     # todo chceck path 6 diferent nodes
