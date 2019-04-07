@@ -778,13 +778,13 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
                height="1.3", margin="20")
 
     x = 0
-    fill_color = 'dodgerblue'
+    fill_color = 'coral2'  # blue / coral2
     if guards_to_generate == '3_guards':
         x = guard_len - 3 + round(guard_exit / 2)
-        fill_color = 'coral2'
+        fill_color = 'darkorchid1'  # coral2 / darkorchid1
     elif guards_to_generate == '1_guard':
         x = guard_len - 1 + round(guard_exit / 2)
-        fill_color = 'coral2'
+        fill_color = 'darkorchid1'  # coral2 / darkorchid1
     # darkorchid1 forestgreen dodgerblue lawngreen
     fake_guards = 0
     guard_generated = 0
@@ -793,36 +793,36 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
         if "Guard" in r.flags:
             guard_node.append(r.address)
             if guard_generated >= guard_len:  # gu_ex
-                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
-                                     shape='box', height='0.3', width='0.3')  # FILL
+                subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='lawngreen'.format(fill_color),
+                                     shape='box', height='0.3', width='0.3')  # FILL / lawngreen
             else:
                 guard_generated = guard_generated + 1
                 subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
-                                     shape='circle', height='0.3', width='0.3')  # FILL
+                                     shape='circle', height='0.3', width='0.3')  # FILL / FILL
         elif "Exit" in r.flags:
             exit_node.append(r.address)
-            if exits_generated >= exit_len:
-                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='box',
-                                    height='0.3', width='0.3')  # BLUE
+            if exits_generated >= exit_len:  # gu_ex
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor='lawngreen', shape='box',
+                                    height='0.3', width='0.3')  # BLUE / lawngreen
             else:
                 exits_generated = exits_generated + 1
-                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='box',
-                                    height='0.3', width='0.3')  # WH
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor='forestgreen', shape='box',
+                                    height='0.3', width='0.3')  # WH / forestgreen
         else:
             if fake_guards < x:
                 fake_guards = fake_guards + 1
                 guard_node.append(r.address)
                 if guard_generated >= guard_len:  # gu_ex
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='dodgerblue',
-                                         shape='box', height='0.3', width='0.3')  # BLUE
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='lawngreen',
+                                         shape='box', height='0.3', width='0.3')  # BLUE / lawngreen
                 else:
                     guard_generated = guard_generated + 1
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="blue",
-                                         shape='circle', height='0.3', width='0.3')  # BLUE
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='coral2',
+                                         shape='circle', height='0.3', width='0.3')  # BLUE / coral2
             else:
                 middle_node.append(r.address)
-                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="darkorchid1", shape='circle',
-                                      height='0.3', width='0.3')  # WH
+                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='circle',
+                                      height='0.3', width='0.3')  # WH / dodgerblue
 
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
@@ -1117,7 +1117,7 @@ def generate_graph_legend(graph_type):
         gu_mi_l.attr(label="Guard\nMiddle", penwidth="0")
         ex_mi_l.attr(label="Guard\nExit\nMiddle", penwidth="0")
         if graph_type is "large":
-    
+            """
             guard_l.node("GU", label="", style='filled', fillcolor="dodgerblue", shape='circle', height='0.3',
                          width='0.3')
             exit_l.node("EX", label="", style='filled', fillcolor="white", shape='box', height='0.3',
@@ -1130,15 +1130,13 @@ def generate_graph_legend(graph_type):
             """
             guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='circle', height='0.3',
                          width='0.3')
-            gu_mi_l.node("GU_MI", label="", style='filled', fillcolor="darkorchid1", shape='circle', height='0.3',
-                         width='0.3')
-            exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='circle', height='0.3',
+            exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='box', height='0.3',
                         width='0.3')
             mid_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='circle', height='0.3',
                        width='0.3')
-            ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='circle', height='0.3',
+            ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3',
                          width='0.3')
-            """
+
         else:
             guard_l.node("GU", label="", shape='circle', color="blue", fillcolor="white", height='0.3', width='0.3',
                          penwidth="2")
