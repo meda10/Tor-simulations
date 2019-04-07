@@ -27,8 +27,12 @@ except ImportError:
 
 def parse_config_file():
     config = configparser.ConfigParser(allow_no_value=True)
-    config.read('config.ini')
-
+    try:
+        config.read('config.ini')
+    except configparser.DuplicateSectionError:
+        print('Node already exists')  # todo
+        sys.exit(1)
+    
     conf = []
     all_nodes = []
 
@@ -45,7 +49,11 @@ def parse_config_file():
            'path': config['general']['path'],
            'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
            'simulation_type': config['general']['simulation_type'],
-           'nodes': config['hiden_service_simulation']['nodes']
+           'nodes': config['hiden_service_simulation']['nodes'],
+           'adv_guard_bandwidth': config['attack_simulation']['adv_guard_bandwidth'],
+           'adv_exit_bandwidth': config['attack_simulation']['adv_exit_bandwidth'],
+           'adv_guard': config['attack_simulation']['adv_guard'],
+           'adv_exit': config['attack_simulation']['adv_exit'],
            }
 
     conf.append(dic)
@@ -65,39 +73,30 @@ def parse_config_file():
 
     conf.append(all_nodes)
 
-    if conf[0]['simulation_type'] == 'hidden_service':
-        conf[0]['number_of_simulations'] = 8
-        try:
-            nodes = int(conf[0]['nodes'])
-            conf[0]['guard'] = round(nodes / 2)
-            conf[0]['middle'] = '0'
-            conf[0]['exit'] = nodes - round(nodes / 2)
-    
-        except ValueError:
-            print('Value of nodes have to be number')
-
-    if conf[0]['simulation_size'] == 'small':
-        if conf[0]['path_selection'] != 'random':
-            print('Value of path_selection have to be: random')
-
-    try:  # todo chceck exit guard too
+    try:
         conf[0]['exit'] = int(conf[0]['exit'])
         conf[0]['middle'] = int(conf[0]['middle'])
         conf[0]['guard'] = int(conf[0]['guard'])
         conf[0]['guard'] = int(conf[0]['guard'])
         conf[0]['guard_exit'] = int(conf[0]['guard_exit'])
-        conf[0]['number_of_simulations'] = int(int(conf[0]['number_of_simulations']))
+        conf[0]['number_of_simulations'] = int(conf[0]['number_of_simulations'])
         if conf[0]['guard'] < 0:
             print('Number of guards have to be > 0')
             sys.exit(1)
         if conf[0]['exit'] < 0:
-            print('Number of exits have to be >0')
-            sys.exit(1)
-        if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
-            print('Number of nodes have to be > 3')
+            print('Number of exits have to be > 0')
             sys.exit(1)
         if conf[0]['guard_exit'] < 0:
             print('Number of guard_exit have to be >= 0')
+            sys.exit(1)
+        if conf[0]['guard_exit'] + conf[0]['guard'] == 0:
+            print('Number of guards have to be > 0')
+            sys.exit(1)
+        if conf[0]['guard_exit'] + conf[0]['exit'] == 0:
+            print('Number of exits have to be > 0')
+            sys.exit(1)
+        if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
+            print('Number of nodes have to be > 3')
             sys.exit(1)
     except ValueError:
         print('Number of nodes have to be > 3\n'
@@ -105,15 +104,52 @@ def parse_config_file():
               'Number of exits have to be > 1')
         sys.exit(1)
 
-    try:
+    if conf[0]['simulation_type'] == 'attack':  # todo max 255 overflow
+        try:
+            conf[0]['number_of_simulations'] = int(config['attack_simulation']['number_of_simulations'])
+            conf[0]['adv_guard_bandwidth'] = int(config['attack_simulation']['adv_guard_bandwidth'])
+            conf[0]['adv_exit_bandwidth'] = int(config['attack_simulation']['adv_exit_bandwidth'])
+            conf[0]['adv_guard'] = int(conf[0]['adv_guard'])
+            conf[0]['adv_exit'] = int(conf[0]['adv_exit'])
+            conf[0]['guard_exit'] = int(config['attack_simulation']['nodes'])
+            conf[0]['guard'] = 0
+            conf[0]['middle'] = 0
+            conf[0]['exit'] = 0
+        except ValueError:
+            print('Value of nodes, bandwidth, simulations have to be number')
+
+    if conf[0]['simulation_type'] == 'hidden_service':
+        conf[0]['adv_exit'] = 0
+        conf[0]['adv_guard'] = 0
+        conf[0]['adv_guard_bandwidth'] = 0
+        conf[0]['adv_exit_bandwidth'] = 0
+        conf[0]['number_of_simulations'] = 8
+        try:
+            conf[0]['guard_exit'] = int(conf[0]['nodes'])
+            conf[0]['guard'] = 0
+            conf[0]['middle'] = 0
+            conf[0]['exit'] = 0
+        except ValueError:
+            print('Value of nodes and bandwidth have to be number')
+
+    if conf[0]['simulation_type'] == 'path':
+        conf[0]['adv_exit'] = 0
+        conf[0]['adv_guard'] = 0
+        conf[0]['adv_guard_bandwidth'] = 0
+        conf[0]['adv_exit_bandwidth'] = 0
+        if conf[0]['simulation_size'] == 'small':
+            if conf[0]['path_selection'] != 'random':
+                print('Value of path_selection have to be: random')
+        
         if conf[0]['path_selection'] == '3_guards':
-            if int(conf[0]['guard']) < 3:
+            if conf[0]['guard'] + conf[0]['guard_exit'] < 3:
                 print('Number of guards have to be > 3')
                 sys.exit(1)
-    except ValueError:
-        print('Number of guards have to be > 3')
-        sys.exit(1)
-
+        if conf[0]['path_selection'] == '1_guard':
+            if conf[0]['guard'] + conf[0]['guard_exit'] < 1:
+                print('Number of guards have to be > 1')
+                sys.exit(1)
+    
     return conf
 
 
@@ -122,17 +158,21 @@ def run_simulation():
     routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
                                             config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
                                             config[1]))
-    run_tor_path_simulator(config[0]['path'], config[0]['number_of_simulations'])
-    paths = get_paths(config[0]['remove_duplicate_paths'])
+    run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
+                           config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
+                           config[0]['number_of_simulations'])
+    circuits_output = get_circuits(config[0]['remove_duplicate_paths'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
-        generate_hidden_service_graph(routers, paths)
+        generate_hidden_service_graph(routers, circuits_output[0])
+    elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
+        generate_attack_graph(routers, config[0]['adv_guard'], config[0]['adv_exit'], circuits_output[1])
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         if config[0]['simulation_size'] == 'large':
-            generate_large_graph(routers, paths, config[0]['path_selection'], config[0]['guard'],
+            generate_large_graph(routers, circuits_output[0], config[0]['path_selection'], config[0]['guard'],
                                  config[0]['exit'], config[0]['guard_exit'])
         elif config[0]['simulation_size'] == 'small':
-            generate_simple_graph(routers, paths, config[0]['guard'], config[0]['exit'])
+            generate_simple_graph(routers, circuits_output[0], config[0]['guard'], config[0]['exit'])
 
     if config[0]['create_html'] and config[0]['generate_graph']:
         create_html()
@@ -180,21 +220,65 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_paths(remove_duplicate_paths):
-    path = []
+def get_circuits(remove_duplicate_paths):
+    circuits = []
+    node_usage = {}
+    statistic = {'bad_guard_used': 0,
+                 'bad_exit_used': 0,
+                 'bad_circuit': 0,
+                 'bad_node': 0,
+                 'bad_gu_and_ex': 0}
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
     
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
-            x = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            if x not in path and remove_duplicate_paths:
-                path.append(x)
+            guard_bad = False
+            exit_bad = False
+            middle_bad = False
+            circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
+            if circuit not in circuits and remove_duplicate_paths:
+                circuits.append(circuit)
             elif not remove_duplicate_paths:
-                path.append(x)
-
-    return path
+                circuits.append(circuit)
+    
+            if circuit[0][:3] == '10.':
+                guard_bad = True
+            if circuit[1][:3] == '10.':
+                middle_bad = True
+            if circuit[2][:3] == '10.':
+                exit_bad = True
+    
+            if guard_bad and middle_bad and exit_bad:
+                statistic['bad_circuit'] = statistic['bad_circuit'] + 1
+            elif exit_bad and guard_bad:
+                statistic['bad_gu_and_ex'] = statistic['bad_gu_and_ex'] + 1
+            elif exit_bad or guard_bad:
+                statistic['bad_node'] = statistic['bad_node'] + 1
+                if exit_bad:
+                    statistic['bad_exit_used'] = statistic['bad_exit_used'] + 1
+                else:
+                    statistic['bad_guard_used'] = statistic['bad_guard_used'] + 1
+    
+            if circuit[0] not in node_usage.keys():
+                node_usage[circuit[0]] = 1
+            else:
+                node_usage[circuit[0]] = node_usage[circuit[0]] + 1
+    
+            if circuit[1] not in node_usage.keys():
+                node_usage[circuit[1]] = 1
+            else:
+                node_usage[circuit[1]] = node_usage[circuit[1]] + 1  # todo chcek middle?
+    
+            if circuit[2] not in node_usage.keys():
+                node_usage[circuit[2]] = 1
+            else:
+                node_usage[circuit[2]] = node_usage[circuit[2]] + 1
+    
+    print(node_usage)
+    data = [circuits, node_usage, statistic]
+    return data
 
 
 def get_multipurpose_nodes(routers, paths, fake_guards):
@@ -279,7 +363,7 @@ def generate_nickname():
 
 
 def generate_ipv4_address():
-    return '%i.%i.%i.%i' % (random.randint(0, 255), random.randint(0, 255),
+    return '%i.%i.%i.%i' % (random.randint(15, 255), random.randint(0, 255),
                             random.randint(0, 255), random.randint(0, 255))
 
 
@@ -317,7 +401,7 @@ def generate_ntor_key():
     return public_ntor_key
 
 
-def make_node(x, y, params):
+def make_node(x, y, descriptor_entries):
     node = []
     server_descriptors = []
     consensus_entries = []
@@ -325,38 +409,38 @@ def make_node(x, y, params):
     for i in range(x, y):
         server_desc = None
         signing_key = stem.descriptor.create_signing_key()
-        if params[i - x]['type'] == 'exit':
+        if descriptor_entries[i - x]['type'] == 'exit':
             server_desc = RelayDescriptor.create({'published': '2019-03-04 13:37:39',
                                                   'reject': '0.0.0.0/8:*',
                                                   'accept': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
-                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
-                                                  'router': '%s %s %s 0 0' % (params[i - x]['name'],
-                                                                              params[i - x]['ip'],
-                                                                              params[i - x]['port']),
+                                                  'bandwidth': '%s' % (descriptor_entries[i - x]['bandwidth']),
+                                                  'router': '%s %s %s 0 0' % (descriptor_entries[i - x]['name'],
+                                                                              descriptor_entries[i - x]['ip'],
+                                                                              descriptor_entries[i - x]['port']),
                                                   }, validate=True, sign=True, signing_key=signing_key)
 
             consensus_entries.append(generate_router_status_entry(server_desc, 'Exit Fast Running Stable Valid'))
-        elif params[i - x]['type'] == 'middle':
-            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
-                                                                              params[i - x]['ip'],
-                                                                              params[i - x]['port']),
+        elif descriptor_entries[i - x]['type'] == 'middle':
+            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (descriptor_entries[i - x]['name'],
+                                                                              descriptor_entries[i - x]['ip'],
+                                                                              descriptor_entries[i - x]['port']),
                                                   'protocols': 'Link 1 2 Circuit 1',
                                                   'platform': 'Tor 0.2.4.8 on Linux',
-                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
+                                                  'bandwidth': '%s' % (descriptor_entries[i - x]['bandwidth']),
                                                   'published': '2019-03-04 13:37:39',
                                                   'reject': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
                                                   }, validate=True, sign=True, signing_key=signing_key)
 
             consensus_entries.append(generate_router_status_entry(server_desc, 'Fast Running Stable Valid'))
-        elif params[i - x]['type'] == 'guard':
-            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (params[i - x]['name'],
-                                                                              params[i - x]['ip'],
-                                                                              params[i - x]['port']),
+        elif descriptor_entries[i - x]['type'] == 'guard':
+            server_desc = RelayDescriptor.create({'router': '%s %s %s 0 0' % (descriptor_entries[i - x]['name'],
+                                                                              descriptor_entries[i - x]['ip'],
+                                                                              descriptor_entries[i - x]['port']),
                                                   'protocols': 'Link 1 2 Circuit 1',
                                                   'platform': 'Tor 0.2.4.8 on Linux',
-                                                  'bandwidth': '%s' % (params[i - x]['bandwidth']),
+                                                  'bandwidth': '%s' % (descriptor_entries[i - x]['bandwidth']),
                                                   'published': '2019-03-04 13:37:39',
                                                   'reject': '*:*',
                                                   'ntor-onion-key': '%s' % generate_ntor_key(),
@@ -372,10 +456,14 @@ def make_node(x, y, params):
     return node
 
 
-def make_descriptors(params):
-    guard_n = make_node(0, len(params[0]), params[0])
-    middle_n = make_node(len(params[0]), len(params[0]) + len(params[1]), params[1])
-    exit_n = make_node(len(params[0]) + len(params[1]), len(params[0]) + len(params[1]) + len(params[2]), params[2])
+def make_descriptors(descriptor_entries):
+    guard_len = len(descriptor_entries[0])
+    middle_len = len(descriptor_entries[1])
+    exit_len = len(descriptor_entries[2])
+    
+    guard_n = make_node(0, guard_len, descriptor_entries[0])
+    middle_n = make_node(guard_len, guard_len + middle_len, descriptor_entries[1])
+    exit_n = make_node(guard_len + middle_len, guard_len + middle_len + exit_len, descriptor_entries[2])
     
     server_descriptors = guard_n[0] + middle_n[0] + exit_n[0]
     consensus_entries = guard_n[1] + middle_n[1] + exit_n[1]
@@ -395,101 +483,127 @@ def make_descriptors(params):
     return consensus_entries
 
 
-def valid_node(node, names, ip, same_bandwidth):
-    if node['name'] not in names and node['name'] != '':
-        names.append(node['name'])
+def validate_node_entries(node_entries, list_of_names, list_of_ip, same_bandwidth):
+    """
+    Checks if node entries from config file are valid
+    :param node_entries: node entries from config file
+    :param list_of_names: list of used names
+    :param list_of_ip: list of used IP adresses
+    :param same_bandwidth: True/False every node will have same bandwidth
+    :return: valid node
+    """
+    if node_entries['name'] not in list_of_names and node_entries['name'] != '':
+        list_of_names.append(node_entries['name'])
     else:
-        node['name'] = generate_nickname()
-        names.append(node['name'])
+        node_entries['name'] = generate_nickname()
+        list_of_names.append(node_entries['name'])
     
     try:
-        socket.inet_aton(node['ip'])
-        if node['ip'] in ip:
-            node['ip'] = generate_ipv4_address()
+        socket.inet_aton(node_entries['ip'])
+        if node_entries['ip'] in list_of_ip:
+            node_entries['ip'] = generate_ipv4_address()
     except socket.error:
-        node['ip'] = generate_ipv4_address()
+        node_entries['ip'] = generate_ipv4_address()
     finally:
-        ip.append(node['ip'])
+        list_of_ip.append(node_entries['ip'])
     
     try:
-        if int(node['port']) not in range(1, 65535):
-            node['port'] = generate_port()
+        if int(node_entries['port']) not in range(1, 65535):
+            node_entries['port'] = generate_port()
     except ValueError:
-        node['port'] = generate_port()
+        node_entries['port'] = generate_port()
     
     if same_bandwidth:
-        node['bandwidth'] = generate_bandwidth(same_bandwidth)
+        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
     else:
         try:
-            bandwidth = node['bandwidth'].split(' ')
+            bandwidth = node_entries['bandwidth'].split(' ')
             if len(bandwidth) == 3:
                 for b in bandwidth:
                     if int(b) <= 0:
-                        node['bandwidth'] = generate_bandwidth(same_bandwidth)
+                        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
             else:
-                node['bandwidth'] = generate_bandwidth(same_bandwidth)
+                node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
         except ValueError:
-            node['bandwidth'] = generate_bandwidth(same_bandwidth)
+            node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
 
 
-def check_params(s_type, guard_count=0, middle_count=0, exit_count=0, gu_ex_count=0, same_bandwidth=False, params=None):
-    names = []
-    ip = []
+def create_node_entries(node_type, same_bandwidth):
+    """
+    Creates node
+    :param node_type: type of node (guard/middle/exit)
+    :param same_bandwidth: True/False every node will have same bandwidth
+    :return: valid node
+    """
+    node = {'type': '{}'.format(node_type),
+            'name': '{}'.format(generate_nickname()),
+            'ip': '{}'.format(generate_ipv4_address()),
+            'port': '{}'.format(generate_port()),
+            'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
+    return node
+
+
+def check_params(sim_type, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same_bandwidth=False, node_entries=None):
+    """
+    Creates node entries or checks if node entries are valid
+    :param sim_type: type of simulation
+    :param guard_c: guard count
+    :param middle_c: middle count
+    :param exit_c: exit count
+    :param guard_exit_c: guard exit count
+    :param same_bandwidth: True/False every node will have same bandwidth
+    :param node_entries: node entries from config file
+    :return: list of nodes to generate, every node is represented as dictionary
+    """
+    all_names = []
+    all_ip = []
     guard_node = []
     middle_node = []
     exit_node = []
-
-    if exit_count == 0:
-        guard_to_generate = round(gu_ex_count / 2)
-        exit_to_generate = gu_ex_count - round(gu_ex_count / 2)
-    else:
-        guard_to_generate = gu_ex_count - round(gu_ex_count / 2)
-        exit_to_generate = round(gu_ex_count / 2)
     
-    if params is not None:
-        for node in params:
-            valid_node(node, names, ip, same_bandwidth)
-            guard_node.append(node) if node['type'] == 'guard' else None
-            middle_node.append(node) if node['type'] == 'middle' else None
-            exit_node.append(node) if node['type'] == 'exit' else None
-    for i in range(0, guard_count - len(guard_node) + guard_to_generate):
-        node = {'type': 'guard',
-                'name': '{}'.format(generate_nickname()),
-                'ip': '{}'.format(generate_ipv4_address()),
-                'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
-        guard_node.append(node)
-    for i in range(0, middle_count - len(middle_node)):
-        node = {'type': 'middle',
-                'name': '{}'.format(generate_nickname()),
-                'ip': '{}'.format(generate_ipv4_address()),
-                'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
-        middle_node.append(node)
-    for i in range(0, exit_count - len(exit_node) + exit_to_generate):
-        node = {'type': 'exit',
-                'name': '{}'.format(generate_nickname()),
-                'ip': '{}'.format(generate_ipv4_address()),
-                'port': '{}'.format(generate_port()),
-                'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
-        exit_node.append(node)
-
-    if s_type == '1_guard':
-        for node in guard_node[1:guard_count + guard_to_generate]:
-            node['type'] = 'middle'
-        middle_node = guard_node[1:guard_count + guard_to_generate] + middle_node[:middle_count]
-        data = [guard_node[:1], middle_node, exit_node[:exit_count + exit_to_generate]]
-        return data
-    elif s_type == '3_guards':
-        for node in guard_node[3:guard_count + guard_to_generate]:
-            node['type'] = 'middle'
-        middle_node = guard_node[3:guard_count + guard_to_generate] + middle_node[:middle_count]
-        data = [guard_node[:3], middle_node, exit_node[:exit_count + exit_to_generate]]
-        return data
+    if exit_c == 0:
+        guard_to_generate = round(guard_exit_c / 2)
+        exit_to_generate = guard_exit_c - round(guard_exit_c / 2)
     else:
-        data = [guard_node[:guard_count + guard_to_generate], middle_node[:middle_count],
-                exit_node[:exit_count + exit_to_generate]]
-        return data
+        guard_to_generate = guard_exit_c - round(guard_exit_c / 2)
+        exit_to_generate = round(guard_exit_c / 2)
+    
+    if sim_type == '3_guards':
+        if guard_c + guard_exit_c == 3:
+            guard_to_generate = guard_exit_c
+        if guard_c == 1 and guard_exit_c == 3:
+            guard_to_generate = round(guard_exit_c / 2)
+            exit_to_generate = guard_exit_c - round(guard_exit_c / 2)
+    
+    if node_entries is not None:
+        for node in node_entries:
+            validate_node_entries(node, all_names, all_ip, same_bandwidth)
+            guard_node.append(node) if node['type'] == 'guard' and len(guard_node) < guard_c else None
+            middle_node.append(node) if node['type'] == 'middle' and len(middle_node) < middle_c else None
+            exit_node.append(node) if node['type'] == 'exit' and len(exit_node) < exit_c else None
+    for i in range(0, guard_c - len(guard_node) + guard_to_generate):
+        guard_node.append(create_node_entries('guard', same_bandwidth))
+    for i in range(0, middle_c - len(middle_node)):
+        middle_node.append(create_node_entries('middle', same_bandwidth))
+    for i in range(0, exit_c - len(exit_node) + exit_to_generate):
+        exit_node.append(create_node_entries('exit', same_bandwidth))
+    
+    if sim_type == '1_guard':
+        for node in guard_node[1:guard_c + guard_to_generate]:
+            node['type'] = 'middle'
+        middle_node = guard_node[1:guard_c + guard_to_generate] + middle_node[:middle_c]
+        descriptor_entries = [guard_node[:1], middle_node, exit_node[:exit_c + exit_to_generate]]
+        return descriptor_entries
+    elif sim_type == '3_guards':
+        for node in guard_node[3:guard_c + guard_to_generate]:
+            node['type'] = 'middle'
+        middle_node = guard_node[3:guard_c + guard_to_generate] + middle_node[:middle_c]
+        descriptor_entries = [guard_node[:3], middle_node, exit_node[:exit_c + exit_to_generate]]
+        return descriptor_entries
+    else:
+        descriptor_entries = [guard_node[:guard_c + guard_to_generate], middle_node[:middle_c],
+                              exit_node[:exit_c + exit_to_generate]]
+        return descriptor_entries
 
 
 def generate_simple_graph(routers, paths, guard_len, exit_len):
@@ -636,7 +750,7 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
     graph = Digraph('test', format='svg')
 
     graph.attr(layout='twopi')
-    graph.attr(ranksep='4 2 2')
+    graph.attr(ranksep='5.5 2 2')
     graph.attr(root='PC')
     graph.attr(size="7.5")
     graph.attr(overlap="false")
@@ -671,44 +785,44 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
     elif guards_to_generate == '1_guard':
         x = guard_len - 1 + round(guard_exit / 2)
         fill_color = 'coral2'
-    
+    # darkorchid1 forestgreen dodgerblue lawngreen
     fake_guards = 0
     guard_generated = 0
     exits_generated = 0
     for index, r in enumerate(routers, start=0):
         if "Guard" in r.flags:
             guard_node.append(r.address)
-            if guard_generated >= guard_len:
+            if guard_generated >= guard_len:  # gu_ex
                 subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
-                                     shape='box', height='0.3', width='0.3')
+                                     shape='box', height='0.3', width='0.3')  # FILL
             else:
                 guard_generated = guard_generated + 1
                 subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
-                                     shape='circle', height='0.3', width='0.3')
+                                     shape='circle', height='0.3', width='0.3')  # FILL
         elif "Exit" in r.flags:
             exit_node.append(r.address)
             if exits_generated >= exit_len:
                 subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='box',
-                                    height='0.3', width='0.3')
+                                    height='0.3', width='0.3')  # BLUE
             else:
                 exits_generated = exits_generated + 1
-                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="white", shape='box',
-                                    height='0.3', width='0.3')
+                subgraph_exits.node(str(r.address), label="", style='filled', fillcolor="forestgreen", shape='box',
+                                    height='0.3', width='0.3')  # WH
         else:
             if fake_guards < x:
                 fake_guards = fake_guards + 1
                 guard_node.append(r.address)
-                if guard_generated >= guard_len:
+                if guard_generated >= guard_len:  # gu_ex
                     subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='dodgerblue',
-                                         shape='box', height='0.3', width='0.3')
+                                         shape='box', height='0.3', width='0.3')  # BLUE
                 else:
                     guard_generated = guard_generated + 1
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="dodgerblue",
-                                         shape='circle', height='0.3', width='0.3')
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor="blue",
+                                         shape='circle', height='0.3', width='0.3')  # BLUE
             else:
                 middle_node.append(r.address)
-                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="white", shape='circle',
-                                      height='0.3', width='0.3')
+                subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="darkorchid1", shape='circle',
+                                      height='0.3', width='0.3')  # WH
 
     graph.subgraph(subgraph_guards)
     graph.subgraph(subgraph_middles)
@@ -902,6 +1016,56 @@ def generate_hidden_service_graph(routers, paths):
     graph.edge(paths[6][2], paths[6][1], layer="path9", color="red", penwidth="2.3")
     graph.edge(paths[6][1], paths[6][0], layer="path9", color="red", penwidth="2.3")
     graph.edge(paths[6][0], "HS", layer="path9", color="red", penwidth="2.3")
+
+    graph.render('graph/simulation.dot', view=False)
+    generate_graph_legend('hidden_service')
+
+
+def generate_attack_graph(routers, adv_guard_c, adv_exit_c, node_usage):  # todo alpha by node usage, colr by True/Flase
+    graph = Digraph('test', format='svg')
+    
+    graph.attr(layout='neato')
+    graph.attr(size="8.5")
+    graph.attr(sep="-0.5")
+    graph.attr(overlap="scalexy")
+    graph.attr(splines="true")
+    
+    layers = []
+    for i in range(0, 10):
+        layers.append("path{}:".format(i))
+    
+    graph.attr(layers=''.join(layers)[:-1])
+    
+    pc_icon_path = "resources//computer.png"
+    se_icon_path = "resources//SE.svg"
+    graph.node("NODE", label="", shape="none")
+    graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
+    graph.node("SE", label="", shape="none", image=se_icon_path, fixedsize="shape", width="0.75", height="1")
+    
+    for index, r in enumerate(routers, start=0):
+        graph.node(str(r.address), label="", style='filled', fillcolor="white", shape='box', height='0.3', width='0.3')
+        graph.edge("NODE", str(r.address), style="invis", constraint="false")
+    
+    for i in range(1, adv_guard_c):
+        if '10.{}.0.0'.format(i) in node_usage.keys():
+            graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="blue", shape='box', height='0.3',
+                       width='0.3')
+        else:
+            graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="black", shape='box', height='0.3',
+                       width='0.3')  # guard was not used
+        graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
+    for i in range(adv_guard_c, adv_guard_c + adv_exit_c):
+        if '10.{}.0.0'.format(i) in node_usage.keys():
+            graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="red", shape='circle', height='0.3',
+                       width='0.3')
+        else:
+            graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="black", shape='circle', height='0.3',
+                       width='0.3')  # exit was not used
+        
+        graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
+    
+    graph.edge("NODE", "PC", style="invis", len="0.1", constraint="false")
+    graph.edge("NODE", "SE", style="invis", len="1.1", constraint="false")
     
     graph.render('graph/simulation.dot', view=False)
     generate_graph_legend('hidden_service')
@@ -1028,7 +1192,7 @@ def create_html():
         html_file.close()
 
 
-def run_tor_path_simulator(path, n_samples=5):
+def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv_exit_bandwidth, n_samples=5):
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/network-state-2019-02')
     simulation_folder = Path(cwd + '/torps/out/simulation')
@@ -1047,12 +1211,12 @@ def run_tor_path_simulator(path, n_samples=5):
     num_samples = n_samples
     tracefile = Path(path + '/in/users2-processed.traces.pickle')
     usermodel = 'simple=600000000'
-    format_arg = 'normal'
-    adv_guard_bw = '5444444444'
-    adv_exit_bw = '5444444444'
+    format_arg = 'normal'  # relay-adv
+    adv_guard_bw = adv_guard_bandwidth
+    adv_exit_bw = adv_exit_bandwidth
     adv_time = '0'
-    num_adv_guards = '0'
-    num_adv_exits = '0'
+    num_adv_guards = adv_guards
+    num_adv_exits = adv_exits
     num_guards = '1'
     gard_expiration = '1'
     loglevel = 'INFO'
@@ -1086,5 +1250,8 @@ def run_tor_path_simulator(path, n_samples=5):
 if __name__ == '__main__':
     run_simulation()
 
+    # get_circuits(False)
+
     # todo grapph size in config file
-    # todo chceck path 6 diferent nodes
+    # todo ip generate function
+    # todo 3 graph layout
