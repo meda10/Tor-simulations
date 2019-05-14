@@ -243,14 +243,14 @@ def get_circuits(remove_duplicate_paths):
                 circuits.append(circuit)
             elif not remove_duplicate_paths:
                 circuits.append(circuit)
-    
+
             if circuit[0][:3] == '10.':
                 guard_bad = True
             if circuit[1][:3] == '10.':
                 middle_bad = True
             if circuit[2][:3] == '10.':
                 exit_bad = True
-    
+
             if guard_bad and middle_bad and exit_bad:
                 statistic['bad_circuit'] = statistic['bad_circuit'] + 1
             elif exit_bad and guard_bad:
@@ -261,17 +261,17 @@ def get_circuits(remove_duplicate_paths):
                     statistic['bad_exit_used'] = statistic['bad_exit_used'] + 1
                 else:
                     statistic['bad_guard_used'] = statistic['bad_guard_used'] + 1
-    
+
             if circuit[0] not in node_usage.keys():
                 node_usage[circuit[0]] = 1
             else:
                 node_usage[circuit[0]] = node_usage[circuit[0]] + 1
-    
+
             if circuit[1] not in node_usage.keys():
                 node_usage[circuit[1]] = 1
             else:
                 node_usage[circuit[1]] = node_usage[circuit[1]] + 1  # todo chcek middle?
-    
+
             if circuit[2] not in node_usage.keys():
                 node_usage[circuit[2]] = 1
             else:
@@ -280,7 +280,7 @@ def get_circuits(remove_duplicate_paths):
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
         node_usage[k] = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
-        
+
     data = [circuits, node_usage, statistic]
     return data
 
@@ -318,7 +318,7 @@ def get_multipurpose_nodes(routers, paths, fake_guards):
     
     output = [gu_mi_node, ex_mi_node]
     return output
-    
+
 
 def generate_router_status_entry(self, flags='Fast Running Stable Valid'):
     """
@@ -643,28 +643,28 @@ def generate_simple_graph(routers, paths, guard_len, exit_len):
 
     computer_icon_path = "resources//computer.png"
     server_icon_path = "resources//SE.svg"
-    subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true",
-                     width="0.6", height="0.6")
-    subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true",
-                         width="0.7", height="0.7", margin="20")
-
+    subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="0.6",
+                     height="0.6")
+    subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="0.7",
+                         height="0.7", margin="20")
+    
     guard_count = 0
     exit_count = 0
     for r in routers:
         if "Guard" in r.flags:
             guard_node.append(r.address)
             if guard_count >= guard_len:
-                subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white",
-                                     fontsize='10', fontname='Verdana')
+                subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
+                                     fontname='Verdana')
             else:
                 guard_count = guard_count + 1
-                subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
-                                     fontsize='10', fontname='Verdana')
+                subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white", fontsize='10',
+                                     fontname='Verdana')
         elif "Exit" in r.flags:
             exit_node.append(r.address)
             if exit_count >= exit_len:
-                subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white",
-                                    fontsize='10', fontname='Verdana')
+                subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
+                                    fontname='Verdana')
             else:
                 exit_count = exit_count + 1
                 subgraph_exits.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
@@ -776,9 +776,9 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
     computer_icon_path = "resources//computer.png"
     server_icon_path = "resources//SE.svg"
     graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
-    graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
-               height="1.3", margin="20")
-
+    graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3", height="1.3",
+               margin="20")
+    
     x = 0
     fill_color = 'coral2'  # blue / coral2
     if guards_to_generate == '3_guards':
@@ -815,12 +815,12 @@ def generate_large_graph(routers, paths, guards_to_generate, guard_len, exit_len
                 fake_guards = fake_guards + 1
                 guard_node.append(r.address)
                 if guard_generated >= guard_len:  # gu_ex
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='lawngreen',
-                                         shape='box', height='0.3', width='0.3')  # BLUE / lawngreen
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='lawngreen', shape='box',
+                                         height='0.3', width='0.3')  # BLUE / lawngreen
                 else:
                     guard_generated = guard_generated + 1
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='coral2',
-                                         shape='circle', height='0.3', width='0.3')  # BLUE / coral2
+                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='coral2', shape='circle',
+                                         height='0.3', width='0.3')  # BLUE / coral2
             else:
                 middle_node.append(r.address)
                 subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue", shape='circle',
@@ -1096,22 +1096,22 @@ def generate_graph_legend(graph_type):
         ip_l = Digraph('cluster_ip_l')
         rp_l = Digraph('cluster_rp_l')
         hs_l = Digraph('cluster_hs_l')
-    
+
         dir_l.attr(label="Directory\nauthority", penwidth="0")
         rp_l.attr(label="Rendezvous\npoint", penwidth="0")
         ip_l.attr(label="Introductory\npoint", penwidth="0")
         hs_l.attr(label="Hidden\nservice", penwidth="0")
-    
+
         rp_icon_path = "resources//RP.png"
         ip_icon_path = "resources//IP.png"
         hs_icon_path = "resources//HS.png"
         dir_icon_path = "resources//DIR.png"
-    
+
         dir_l.node("DIR_L", label="", shape="none", image=dir_icon_path, fixedsize="true", width="0.75", height="1")
         ip_l.node("IP_L", label="", shape="none", image=ip_icon_path, fixedsize="true", width="0.75", height="1")
         rp_l.node("RP_L", label="", shape="none", image=rp_icon_path, fixedsize="true", width="0.75", height="1")
         hs_l.node("HS_L", label="", shape="none", image=hs_icon_path, fixedsize="true", width="0.75", height="1")
-    
+
         subgraph_legend.subgraph(dir_l)
         subgraph_legend.subgraph(ip_l)
         subgraph_legend.subgraph(rp_l)
@@ -1122,19 +1122,19 @@ def generate_graph_legend(graph_type):
         friend_gu_l = Digraph('cluster_friend_gu_l')
         friend_ex_l = Digraph('cluster_friend_ex_l')
         unused_l = Digraph('cluster_unused_l')
-    
+
         enemy_gu_l.attr(label="Enemy\nGuard", penwidth="0")
         enemy_ex_l.attr(label="Enemy\nExit", penwidth="0")
         friend_gu_l.attr(label="Friendly\nGuard", penwidth="0")
         friend_ex_l.attr(label="Friendly\nExit", penwidth="0")
         unused_l.attr(label="Enemy\nUnused", penwidth="0")
-    
+
         enemy_gu_l.node("EN_GU", label="", shape="box", style='filled', fillcolor="red", height='0.3', width='0.3')
         enemy_ex_l.node("EN_EX", label="", shape="circle", style='filled', fillcolor="red", height='0.3', width='0.3')
         friend_gu_l.node("FR_GU", label="", shape="box", style='filled', fillcolor="blue", height='0.3', width='0.3')
         friend_ex_l.node("FR_EX", label="", shape="circle", style='filled', fillcolor="blue", height='0.3', width='0.3')
         unused_l.node("UNSET", label="", shape="circle", style='filled', fillcolor="green", height='0.3', width='0.3')
-    
+
         subgraph_legend.subgraph(unused_l)
         subgraph_legend.subgraph(enemy_gu_l)
         subgraph_legend.subgraph(enemy_ex_l)
@@ -1165,10 +1165,8 @@ def generate_graph_legend(graph_type):
                          width='0.3')
     
             """
-            guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='circle', height='0.3',
-                         width='0.3')
-            exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='box', height='0.3',
-                        width='0.3')
+            guard_l.node("GU", label="", style='filled', fillcolor="coral2", shape='circle', height='0.3', width='0.3')
+            exit_l.node("EX", label="", style='filled', fillcolor="forestgreen", shape='box', height='0.3', width='0.3')
             mid_l.node("MI", label="", style='filled', fillcolor="dodgerblue", shape='circle', height='0.3',
                        width='0.3')
             ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3',
@@ -1186,7 +1184,7 @@ def generate_graph_legend(graph_type):
         subgraph_legend.subgraph(gu_mi_l)
         subgraph_legend.subgraph(ex_mi_l)
         subgraph_legend.subgraph(guard_l)
-        
+
     graph.subgraph(subgraph_legend)
 
     graph.render('graph/legend.dot', view=False)
@@ -2556,8 +2554,8 @@ def fix_svg_links():
                           'x5jeAonwbOslZLtwK/DmUdjqN8GjDLWq2dS3kdPcFRPg2WZa3W7gJ+HspylE+D9TybtRZt+3rk2wAAAABJRU5ErkJggg'
                           '==')
         svg.write(buf)
-        
-        
+
+
 def create_html():
     cwd = os.getcwd()
     
