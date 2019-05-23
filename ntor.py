@@ -8,8 +8,8 @@ keys, see §5.1.4 of `tor-spec.txt`_, as well as the NTOR handshake proposal_.
 .. _proposal: https://gitweb.torproject.org/torspec.git/tree/proposals/216-ntor-handshake.txt
 """
 
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import binascii
