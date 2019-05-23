@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 import binascii
 import os
 import random
@@ -167,24 +168,19 @@ def run_simulation():
     circuits_output = get_circuits(config[0]['remove_duplicate_paths'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
-        # generate_hidden_service_graph(routers, circuits_output[0])
         g = GraphGenerator(routers=routers, paths=circuits_output[0])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
-        # generate_attack_graph(routers, config[0]['adv_guard'], config[0]['adv_exit'], circuits_output[1])
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
                            node_usage=circuits_output[1])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         if config[0]['simulation_size'] == 'large':
-            # generate_large_graph(routers, circuits_output[0], config[0]['path_selection'], config[0]['guard'],
-            #                      config[0]['exit'], config[0]['guard_exit'])
             g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
                                guards_to_generate=config[0]['path_selection'], guard_len=config[0]['guard'],
                                exit_len=config[0]['exit'])
             GraphGenerator.generate_graph(g)
         elif config[0]['simulation_size'] == 'small':
-            # generate_simple_graph(routers, circuits_output[0], config[0]['guard'], config[0]['exit'])
             g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_len=config[0]['guard'],
                                exit_len=config[0]['exit'])
             GraphGenerator.generate_graph(g)
