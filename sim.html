@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Hello, world!</title>
+</head>
+<body>
+<h1>Simulator</h1>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="js/show.js" ></script>
+<form method="post" action="backend.php">
+    <label>Simulation type:
+        <select name="simulation_type" onchange="java_script_:show(this.options[this.selectedIndex].value)">
+            <option value ="path">Path</option>
+            <option value ="hidden_service">Hidden service</option>
+            <option value ="attack">Attack</option>
+        </select>
+    </label><br/>
+    <label>Remove duplicate paths: <input type="checkbox" name="remove_duplicate_paths"></label><br/>
+    <label>Same bandwidth: <input type="checkbox" name="same_bandwidth"></label><br/>
+    <label>Generate graph: <input type="checkbox" name="generate_graph"></label><br/>
+    <label>Create html: <input type="checkbox" name="create_html"></label><br/>
+
+    <div id="hidden_div_path" style="display:inline-block">
+        <label>Guard: <input type="number" name="guard" min="0"></label><br/>
+        <label>Middle: <input type="number" name="middle" min="0"></label><br/>
+        <label>Exit: <input type="number" name="exit" min="0"></label><br/>
+        <label>Guard exit: <input type="number" name="guard_exit" min="0"></label><br/>
+        <label>Number of simulations: <input type="number" name="number_of_simulations" min="1"></label><br/>
+        <label>Simulation size:
+            <select name="simulation_size">
+                <option value ="small">Small</option>
+                <option value ="large">Large</option>
+            </select>
+        </label><br/>
+        <label>Path selection:
+            <select name="path_selection">
+                <option value ="random">Random</option>
+                <option value ="3_guards">3 guards</option>
+                <option value ="1_guard">1 guard</option>
+            </select>
+        </label><br/>
+    </div>
+
+    <div id="hidden_div_hs" style="display:none">
+        <label>Nodes: <input type="number" name="nodes_hs" min="3"></label><br/>
+    </div>
+
+    <div id="hidden_div_attack" style="display:none">
+        <label>Nodes: <input type="number" name="nodes_attack" min="0"></label><br/>
+        <label>Number of simulations: <input type="number" name="number_of_simulations_attack" min="1"></label><br/>
+        <label>Adversary guard: <input type="number" name="adv_guard" min="0"></label><br/>
+        <label>Adversary exit: <input type="number" name="adv_exit" min="0"></label><br/>
+        <label>Adversary guard bandwidth: <input type="number" name="adv_guard_bandwidth" min="0"></label><br/>
+        <label>Adversary exit bandwidth: <input type="number" name="adv_exit_bandwidth" min="0"></label><br/>
+    </div>
+
+    <br/>
+    <input type="submit" name="submit" value="Submit">
+</form>
+</body>
+</html>
