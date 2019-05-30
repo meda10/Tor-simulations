@@ -291,30 +291,40 @@ function create_graph_page(){
     //fclose($legend_file);
 
 
+    $txt = "<!DOCTYPE html>
+            <html lang=\"en\">
+            <head>
+            <meta charset=\"UTF-8\">
+            <link rel=\"stylesheet\" href=\"resources//animation.css\">
+            <script defer=\"\" src=\"resources//animation.js\"></script>
+            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">
+            <link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">
+            <link rel=\"stylesheet\" type=\"text/css\" href=\"css/bootstrap.min.css\">
+            <title>Simulator</title>
+            </head>
+            <body>
+            <div class=\"content\">
+                <div class=\"header\">
+                    <h1>Simulator</h1>
+                </div>
+            </div>
+            <div class=\"content\">
+                <ul id=\"link-container\">
+                </ul>
+            ";
+
     $html_file = fopen("graph.html", "w") or die("Unable to open html file!");
-    $txt = "<!DOCTYPE html>\n
-            <html lang=\"en\">\n
-            <head>\n
-            <meta charset=\"UTF-8\">\n
-            <title>Title</title>\n
-            <link rel=\"stylesheet\" href=\"resources//animation.css\">\n
-            <script defer=\"\" src=\"resources//animation.js\"></script>\n
-            </head>\n
-            <body>\n
-            <h1>Simulator</h1>\n
-            <ul id=\"link-container\">\n
-            </ul>\n";
     fwrite($html_file, $txt);
     fwrite($html_file, $graph);
     fwrite($html_file, "<br>");
     fwrite($html_file, $legend);
-    fwrite($html_file,"<div class='container'>\n
-                                <h1>Download Zip</h1>\n
-                                <form method='post' action='backend.php'>\n
-                                    <input type='submit' name='download' value='Download'>\n
-                                 </form>\n
-                             </div>\n");
-    fwrite($html_file,"</body>\n</html>\n");
+    fwrite($html_file, "<div class='container'>
+                                <h1>Download Zip</h1>
+                                <form method='post' action='backend.php'>
+                                    <input type='submit' name='download' value='Download'>
+                                 </form>
+                             </div>");
+    fwrite($html_file, "</div></body></html>");
     fclose($html_file);
 }
 
