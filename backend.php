@@ -303,12 +303,12 @@ function create_graph_page(){
             <title>Simulator</title>
             </head>
             <body>
-            <div class=\"content\">
+            <div class=\"wrap\">
                 <div class=\"header\">
                     <h1>Simulator</h1>
                 </div>
             </div>
-            <div class=\"content\">
+            <div class=\"wrap\">
                 <ul id=\"link-container\">
                 </ul>
             ";

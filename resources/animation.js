@@ -3,12 +3,13 @@ function show_layer(num) {
 	
 	if (layers.length > 0) {
 		layers[num].classList.remove("hidden");
-		var li = document.createElement("li");
+		var button = document.createElement("button");
+		button.className='btn btn-primary';
 		var link = document.createElement("a");
-		li.appendChild(link);
-		
+		button.appendChild(link);
+
 		function show_next(next_num) {
-			document.getElementById("link-container").removeChild(li);
+			document.getElementById("link-container").removeChild(button);
 			layers[num].classList.add("hidden");
 			show_layer(next_num);
 		}
@@ -16,8 +17,8 @@ function show_layer(num) {
 		var next_num = (num + 1) % layers.length;
 		link.onclick = show_next.bind(null, next_num);
 		link.href = "#" + next_num;
-		link.text = next_num == 0 ? "Restart animation" : "Next step";
-		document.getElementById("link-container").appendChild(li);
+		link.text = next_num == 0 ? "Restart" : "Next";
+		document.getElementById("link-container").appendChild(button);
 	}
 }
 
@@ -32,3 +33,4 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 });
 
+//<button type="button" class="btn btn-primary">Primary</button>
