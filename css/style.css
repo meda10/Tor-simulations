@@ -65,20 +65,20 @@ body {
 }
 
 .left {
-    width: 750px;
-    min-width: 750px;
+    width: 820px;
+    min-width: 820px;
 }
 
 .right {
-    width: 450px;
-    min-width: 450px;
+    width: 380px;
+    min-width: 380px;
 }
 
 .tabs_graph{
     margin-left: 20px;
-    margin-right: 20px;
-    min-width: 420px;
-    width: 420px;
+    /*margin-right: 20px;
+    min-width: 380px;
+    width: 380px;*/
 }
 
 .left_header {
