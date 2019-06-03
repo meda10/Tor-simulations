@@ -2163,12 +2163,12 @@ class GraphGenerator:
         graph.attr(sep="-0.5")
         graph.attr(overlap="scalexy")
         graph.attr(splines="true")
-        
-        layers = []
-        for i in range(0, 10):
-            layers.append("path{}:".format(i))
-        
-        graph.attr(layers=''.join(layers)[:-1])
+
+        # layers = []
+        # for i in range(0, 10):
+        #     layers.append("path{}:".format(i))
+
+        # graph.attr(layers=''.join(layers)[:-1])
         
         pc_icon_path = "resources//computer.png"
         graph.node("NODE", label="", shape="none")
