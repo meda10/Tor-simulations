@@ -291,39 +291,75 @@ function create_graph_page(){
     //fclose($legend_file);
 
 
-    $txt = "<!DOCTYPE html>
-            <html lang=\"en\">
-            <head>
-            <meta charset=\"UTF-8\">
-            <link rel=\"stylesheet\" href=\"resources//animation.css\">
-            <script defer=\"\" src=\"resources//animation.js\"></script>
-            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">
-            <link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\">
-            <link rel=\"stylesheet\" type=\"text/css\" href=\"css/bootstrap.min.css\">
-            <title>Simulator</title>
-            </head>
-            <body>
-            <div class=\"wrap\">
-                <div class=\"header\">
-                    <h1>Simulator</h1>
+    $html_start = "<!DOCTYPE html>
+                <html lang=\"en\">
+                <head>
+                    <meta charset=\"utf-8\">
+                    <meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">
+                    <link rel=\"stylesheet\" href=\"resources//animation.css\">
+                    <script defer=\"\" src=\"resources//animation.js\"></script>
+                    <link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>
+                    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>
+                    <script src=\"js/show.js\"></script>
+                    <title>Simulator</title>
+                </head>
+                <body>
+                <div class=\"wrap\">
+                    <div class=\"header\">
+                        <h1>Simulator</h1>
+                    </div>
+                </div>
+                <div class=\"wrap\">
+                    <div class=\"content_graph\">
+                        <div class=\"left\">
+                            <div class=\"left_header\">
+                                <legend>Graph</legend>
+                                <ul id=\"link-container\">
+                                </ul>
+                            </div>
+                            <div class=\"graph\">
+                ";
+
+    $html_middle = "
+            </div>
+        </div>
+        <div class=\"right\">
+            <div id=\"tabs_graph\" class=\"tabs_graph\">
+                <ul class=\"nav nav-tabs\" id=\"my_tab\" role=\"tablist\">
+                    <li class=\"nav-item active\">
+                        <a class=\"nav-link active\" id=\"info_tab\" data-toggle=\"tab\" href=\"#info\" role=\"tab\" aria-controls=\"info\" aria-selected=\"true\" aria-expanded=\"true\">Info</a>
+                    </li>
+                    <li class=\"nav-item\">
+                        <a class=\"nav-link\" id=\"path_tab\" data-toggle=\"tab\" href=\"#path\" role=\"tab\" aria-controls=\"path\" aria-selected=\"false\">Paths</a>
+                    </li>
+                </ul>
+                <div class=\"tab-content\" id=\"my_tab_content\">
+                    <div class=\"tab-pane fade show active in\" id=\"info\" role=\"tabpanel\" aria-labelledby=\"info-info_tab\">
+                        <div class=\"legend\">";
+    $html_end = "                        </div>
+                        <div class=\"download\">
+                            <h1>Download Zip</h1>
+                            <form method='post' action='backend.php'>
+                                <input class=\"btn btn-primary button\" name=\"download\" type=\"submit\" value=\"Download\">
+                            </form>
+                        </div>
+                    </div>
+                    <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
+                        PATHS
+                    </div>
                 </div>
             </div>
-            <div class=\"wrap\">
-                <ul id=\"link-container\">
-                </ul>
-            ";
+        </div>
+    </div>";
 
     $html_file = fopen("graph.html", "w") or die("Unable to open html file!");
-    fwrite($html_file, $txt);
+    fwrite($html_file, $html_start);
     fwrite($html_file, $graph);
-    fwrite($html_file, "<br>");
+    fwrite($html_file, $html_middle);
     fwrite($html_file, $legend);
-    fwrite($html_file, "<div class='container'>
-                                <h1>Download Zip</h1>
-                                <form method='post' action='backend.php'>
-                                    <input type='submit' name='download' value='Download'>
-                                 </form>
-                             </div>");
+    fwrite($html_file, $html_end);
     fwrite($html_file, "</div></body></html>");
     fclose($html_file);
 }
