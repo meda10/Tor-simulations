@@ -88,17 +88,32 @@ body {
 }
 
 .left_header legend {
-    width: 80%;
+    width: 78%;
 }
 
 .left_header ul {
-    width: 15%;
+
 }
 
 #link-container {
     margin-bottom: 20px;
     font-size: 21px;
     line-height: 40px;
+}
+
+#link-container h3{
+    margin: 0px;
+    font-size: 21px;
+    line-height: 40px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+#link-container{
+    margin-left: 0;
+    min-width: 180px;
 }
 
 #link-container a{
