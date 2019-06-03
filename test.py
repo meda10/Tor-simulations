@@ -78,35 +78,41 @@ def parse_config_file():
     conf.append(all_nodes)
 
     try:
-        conf[0]['exit'] = int(conf[0]['exit'])
-        conf[0]['middle'] = int(conf[0]['middle'])
-        conf[0]['guard'] = int(conf[0]['guard'])
-        conf[0]['guard'] = int(conf[0]['guard'])
-        conf[0]['guard_exit'] = int(conf[0]['guard_exit'])
         conf[0]['number_of_simulations'] = int(conf[0]['number_of_simulations'])
-        if conf[0]['guard'] < 0:
-            print('Number of guards have to be > 0')
-            sys.exit(1)
-        if conf[0]['exit'] < 0:
-            print('Number of exits have to be > 0')
-            sys.exit(1)
-        if conf[0]['guard_exit'] < 0:
-            print('Number of guard_exit have to be >= 0')
-            sys.exit(1)
-        if conf[0]['guard_exit'] + conf[0]['guard'] == 0:
-            print('Number of guards have to be > 0')
-            sys.exit(1)
-        if conf[0]['guard_exit'] + conf[0]['exit'] == 0:
-            print('Number of exits have to be > 0')
-            sys.exit(1)
-        if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
-            print('Number of nodes have to be > 3')
-            sys.exit(1)
     except ValueError:
-        print('Number of nodes have to be > 3\n'
-              'Number of guards have to be > 1\n'
-              'Number of exits have to be > 1')
+        print('Number of simulations have to be >= 1')
         sys.exit(1)
+
+    if conf[0]['simulation_type'] == 'path':
+        try:
+            conf[0]['exit'] = int(conf[0]['exit'])
+            conf[0]['middle'] = int(conf[0]['middle'])
+            conf[0]['guard'] = int(conf[0]['guard'])
+            conf[0]['guard'] = int(conf[0]['guard'])
+            conf[0]['guard_exit'] = int(conf[0]['guard_exit'])
+            if conf[0]['guard'] < 0:
+                print('Number of guards have to be > 0')
+                sys.exit(1)
+            if conf[0]['exit'] < 0:
+                print('Number of exits have to be > 0')
+                sys.exit(1)
+            if conf[0]['guard_exit'] < 0:
+                print('Number of guard_exit have to be >= 0')
+                sys.exit(1)
+            if conf[0]['guard_exit'] + conf[0]['guard'] == 0:
+                print('Number of guards have to be > 0')
+                sys.exit(1)
+            if conf[0]['guard_exit'] + conf[0]['exit'] == 0:
+                print('Number of exits have to be > 0')
+                sys.exit(1)
+            if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
+                print('Number of nodes have to be > 3')
+                sys.exit(1)
+        except ValueError:
+            print('Number of nodes have to be > 3\n'
+                  'Number of guards have to be > 1\n'
+                  'Number of exits have to be > 1')
+            sys.exit(1)
 
     if conf[0]['simulation_type'] == 'attack':  # todo max 255 overflow
         try:
@@ -119,6 +125,9 @@ def parse_config_file():
             conf[0]['guard'] = 0
             conf[0]['middle'] = 0
             conf[0]['exit'] = 0
+            if conf[0]['adv_guard'] + conf[0]['adv_exit'] + conf[0]['guard_exit'] < 3:
+                print('Number of nodes + adv. guard + adv. exit have to be > 3\n')
+                sys.exit(1)
         except ValueError:
             print('Value of nodes, bandwidth, simulations have to be number')
 
@@ -133,6 +142,9 @@ def parse_config_file():
             conf[0]['guard'] = 0
             conf[0]['middle'] = 0
             conf[0]['exit'] = 0
+            if conf[0]['guard_exit'] < 3:
+                print('Number of nodes have to be > 3\n')
+                sys.exit(1)
         except ValueError:
             print('Value of nodes and bandwidth have to be number')
 
@@ -373,7 +385,7 @@ def generate_nickname():
 
 
 def generate_ipv4_address():
-    return '%i.%i.%i.%i' % (random.randint(15, 255), random.randint(0, 255),
+    return '%i.%i.%i.%i' % (random.randint(11, 255), random.randint(0, 255),
                             random.randint(0, 255), random.randint(0, 255))
 
 

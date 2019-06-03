@@ -1743,8 +1743,8 @@ class GraphGenerator:
         guard_node = []
         middle_node = []
         exit_node = []
-        
-        graph = Digraph('test', format='svg')
+
+        graph = Digraph('Path', format='svg')
         
         graph.attr(layout="dot")
         graph.attr(rankdir='TB')
@@ -1879,13 +1879,13 @@ class GraphGenerator:
         guard_node = []
         middle_node = []
         exit_node = []
-        
-        graph = Digraph('test', format='svg')
+
+        graph = Digraph('Path', format='svg')
         
         graph.attr(layout='twopi')
         graph.attr(ranksep='5.5 2 2')
         graph.attr(root='PC')
-        graph.attr(size="7.5")
+        graph.attr(size="8.5")
         graph.attr(overlap="false")
         graph.attr(splines="true")
         # graph.attr(concentrate="true")
@@ -2028,7 +2028,7 @@ class GraphGenerator:
         self.generate_graph_legend("large")
     
     def generate_hidden_service_graph(self):
-        graph = Digraph('test', format='svg')
+        graph = Digraph('Hidden_service', format='svg')
         
         graph.attr(layout='neato')
         graph.attr(size="8.5")
@@ -2156,7 +2156,7 @@ class GraphGenerator:
         self.generate_graph_legend('hidden_service')
     
     def generate_attack_graph(self):  # todo alpha by node usage, colr by True/Flase
-        graph = Digraph('test', format='svg')
+        graph = Digraph('Attack', format='svg')
         
         graph.attr(layout='neato')
         graph.attr(size="8.5")
@@ -2171,10 +2171,8 @@ class GraphGenerator:
         graph.attr(layers=''.join(layers)[:-1])
         
         pc_icon_path = "resources//computer.png"
-        se_icon_path = "resources//SE.svg"
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
-        graph.node("SE", label="", shape="none", image=se_icon_path, fixedsize="shape", width="0.75", height="1")
         
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit
             try:
@@ -2185,8 +2183,8 @@ class GraphGenerator:
                 graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box', height='0.3',
                            width='0.3')
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
-        
-        for i in range(1, self.adv_guard_c):
+    
+        for i in range(1, self.adv_guard_c + 1):
             if '10.{}.0.0'.format(i) in self.node_usage.keys():
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
                            fillcolor="#FF0000{}".format(self.node_usage['10.{}.0.0'.format(i)]), shape='box',
@@ -2195,7 +2193,7 @@ class GraphGenerator:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='box',
                            height='0.3', width='0.3')  # guard was not used
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
-        for i in range(self.adv_guard_c, self.adv_guard_c + self.adv_exit_c):
+        for i in range(self.adv_guard_c + 1, self.adv_guard_c + 1 + self.adv_exit_c):
             if '10.{}.0.0'.format(i) in self.node_usage.keys():
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
                            fillcolor="#FF0000{}".format(self.node_usage['10.{}.0.0'.format(i)]), shape='circle',
@@ -2207,7 +2205,6 @@ class GraphGenerator:
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
         
         graph.edge("NODE", "PC", style="invis", len="0.1", constraint="false")
-        graph.edge("NODE", "SE", style="invis", len="1.1", constraint="false")
         
         graph.render('graph/simulation.dot', view=False)
         self.fix_svg_links()
