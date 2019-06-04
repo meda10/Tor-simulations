@@ -280,6 +280,31 @@ function create_zip(){
     }
 }
 
+function create_table()
+{
+    $table = "";
+    $cwd = getcwd();
+    $output = file_get_contents($cwd . "/torps//out/simulation/output");
+    $i = 0;
+    foreach (preg_split("/((\r?\n)|(\r\n?))/", $output) as $line) {
+        if (!empty($line)) {
+            if ($i >= 1) {
+                $parts = preg_split('/\s+/', $line);
+                $x = $i - 1;
+                $html = "<tr>
+                        <th scope=\"row\">" . $x . "</th>
+                        <td>" . $parts[2] . "</td>
+                        <td>" . $parts[3] . "</td>
+                        <td>" . $parts[4] . "</td>
+                     </tr>";
+                $table = $table . $html;
+            }
+        }
+        $i++;
+    }
+    return $table;
+}
+
 
 function create_graph_page(){
     $cwd = getcwd();
@@ -289,7 +314,7 @@ function create_graph_page(){
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
     //fclose($graph_file);
     //fclose($legend_file);
-
+    $html_table = create_table();
 
     $html_start = "<!DOCTYPE html>
                 <html lang=\"en\">
@@ -350,7 +375,19 @@ function create_graph_page(){
                         </div>
                     </div>
                     <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
-                        PATHS
+                        <table class=\"table table-striped\">
+                            <thead>
+                            <tr>
+                                <th scope=\"col\">#</th>
+                                <th scope=\"col\">Guard</th>
+                                <th scope=\"col\">Middle</th>
+                                <th scope=\"col\">Exit</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                " . $html_table . "
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

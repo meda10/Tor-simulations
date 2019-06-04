@@ -16,16 +16,33 @@ function create_zip(){
     }
 }
 
-//create_zip();
 
-$cwd = getcwd();
-$graph_file = fopen($cwd."/graph/simulation.dot.svg", "r") or die("Unable to open simulaton file!");
-$legend_file = fopen($cwd."/graph/legend.dot.svg", "r") or die("Unable to open legend file!");
-$graph = file_get_contents($cwd."/graph/simulation.dot.svg");
-$legend = file_get_contents($legend_file);
-echo $graph;
-fclose($graph_file);
-fclose($legend_file);
+function write_table()
+{
+    $table = "";
+    $cwd = getcwd();
+    $output = file_get_contents($cwd . "/torps//out/simulation/output");
+    $i = 0;
+    foreach (preg_split("/((\r?\n)|(\r\n?))/", $output) as $line) {
+        if (!empty($line)) {
+            if ($i >= 1) {
+                $parts = preg_split('/\s+/', $line);
+                $x = $i - 1;
+                $html = "<tr>
+                        <th scope=\"row\">" . $x . "</th>
+                        <td>" . $parts[2] . "</td>
+                        <td>" . $parts[3] . "</td>
+                        <td>" . $parts[4] . "</td>
+                     </tr>";
+                $table = $table . $html;
+            }
+        }
+        $i++;
+    }
+    return $table;
+}
 
 
+$x = write_table();
+echo $x;
 

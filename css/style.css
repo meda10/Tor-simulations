@@ -127,6 +127,18 @@ body {
     max-height: 88vw;
 }
 
+#path {
+    max-height: 900px;
+}
+
+#path table {
+    font-size: 11.6px;
+}
+
+.right {
+    max-width: 900px;
+}
+
 /*
 text-transform: uppercase;
 */
