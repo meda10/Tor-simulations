@@ -121,6 +121,12 @@ body {
     text-decoration: none;
 }
 
+
+.graph svg {
+    max-width: 88vw;
+    max-height: 88vw;
+}
+
 /*
 text-transform: uppercase;
 */
@@ -131,13 +137,17 @@ text-transform: uppercase;
     }
 
     .left {
+        width: unset;
+        min-width: unset;
+        /*
         width: 80vw;
         min-width: unset;
+        */
     }
 
     .right {
-        width: 80vw;
-        min-width: unset;
+        width: 88vw;
+        min-width: 88vw;
     }
 }
 

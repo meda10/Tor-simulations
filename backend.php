@@ -317,6 +317,9 @@ function create_graph_page(){
                             <div class=\"left_header\">
                                 <legend>Graph</legend>
                                 <ul id=\"link-container\">
+                                    <h3 id=\"current_num\"></h3>
+                                    <button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>
+                                    <button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>
                                 </ul>
                             </div>
                             <div class=\"graph\">
