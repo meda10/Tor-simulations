@@ -138,15 +138,11 @@ body {
 }
 
 #path {
-    max-height: 900px;
+    max-height: 82vh;
 }
 
 #path table {
     font-size: 11.6px;
-}
-
-.right {
-    max-width: 900px;
 }
 
 /*
