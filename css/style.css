@@ -114,6 +114,9 @@ body {
 #link-container{
     margin-left: 0;
     min-width: 180px;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
 }
 
 #link-container a{
@@ -121,6 +124,11 @@ body {
     text-decoration: none;
 }
 
+.graph {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
 
 .graph svg {
     max-width: 88vw;
@@ -137,7 +145,7 @@ text-transform: uppercase;
     }
 
     .left {
-        width: unset;
+        width: 100%;
         min-width: unset;
         /*
         width: 80vw;
@@ -146,8 +154,14 @@ text-transform: uppercase;
     }
 
     .right {
-        width: 88vw;
-        min-width: 88vw;
+        width: 100%;
+        min-width: unset;
+    }
+
+    #tabs_graph {
+        width: unset;
+        min-width: unset;
+        margin-left: unset;
     }
 }
 
