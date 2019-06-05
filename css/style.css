@@ -109,6 +109,8 @@ body {
     vertical-align: middle;
     margin-right: 15px;
     margin-left: 15px;
+    min-width: 24px;
+    text-align: center;
 }
 
 #link-container{
@@ -168,6 +170,7 @@ text-transform: uppercase;
     .right {
         width: 100%;
         min-width: unset;
+        max-width: unset;
     }
 
     #tabs_graph {
