@@ -7,7 +7,7 @@ from graphviz import Digraph
 class GraphGenerator:
     
     def __init__(self, routers=None, paths=None, graph_type=None, guard_len=None, exit_len=None,
-                 guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None, node_usage=None):
+                 guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None, color=None):
         self.routers = routers
         self.paths = paths
         self.graph_type = graph_type
@@ -17,7 +17,7 @@ class GraphGenerator:
         self.guard_exit = guard_exit
         self.adv_guard_c = adv_guard_c
         self.adv_exit_c = adv_exit_c
-        self.node_usage = node_usage
+        self.color = color
     
     def generate_graph(self):
         if self.guard_exit is not None:
@@ -2177,7 +2177,7 @@ class GraphGenerator:
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit
             try:
                 graph.node(str(r.address), label="", style='filled',
-                           fillcolor="#0000FF{}".format(self.node_usage[str(r.address)]), shape='box', height='0.3',
+                           fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='box', height='0.3',
                            width='0.3')
             except KeyError:
                 graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box', height='0.3',
@@ -2185,18 +2185,18 @@ class GraphGenerator:
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
     
         for i in range(1, self.adv_guard_c + 1):
-            if '10.{}.0.0'.format(i) in self.node_usage.keys():
+            if '10.{}.0.0'.format(i) in self.color.keys():
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
-                           fillcolor="#FF0000{}".format(self.node_usage['10.{}.0.0'.format(i)]), shape='box',
+                           fillcolor="#FF0000{}".format(self.color['10.{}.0.0'.format(i)]), shape='box',
                            height='0.3', width='0.3')
             else:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='box',
                            height='0.3', width='0.3')  # guard was not used
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
         for i in range(self.adv_guard_c + 1, self.adv_guard_c + 1 + self.adv_exit_c):
-            if '10.{}.0.0'.format(i) in self.node_usage.keys():
+            if '10.{}.0.0'.format(i) in self.color.keys():
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
-                           fillcolor="#FF0000{}".format(self.node_usage['10.{}.0.0'.format(i)]), shape='circle',
+                           fillcolor="#FF0000{}".format(self.color['10.{}.0.0'.format(i)]), shape='circle',
                            height='0.3', width='0.3')
             else:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='circle',

@@ -11,6 +11,7 @@ from graph import GraphGenerator
 try:
     import stem
     import socket
+    import json
     import stem.descriptor
     import stem.util.str_tools
     import ntor
@@ -184,7 +185,7 @@ def run_simulation():
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
-                           node_usage=circuits_output[1])
+                           color=circuits_output[1])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         if config[0]['simulation_size'] == 'large':
@@ -298,10 +299,19 @@ def get_circuits(remove_duplicate_paths):
             else:
                 node_usage[circuit[2]] = node_usage[circuit[2]] + 1
 
+    cwd = os.getcwd()
+    output_folder = Path(cwd + '/torps/out/simulation')
+
+    if not output_folder.exists():
+        output_folder.mkdir(parents=True)
+
+    output_file = output_folder / 'usage'
+    with open(output_file, 'w') as file:
+        json.dump(node_usage, file)
+    
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
         node_usage[k] = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
-
     data = [circuits, node_usage, statistic]
     return data
 
