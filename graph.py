@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from graphviz import Digraph
@@ -18,6 +19,7 @@ class GraphGenerator:
         self.adv_guard_c = adv_guard_c
         self.adv_exit_c = adv_exit_c
         self.color = color
+        self.cwd = os.getcwd()
     
     def generate_graph(self):
         if self.guard_exit is not None:
@@ -37,7 +39,7 @@ class GraphGenerator:
         with open(svg_file, "r") as svg:
             buf = svg.read()
         
-        buf = buf.replace('resources//computer.png', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6'
+        buf = buf.replace(cwd + '/resources/computer.png', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6'
                                                      'eAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAACu5JREFUeJzt'
                                                      '3W2MHVUdx/Hv3W1pkQcrsCJPlVIhCLSoiEAETHmmBRQlig8xCBJRERARJUUjMURFX'
                                                      '4ggEA3RREgQtUTlSR4VRR6CAQsUqARBQMUisKmFtpSuL86WNLPn/Luzu3fn3t3vJ5'
@@ -97,8 +99,8 @@ class GraphGenerator:
                                                      'JOYXyzIplhfKTKF8kfo60z1TPeOaRPvfc6OfqwfVK/eVjB7d5eeF1yGywqo80NFi6'
                                                      '8CV1s+WkoedS0Dd4dfHdGA5NXJsB74oqbCggS0jnodJEtIZ4VsIGh3n7Sedx83Aqu'
                                                      'yaW5aQfbuVGwV73f18dfj8mwSVzAAAAAElFTkSuQmCC')
-        
-        buf = buf.replace('resources//SE.svg', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
+
+        buf = buf.replace(cwd + '/resources//SE.svg', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
                                                'mh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjQgNjQiPgoJPHBh'
                                                'dGggZD0iTSAxNC44NTM1MTYgNiBDIDEzLjMyODUxNiA2IDExLjk1NzM5MSA2Ljg0NzkzNzU'
                                                'gMTEuMjc1MzkxIDguMjEwOTM3NSBMIDYuNTI3MzQzOCAxNy43MDg5ODQgQyA2LjE4MzM0Mz'
@@ -197,7 +199,8 @@ class GraphGenerator:
                                                'AzNi40NDcgNTIgMzcgNTIgTCA0MyA1MiBDIDQzLjU1MyA1MiA0NCA1MS41NTMgNDQgNTEgQ'
                                                'yA0NCA1MC40NDcgNDMuNTUzIDUwIDQzIDUwIEwgMzcgNTAgeiIvPgo8L3N2Zz4K')
         
-        buf = buf.replace('resources//PC.png', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHgCAYAAABjMUxjAAAdD'
+        buf = buf.replace(cwd + '/resources//PC.png',
+                                               'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHgCAYAAABjMUxjAAAdD'
                                                'klEQVR4nO3debhddX3v8fc5CYHEkBCGMM+EEAYZFAHFItZaLUhFy6QgVtSi0oFHb6/X4oCi'
                                                'PN6rtZZSixdrbW+pbbkXZLZKnZmcmCEMQglEICGBhATCSc6+f/xOICYn5+y9fr+91v6e/X4'
                                                '9z3kIyV7f9T0nyees/PZvGKB7dgO2BbYH5gEHAbsDWwGzgcldvLckdcsw8AzwGLAI+CVwF/'
@@ -340,7 +343,7 @@ class GraphGenerator:
                                                'UTiGEt5XuAtKn/DsDbSYcA1PFE2yJtk/qhkXu/j7Qjnyag/w+NgjXnuXdnbQAAAABJRU5Er'
                                                'kJggg==')
         
-        buf = buf.replace('resources//HS.png',
+        buf = buf.replace(cwd + '/resources//HS.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZQkZ3nu+Y'
                           'ustfe9W63uVrf2pSW07wIhCQmDwIBYxG4wyJdruGZ8r+2Z8Xh8PGfmnDuMfT0eX19hMGYTCBAIBBI7CNC+L6i1qxe11C'
                           '31vlfXlpnzxxOhLJWqq+KLjFyi6vmdk6d6qcj8MjLj+d5414jJRwcwGzgaWA2cDJwR/1wERK1bmjEmR6rANmAN8FD883'
@@ -668,7 +671,7 @@ class GraphGenerator:
                           'dsOzU9ClwMHA78pHAvSuZ2c2l47up/HUpMi3kf5cd8rQW+A1wD7CjciyrinbU0Mg8Dc4AXE6O+vgr8qYnX30wE9DHAZO'
                           'BbGNQd7b+l9i6EeCJP8AAAAABJRU5ErkJggg==')
         
-        buf = buf.replace('resources//IP.png',
+        buf = buf.replace(cwd + '/resources//IP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5Qc53nm++'
                           'ueiJwBIhFgABMIMYiZlChG2aJoSVSgskVL9GpXWvt61/bd6+vr43vunrNX116fXdtLWTlTEiWKlEhliaKYcwRJkCACQQ'
                           'Ikch5M6u77x1PFHgwHM/VVV4eaeX7n9BmEqe6vq7ue7603Fhh/tAHTgeOAlcCpwJnRz3lAoXlLM8ZkSAXYDqwGHot+Pg'
@@ -978,7 +981,7 @@ class GraphGenerator:
                           'CsARYg1gALEGuABYg1wALEGmABYg2wALEGWIBYAyxArAEWINYACxBrgAWINcACxBpgAWINsACxBliAWAMsQKwBFiDWAA'
                           'sQa4AF/A0bVjb6AzWIxQAAAABJRU5ErkJggg==')
         
-        buf = buf.replace('resources//DIR.png',
+        buf = buf.replace(cwd + '/resources//DIR.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5gkd53m+c'
                           'ks2953q526ZVqu1cggL4GQZUBoAGGEBwGaYRdu2NmdmbuZm5tjb/e5PW5mZ3dn58TA4I0AgUAgAcIJkPdCqCW11Gqjlr'
                           'ql9r66XGbeH2+EsrpUXRW/yEgTVe/nefKpNhWZvwzzxje+tsD4ow2YDhwHrAROBc6Mfs4DCs1bmjEmQyrAdmA18Gj080'
@@ -1309,7 +1312,7 @@ class GraphGenerator:
                           '8lxqXuLnVFVlVXA0+imTmzhHjT1d9rAi7r7tcPvDbw6xVgJ7CduBnkeeC5gV8HylqgdZWniIl8FwmyBo/yXS7Iqr3/Aw'
                           'MkQ3KXnLLlAAAAAElFTkSuQmCC')
         
-        buf = buf.replace('resources//RP.png',
+        buf = buf.replace(cwd + '/resources//RP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZRk5Xnm+Y'
                           'vItfa9itqoKoq9KLGIHQQCBLKEsCS0oN3CEra6pbHa3bZn2uPxcU/3OT0euz09tgdZsqxdSEJCIIF2CSH2fS2goKiFgi'
                           'qofc/KLSLmj+deIkmyMu9348ZyM5/fOXGylrwRX9yI+3zvfdcC4482YDqwElgFnAKcEf2cBxSatzRjTIZUgB3AGuDR6O'
@@ -1656,10 +1659,10 @@ class GraphGenerator:
             ip_l.attr(label="Introductory\npoint", penwidth="0")
             hs_l.attr(label="Hidden\nservice", penwidth="0")
             
-            rp_icon_path = "resources//RP.png"
-            ip_icon_path = "resources//IP.png"
-            hs_icon_path = "resources//HS.png"
-            dir_icon_path = "resources//DIR.png"
+            rp_icon_path = self.cwd + '/resources/RP.png'
+            ip_icon_path = self.cwd + '/resources/IP.png'
+            hs_icon_path = self.cwd + '/resources/HS.png'
+            dir_icon_path = self.cwd + '/resources/DIR.png'
             
             dir_l.node("DIR_L", label="", shape="none", image=dir_icon_path, fixedsize="true", width="0.75", height="1")
             ip_l.node("IP_L", label="", shape="none", image=ip_icon_path, fixedsize="true", width="0.75", height="1")
@@ -1735,8 +1738,11 @@ class GraphGenerator:
             subgraph_legend.subgraph(guard_l)
         
         graph.subgraph(subgraph_legend)
-        
-        graph.render('graph/legend.dot', view=False)
+        try:
+            graph.render('graph/legend.dot', view=False)
+        except Exception:
+            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            sys.exit(1)
         self.fix_svg_links(file='/graph/legend.dot.svg')
     
     def generate_simple_graph(self):
@@ -1773,8 +1779,8 @@ class GraphGenerator:
         subgraph_pc.graph_attr.update(rank='same')
         subgraph_server.graph_attr.update(rank='same')
         
-        computer_icon_path = "resources//computer.png"
-        server_icon_path = "resources//SE.svg"
+        computer_icon_path = self.cwd + '/resources/computer.png'
+        server_icon_path = self.cwd + '/resources/SE.svg'
         subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="0.6",
                          height="0.6")
         subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="0.7",
@@ -1870,8 +1876,11 @@ class GraphGenerator:
                         graph.edge(middle_node[i], exit_node[j], style='invis')
                     if len(exit_node) - 1 == j and i > j:
                         graph.edge(middle_node[i], exit_node[j], style='invis')
-        
-        graph.render('graph/simulation.dot', view=False)
+        try:
+            graph.render('graph/simulation.dot', view=False)
+        except Exception:
+            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend("small")
     
@@ -1904,8 +1913,8 @@ class GraphGenerator:
         subgraph_middles.graph_attr.update(rank='same')
         subgraph_exits.graph_attr.update(rank='same')
         
-        computer_icon_path = "resources//computer.png"
-        server_icon_path = "resources//SE.svg"
+        computer_icon_path = self.cwd + '/resources/computer.png'
+        server_icon_path = self.cwd + '/resources/SE.svg'
         graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
         graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
                    height="1.3", margin="20")
@@ -2022,8 +2031,11 @@ class GraphGenerator:
             graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
             graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
             graph.edge(path[2], "SERVER", constraint="false", layer="path{}".format(index))
-        
-        graph.render('graph/simulation.dot', view=False)
+        try:
+            graph.render('graph/simulation.dot', view=False)
+        except Exception:
+            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend("large")
     
@@ -2042,11 +2054,11 @@ class GraphGenerator:
         
         graph.attr(layers=''.join(layers)[:-1])
         
-        pc_icon_path = "resources//PC.png"
-        rp_icon_path = "resources//RP.png"
-        ip_icon_path = "resources//IP.png"
-        hs_icon_path = "resources//HS.png"
-        dir_icon_path = "resources//DIR.png"
+        pc_icon_path = self.cwd + '/resources/PC.png'
+        rp_icon_path = self.cwd + '/resources/RP.png'
+        ip_icon_path = self.cwd + '/resources/IP.png'
+        hs_icon_path = self.cwd + '/resources/HS.png'
+        dir_icon_path = self.cwd + '/resources/DIR.png'
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="true", width="0.75", height="1")
         graph.node("HS", label="", shape="none", image=hs_icon_path, fixedsize="shape", width="0.75", height="1")
@@ -2150,8 +2162,12 @@ class GraphGenerator:
         graph.edge(self.paths[6][2], self.paths[6][1], layer="path9", color="red", penwidth="2.3")
         graph.edge(self.paths[6][1], self.paths[6][0], layer="path9", color="red", penwidth="2.3")
         graph.edge(self.paths[6][0], "HS", layer="path9", color="red", penwidth="2.3")
-        
-        graph.render('graph/simulation.dot', view=False)
+
+        try:
+            graph.render('graph/simulation.dot', view=False)
+        except Exception:
+            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend('hidden_service')
     
@@ -2169,8 +2185,7 @@ class GraphGenerator:
         #     layers.append("path{}:".format(i))
 
         # graph.attr(layers=''.join(layers)[:-1])
-        
-        pc_icon_path = "resources//computer.png"
+        pc_icon_path = self.cwd + '/resources/computer.png'
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
         
@@ -2205,7 +2220,11 @@ class GraphGenerator:
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
         
         graph.edge("NODE", "PC", style="invis", len="0.1", constraint="false")
-        
-        graph.render('graph/simulation.dot', view=False)
+
+        try:
+            graph.render('graph/simulation.dot', view=False)
+        except Exception:
+            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend('attack')

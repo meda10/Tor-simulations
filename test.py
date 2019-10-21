@@ -3,12 +3,11 @@ import binascii
 import os
 import random
 import sys
-
 import math
 
-from graph import GraphGenerator
 
 try:
+    from graph import GraphGenerator
     import stem
     import socket
     import json
@@ -26,7 +25,7 @@ try:
     from stem.descriptor.networkstatus import NetworkStatusDocumentV3
     from stem.descriptor.router_status_entry import RouterStatusEntryV3
 except ImportError:
-    print('Creating descriptors requires stem (https://stem.torproject.org/)')
+    print('Requirements:')
     sys.exit(1)
 
 
@@ -677,7 +676,7 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/network-state-2019-02')
     simulation_folder = Path(cwd + '/torps/out/simulation')
-    
+
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
     
@@ -711,10 +710,15 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
     out_dir = Path(cwd + '/torps/out')
     initial_descriptors_dir = Path(cwd + '/torps/in/server-descriptors-2019-02')
     
-    os.system("python {} process --start_year {} --start_month {} --end_year {} --end_month {} --in_dir {} "
+    ret = os.system("python {} process --start_year {} --start_month {} --end_year {} --end_month {} --in_dir {} "
               "--out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1".format(torps_path, start_year, start_month,
                                                                                  end_year, end_month, in_dir, out_dir,
                                                                                  initial_descriptors_dir))
+
+    if ret != 0:
+        print('Path Simulator requires: Python2.7 and stem. Make sure torps has right permissions')
+        sys.exit(1)
+
     # os.system("python {} simulate -h".format(torps_path))
     
     os.system("python {} simulate --nsf_dir {} --num_samples {} --trace_file {} --user_model {} --format {} "
