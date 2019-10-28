@@ -100,7 +100,7 @@ class GraphGenerator:
                                                      '8CV1s+WkoedS0Dd4dfHdGA5NXJsB74oqbCggS0jnodJEtIZ4VsIGh3n7Sedx83Aqu'
                                                      'yaW5aQfbuVGwV73f18dfj8mwSVzAAAAAElFTkSuQmCC')
 
-        buf = buf.replace(cwd + '/resources//SE.svg', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
+        buf = buf.replace(cwd + '/resources/SE.svg', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
                                                'mh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjQgNjQiPgoJPHBh'
                                                'dGggZD0iTSAxNC44NTM1MTYgNiBDIDEzLjMyODUxNiA2IDExLjk1NzM5MSA2Ljg0NzkzNzU'
                                                'gMTEuMjc1MzkxIDguMjEwOTM3NSBMIDYuNTI3MzQzOCAxNy43MDg5ODQgQyA2LjE4MzM0Mz'
@@ -199,7 +199,7 @@ class GraphGenerator:
                                                'AzNi40NDcgNTIgMzcgNTIgTCA0MyA1MiBDIDQzLjU1MyA1MiA0NCA1MS41NTMgNDQgNTEgQ'
                                                'yA0NCA1MC40NDcgNDMuNTUzIDUwIDQzIDUwIEwgMzcgNTAgeiIvPgo8L3N2Zz4K')
         
-        buf = buf.replace(cwd + '/resources//PC.png',
+        buf = buf.replace(cwd + '/resources/PC.png',
                                                'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHgCAYAAABjMUxjAAAdD'
                                                'klEQVR4nO3debhddX3v8fc5CYHEkBCGMM+EEAYZFAHFItZaLUhFy6QgVtSi0oFHb6/X4oCi'
                                                'PN6rtZZSixdrbW+pbbkXZLZKnZmcmCEMQglEICGBhATCSc6+f/xOICYn5+y9fr+91v6e/X4'
@@ -343,7 +343,7 @@ class GraphGenerator:
                                                'UTiGEt5XuAtKn/DsDbSYcA1PFE2yJtk/qhkXu/j7Qjnyag/w+NgjXnuXdnbQAAAABJRU5Er'
                                                'kJggg==')
         
-        buf = buf.replace(cwd + '/resources//HS.png',
+        buf = buf.replace(cwd + '/resources/HS.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZQkZ3nu+Y'
                           'ustfe9W63uVrf2pSW07wIhCQmDwIBYxG4wyJdruGZ8r+2Z8Xh8PGfmnDuMfT0eX19hMGYTCBAIBBI7CNC+L6i1qxe11C'
                           '31vlfXlpnzxxOhLJWqq+KLjFyi6vmdk6d6qcj8MjLj+d5414jJRwcwGzgaWA2cDJwR/1wERK1bmjEmR6rANmAN8FD883'
@@ -671,7 +671,7 @@ class GraphGenerator:
                           'dsOzU9ClwMHA78pHAvSuZ2c2l47up/HUpMi3kf5cd8rQW+A1wD7CjciyrinbU0Mg8Dc4AXE6O+vgr8qYnX30wE9DHAZO'
                           'BbGNQd7b+l9i6EeCJP8AAAAABJRU5ErkJggg==')
         
-        buf = buf.replace(cwd + '/resources//IP.png',
+        buf = buf.replace(cwd + '/resources/IP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5Qc53nm++'
                           'ueiJwBIhFgABMIMYiZlChG2aJoSVSgskVL9GpXWvt61/bd6+vr43vunrNX116fXdtLWTlTEiWKlEhliaKYcwRJkCACQQ'
                           'Ikch5M6u77x1PFHgwHM/VVV4eaeX7n9BmEqe6vq7ue7603Fhh/tAHTgeOAlcCpwJnRz3lAoXlLM8ZkSAXYDqwGHot+Pg'
@@ -981,7 +981,7 @@ class GraphGenerator:
                           'CsARYg1gALEGuABYg1wALEGmABYg2wALEGWIBYAyxArAEWINYACxBrgAWINcACxBpgAWINsACxBliAWAMsQKwBFiDWAA'
                           'sQa4AF/A0bVjb6AzWIxQAAAABJRU5ErkJggg==')
         
-        buf = buf.replace(cwd + '/resources//DIR.png',
+        buf = buf.replace(cwd + '/resources/DIR.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5gkd53m+c'
                           'ks2953q526ZVqu1cggL4GQZUBoAGGEBwGaYRdu2NmdmbuZm5tjb/e5PW5mZ3dn58TA4I0AgUAgAcIJkPdCqCW11Gqjlr'
                           'ql9r66XGbeH2+EsrpUXRW/yEgTVe/nefKpNhWZvwzzxje+tsD4ow2YDhwHrAROBc6Mfs4DCs1bmjEmQyrAdmA18Gj080'
@@ -1312,7 +1312,7 @@ class GraphGenerator:
                           '8lxqXuLnVFVlVXA0+imTmzhHjT1d9rAi7r7tcPvDbw6xVgJ7CduBnkeeC5gV8HylqgdZWniIl8FwmyBo/yXS7Iqr3/Aw'
                           'MkQ3KXnLLlAAAAAElFTkSuQmCC')
         
-        buf = buf.replace(cwd + '/resources//RP.png',
+        buf = buf.replace(cwd + '/resources/RP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZRk5Xnm+Y'
                           'vItfa9itqoKoq9KLGIHQQCBLKEsCS0oN3CEra6pbHa3bZn2uPxcU/3OT0euz09tgdZsqxdSEJCIIF2CSH2fS2goKiFgi'
                           'qofc/KLSLmj+deIkmyMu9348ZyM5/fOXGylrwRX9yI+3zvfdcC4482YDqwElgFnAKcEf2cBxSatzRjTIZUgB3AGuDR6O'
