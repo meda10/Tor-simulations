@@ -161,15 +161,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     }
 
     parse_arguments($arr);
-    chdir('/opt/lampp/htdocs/bp_web');
+    $cwd = getcwd();
+    chdir($cwd);
     //echo getcwd();
-    //$command = escapeshellcmd('python3.6 ./test.py');
+    $log = "";
+    //$command = escapeshellcmd("python3.6 ./test.py 1> $log 2>&1");
+
     $command = escapeshellcmd('./test.py');
-    $output = shell_exec($command);
-    //$output = exec($command);
-    create_graph_page();
-    //header('Location:index.html');
-    header('Location:graph.html');
+    //$output = shell_exec($command);
+    exec($command, $op, $ret);
+    if($ret != 0) {
+        echo "Error: ";
+        echo $op[0];
+    }else{
+        create_graph_page();
+        header('Location:graph.html');
+    }
 }
 
 
@@ -263,7 +270,10 @@ function parse_arguments($arr){
         $config['attack_simulation']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth'];
     }
 
-    write_ini_file('config.ini', $config);
+    $return_code = write_ini_file('config.ini', $config);
+    if($return_code != true){
+        echo "Wrong premiisions: can not write to .ini file";
+    }
 }
 
 
@@ -280,8 +290,7 @@ function create_zip(){
     }
 }
 
-function create_table()
-{
+function create_table(){
     $table = "";
     $cwd = getcwd();
     $output = file_get_contents($cwd . "/torps//out/simulation/output");
