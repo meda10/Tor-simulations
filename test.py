@@ -181,7 +181,7 @@ def run_simulation():
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0])
-        GraphGenerator.generate_graph(g)
+        exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
     elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
                            color=circuits_output[1])
@@ -653,17 +653,26 @@ def create_html():
         svg.close()
     
     with open(output_file, 'w') as html_file:
-        html_file.write("<!DOCTYPE html>\n"
-                        "<html lang=\"en\">\n"
-                        "<head>\n"
-                        "<meta charset=\"UTF-8\">\n"
-                        "<title>Title</title>\n"
-                        "<link rel=\"stylesheet\" href=\"resources//animation.css\">\n"
-                        "<script defer=\"\" src=\"resources//animation.js\"></script>\n"
-                        "</head>\n"
+        html_file.write("<!DOCTYPE html>"
+                        "<html lang=\"en\">"
+                        "<head>"
+                        "<meta charset=\"utf-8\">"
+                        "<meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">"
+                        "<link rel=\"stylesheet\" href=\"resources//animation.css\">"
+                        "<script defer=\"\" src=\"resources//animation.js\"></script>"
+                        "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">"
+                        "<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">"
+                        "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>"
+                        "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>"
+                        "<script src=\"js/show.js\"></script>"
+                        "<title>Simulator</title>"
+                        "</head>"
                         "<body>\n"
-                        "<ul id=\"link-container\">\n"
-                        "</ul>\n")
+                        "<ul id=\"link-container\" style=\"justify-content: flex-start\">"
+                        "<h3 id=\"current_num\"></h3>"
+                        "<button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>"
+                        "<button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>"
+                        "</ul>")
         html_file.write(s)
         html_file.write("<br>\n")
         html_file.write(legend)
