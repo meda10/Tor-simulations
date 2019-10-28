@@ -6,9 +6,9 @@ from graphviz import Digraph
 
 
 class GraphGenerator:
-    
-    def __init__(self, routers=None, paths=None, graph_type=None, guard_len=None, exit_len=None,
-                 guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None, color=None):
+
+    def __init__(self, routers=None, paths=None, graph_type=None, guard_len=None, exit_len=None, sim_type=None,
+                 sim_size=None, guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None, color=None):
         self.routers = routers
         self.paths = paths
         self.graph_type = graph_type
@@ -20,329 +20,334 @@ class GraphGenerator:
         self.adv_exit_c = adv_exit_c
         self.color = color
         self.cwd = os.getcwd()
-    
+        self.sim_type = sim_type
+        self.sim_size = sim_size
+
     def generate_graph(self):
-        if self.guard_exit is not None:
-            self.generate_large_graph()
-        elif self.guard_len is not None and self.guard_exit is None:
-            self.generate_simple_graph()
+        if self.sim_type == 'path':
+            if self.sim_size == 'large':
+                self.generate_large_graph()
+            elif self.sim_size == 'small':
+                self.generate_simple_graph()
         elif self.adv_guard_c is not None:
             self.generate_attack_graph()
         else:
             self.generate_hidden_service_graph()
-    
+
     @staticmethod
     def fix_svg_links(file='/graph/simulation.dot.svg'):
         cwd = os.getcwd()
         svg_file = Path(cwd + file)
-        
+
         with open(svg_file, "r") as svg:
             buf = svg.read()
-        
-        buf = buf.replace(cwd + '/resources/computer.png', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6'
-                                                     'eAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAACu5JREFUeJzt'
-                                                     '3W2MHVUdx/Hv3W1pkQcrsCJPlVIhCLSoiEAETHmmBRQlig8xCBJRERARJUUjMURFX'
-                                                     '4ggEA3RREgQtUTlSR4VRR6CAQsUqARBQMUisKmFtpSuL86WNLPn/Luzu3fn3t3vJ5'
-                                                     'kQzj1z53Tv/O7MOXPuTIuhdgdOBg4FZgKbZupIE8Vq4EngVuAyYHGp4lTgIuA1YMD'
-                                                     'FZRIua4EfAtMY1Br871TgBuBgJN0GLABW9g4WXAgc31x7pI4yC9gCuL5F6nMsBnoa'
-                                                     'bZLUWQaAPXuBhcB+DTdG6jQtYG0LeBjYreHGSJ3o0RawHIdypZxVLdK5lqQMO+ZSw'
-                                                     'IBIgSk16+8I9LehHdJ4ugo4fDgV6wakH3ipdnOkzrJmuBU9xZICBkQKGBApYECkgA'
-                                                     'GRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWB'
-                                                     'ApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoY'
-                                                     'EClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECB'
-                                                     'kQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgA'
-                                                     'GRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWB'
-                                                     'ApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoY'
-                                                     'EClgQKSAAZECBkQKGBApMKVm/bOAle1oiDSO3jbcii1goI0Nkbqap1hSwIBIAQMiB'
-                                                     'QyIFDAgUsCASAEDIgUMiBQwIFLAgEgBAyIFDIgUqDubV+3zCvAb4D7SjOkdgWOAnR'
-                                                     'tsk0izeV2aXRYBW2c+mxZwIrCiA9o4KRenuzfvCuCTxJ/DgcDNwEbj0iK9zj5Is54'
-                                                     'FPsOGv6TuAL7d/uaoyoA061Lg5WHWvRBY08a2KMOANOv2GnVfAP7aroYoz4A06/k2'
-                                                     '19coGZBmbVWzfl9bWqEiA9Ksg2rU3QqY266GKM+ANOtzwKbDrPtFvLA77npIV3DVj'
-                                                     'G2Ay9nwF9VBwNntb44qVvQAS5tuxST3YeBaYIfMa1OAzwPX4dGjCY9NAW4A9my6JZ'
-                                                     'PckcDjwO9Ic7FeAXYCFpAPjsbHjS1gJukoMq3hxkidZCWwcy/QT7pCe0iz7ZE6yjn'
-                                                     'Ajb2D/3MnsC2wV3PtkTrGZcBCgN71Cn8LLAP2B6Y30CipaS8BZwDnrStoZSrNAI4H'
-                                                     'DgZmYVg0sa0EngBuBa4idTkkSRql3CmWYucA72+6ESPwIul6i2rw6mx9s4F9mm7EC'
-                                                     'CxrugHdyMmK9fkb/knEgNS3tukGjJDBHgEDIgUMSH3degTRCBgQKWBA6nNofBIxIP'
-                                                     'VNbboBI+TPGUbAgNT35qYbMEKb461LazMg9e3UdANGqEW6Y7xqMCD1TAd2aboRozC'
-                                                     'n6QZ0GwNSz7509/ScA5puQLcxIPUc03QDRumophugiWsj4N90wENdRrl4FFFbrHuO'
-                                                     'R7cv1431H0Z6ExPj6LFuOWxs/zya7K6m+Z16LJdn8E7xGiPfpPkduh3LXQz/xtnSE'
-                                                     'C3gAprfkdsdEo8kqm0rUme26R14PJanSNd3pGGZD/yT5nfc8VxeJd0srVsnYmocTA'
-                                                     'EuovmdtcnlXtLNzKUhrqD5HbQTln9Q/9mJmuB2oPkds5OWU0f355w4nIuVPAf8vel'
-                                                     'GdIjXSA/xEf58dH0zgUtIN+2erH+XJ4HTSU+6kiRJkiSNs3Z3RvcgdXznjMO2NHmt'
-                                                     'AH7Eeo9O6wbbM/mmbLg0u5zBGGvXt/omwB+Bd7bp/aWclcDewENj9YbtCEgLWAR8o'
-                                                     'PD6z0mP2V3fNOBKYMtK+QBwEkMv4u0I/CTz3ktJP42tmg98OVN+KenHUFVfBQ7PlB'
-                                                     '8H/DdTfjVDp40/CJyWqbsdaVpL1SXALzLlHwS+kCn/KOlXjlUXkHaS9T0FnJCpOxW'
-                                                     '4KVP+K+DiTPk84OuZ8nOAuzPl5wEHVsrWkp7Q9b9K+Sak/aZ6c7vHgZMz770AOCtT'
-                                                     'vhh4D7Aq81pH+A7lQ+D9wMaZdb5fqP+DwjauKdTP3bWjBTyQqbuC/Jyj6cALmfr3F'
-                                                     'Noyq9CW7xbqLyjUP7ZQ/2uF+tsU6i/K1H22UBfSrwur9UsXCrcvtOWCQv2PF+p/ul'
-                                                     'D/8kL9asggBWlpof73Cu9f21jf4+kE4OzCa2tJ35LvrZTvRP6bdjlwC3BIpXwX8ke'
-                                                     'nv5EOsdX6c4A9M/XvAt6RKd+H9Bv0qocy7w1waKYM4OVC/QWF+lsX6u9RqL8v6W9U'
-                                                     'tXmmbIvCe0P6MtiuUla6wdwzpJ2yevO8o8kfiZaTpq70Vso/S7pqX/UX4MRM+fnkO'
-                                                     '+DXkN/fzgSuB27LvNaYA0mHtaY7ai5js5Rm9F7SAW0bzvI0MKPwbxi2sZqsOJv8+a'
-                                                     'O619xC+S3j2oqR256hfd3axiIgM4BrGdrBVncrnWbdTvc8ZesjwCdG8waj7YNMIY3'
-                                                     'g7Fp4/XnyHcQtSQmvehVYUnivOeQDvRR4JVP+FtJ5fdVz5Ed/esmf768CHi20aSb5'
-                                                     '/spjpP5Q1RuAnTPl/wH+VdjGrgx9tsca4OFC/T5g20z5E+T7LCWbFcpfJA227JV57'
-                                                     'eHBtlVtQfrNTVXdz2ItaXQwZzb5u7RcTLrk8FRhvbaKzkeXA2/PrDOV9HuD3DrnFr'
-                                                     'ZzdKH+Esohv7ewzn6F+kcV6v+0UB9Sp7Ja/1XSkGXOhwrbODPYxpOZ+tGHfWphG8c'
-                                                     'F69RVGqmcV6i/R6H+74Nt3FNY532F+tGdL/9AA799Oi1oUPSBfKtQ/x6GjnZAGnZ9'
-                                                     'orDOEYVtHFGof0fw78kNjw5QHqXqI32jVevfFWzjG4VtHB2s81Km/iNB/U8VtpG7l'
-                                                     'jBShxW2URruhXTUya2TO6JCGqnM1S+NTPUE2xgAvjKsf1nFSC8UHkHqd+R2aEhHj9'
-                                                     'zO2BpcN5fmB8ifjvWRLvxUrQZuLmx/DvmbDzxCClvOYeTv6nED+XPuLcnfLudp0sW'
-                                                     'qnLnkTzX+BPQX1pnP0M+p9PeFdHqVm8GwhLH71eQ08sPGy0hH7pzdyT/AZzHpb1bV'
-                                                     'Ao4kv4/eRDpSV80CditsfzXp87q/8HrWSAKyO/Bn8uPtUid7hNR3yvVZs0pHgJI+0'
-                                                     'ihGrvMrdbo+4I2ks4JhqROQaaSrk6Xxcakb7E3q7z4+nMp1TrF+Rjym/CXyHai3Ar'
-                                                     '8kP9p0Nvl+xMakMOauhC4cfC3nSvLnoOcPtmEymE3+33of5Y76DNKZQdWzlJ9KtRF'
-                                                     'wJ0M/19XA/uT7CL2D28kNIR9Dvi/SA9xI/h7Cp5GGcHPr/Jr8pQRIQ+pzSZchxsRC'
-                                                     '4hGrHxfW6yF1JnPrlHZySPNucus8SPmod0BhnReYXHcxL02e3FDntD+zzmvkJ5euc'
-                                                     '3dhW6XhXkjD5rl1crOE1zm3sE401+pjhXXWLYuCdV83nAuFx5EeAVDSTxrPzg3rHk'
-                                                     'D+kV8DpG+F3DrTKU94vJ3yrNfTC+X3UR4OnohK84+2Jb4W8iJDB156gFPIf7ND+vL'
-                                                     'JOYXyzIplhfKTKF8kfo60z1TPeOaRPvfc6OfqwfVK/eVjB7d5eeF1yGywqo80NFi6'
-                                                     '8CV1s+WkoedS0Dd4dfHdGA5NXJsB74oqbCggS0jnodJEtIZ4VsIGh3n7Sedx83Aqu'
-                                                     'yaW5aQfbuVGwV73f18dfj8mwSVzAAAAAElFTkSuQmCC')
 
-        buf = buf.replace(cwd + '/resources/SE.svg', 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
-                                               'mh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjQgNjQiPgoJPHBh'
-                                               'dGggZD0iTSAxNC44NTM1MTYgNiBDIDEzLjMyODUxNiA2IDExLjk1NzM5MSA2Ljg0NzkzNzU'
-                                               'gMTEuMjc1MzkxIDguMjEwOTM3NSBMIDYuNTI3MzQzOCAxNy43MDg5ODQgQyA2LjE4MzM0Mz'
-                                               'cgMTguMzk4OTg0IDYgMTkuMTcyMzU5IDYgMTkuOTQzMzU5IEwgNiAzMCBDIDYgMzEuMjAxI'
-                                               'DYuNTQyODEyNSAzMi4yNjYgNy4zODI4MTI1IDMzIEMgNi41NDI4MTI1IDMzLjczNCA2IDM0'
-                                               'Ljc5OSA2IDM2IEwgNiA0MiBDIDYgNDMuMjAxIDYuNTQyODEyNSA0NC4yNjYgNy4zODI4MTI'
-                                               '1IDQ1IEMgNi41NDI4MTI1IDQ1LjczNCA2IDQ2Ljc5OSA2IDQ4IEwgNiA1NCBDIDYgNTYuMj'
-                                               'A2IDcuNzk0IDU4IDEwIDU4IEwgNTQgNTggQyA1Ni4yMDYgNTggNTggNTYuMjA2IDU4IDU0I'
-                                               'EwgNTggNDggQyA1OCA0Ni43OTkgNTcuNDU3MTg4IDQ1LjczNCA1Ni42MTcxODggNDUgQyA1'
-                                               'Ny40NTcxODcgNDQuMjY2IDU4IDQzLjIwMSA1OCA0MiBMIDU4IDM2IEMgNTggMzQuNzk5IDU'
-                                               '3LjQ1NzE4OCAzMy43MzQgNTYuNjE3MTg4IDMzIEMgNTcuNDU3MTg3IDMyLjI2NiA1OCAzMS'
-                                               '4yMDEgNTggMzAgTCA1OCAxOS45NDMzNTkgQyA1OCAxOS4xNzIzNTkgNTcuODE2NjU2IDE4L'
-                                               'jM5ODAzMSA1Ny40NzI2NTYgMTcuNzA3MDMxIEwgNTIuNzI0NjA5IDguMjEwOTM3NSBDIDUy'
-                                               'LjA0MjYwOSA2Ljg0NzkzNzUgNTAuNjcxNDg0IDYgNDkuMTQ2NDg0IDYgTCAxNC44NTM1MTY'
-                                               'gNiB6IE0gMTQuODUzNTE2IDggTCA0OS4xNDQ1MzEgOCBDIDQ5LjkwNzUzMSA4IDUwLjU5Mj'
-                                               'U5NCA4LjQyNDQ2ODcgNTAuOTMzNTk0IDkuMTA1NDY4OCBMIDU1LjY4MzU5NCAxOC42MDE1N'
-                                               'jIgQyA1NS44OTE1OTQgMTkuMDE3NTYzIDU2IDE5LjQ4MDM1OSA1NiAxOS45NDMzNTkgTCA1'
-                                               'NiAyMCBMIDggMjAgTCA4IDE5Ljk0MzM1OSBDIDggMTkuNDgwMzU5IDguMTA5NDA2MyAxOS4'
-                                               'wMTU1NjMgOC4zMTY0MDYyIDE4LjYwMTU2MiBMIDEzLjA2NDQ1MyA5LjEwNTQ2ODggQyAxMy'
-                                               '40MDU0NTMgOC40MjQ0Njg3IDE0LjA5MTUxNiA4IDE0Ljg1MzUxNiA4IHogTSAxNSAxMCBDI'
-                                               'DE0LjQ0NyAxMCAxNCAxMC40NDcgMTQgMTEgQyAxNCAxMS41NTMgMTQuNDQ3IDEyIDE1IDEy'
-                                               'IEwgNDEgMTIgQyA0MS41NTMgMTIgNDIgMTEuNTUzIDQyIDExIEMgNDIgMTAuNDQ3IDQxLjU'
-                                               '1MyAxMCA0MSAxMCBMIDE1IDEwIHogTSA0NSAxMCBDIDQ0LjQ0NyAxMCA0NCAxMC40NDcgND'
-                                               'QgMTEgQyA0NCAxMS41NTMgNDQuNDQ3IDEyIDQ1IDEyIEwgNDkgMTIgQyA0OS41NTMgMTIgN'
-                                               'TAgMTEuNTUzIDUwIDExIEMgNTAgMTAuNDQ3IDQ5LjU1MyAxMCA0OSAxMCBMIDQ1IDEwIHog'
-                                               'TSA4IDIyIEwgNTYgMjIgTCA1NiAzMCBDIDU2IDMxLjEwMyA1NS4xMDMgMzIgNTQgMzIgTCA'
-                                               'xMCAzMiBDIDguODk3IDMyIDggMzEuMTAzIDggMzAgTCA4IDIyIHogTSA0OSAyNCBDIDQ3Lj'
-                                               'M0NiAyNCA0NiAyNS4zNDYgNDYgMjcgQyA0NiAyOC42NTQgNDcuMzQ2IDMwIDQ5IDMwIEMgN'
-                                               'TAuNjU0IDMwIDUyIDI4LjY1NCA1MiAyNyBDIDUyIDI1LjM0NiA1MC42NTQgMjQgNDkgMjQg'
-                                               'eiBNIDEzIDI1IEMgMTIuNDQ3IDI1IDEyIDI1LjQ0NyAxMiAyNiBMIDEyIDI4IEMgMTIgMjg'
-                                               'uNTUzIDEyLjQ0NyAyOSAxMyAyOSBDIDEzLjU1MyAyOSAxNCAyOC41NTMgMTQgMjggTCAxNC'
-                                               'AyNiBDIDE0IDI1LjQ0NyAxMy41NTMgMjUgMTMgMjUgeiBNIDE4IDI1IEMgMTcuNDQ3IDI1I'
-                                               'DE3IDI1LjQ0NyAxNyAyNiBMIDE3IDI4IEMgMTcgMjguNTUzIDE3LjQ0NyAyOSAxOCAyOSBD'
-                                               'IDE4LjU1MyAyOSAxOSAyOC41NTMgMTkgMjggTCAxOSAyNiBDIDE5IDI1LjQ0NyAxOC41NTM'
-                                               'gMjUgMTggMjUgeiBNIDIzIDI1IEMgMjIuNDQ3IDI1IDIyIDI1LjQ0NyAyMiAyNiBMIDIyID'
-                                               'I4IEMgMjIgMjguNTUzIDIyLjQ0NyAyOSAyMyAyOSBDIDIzLjU1MyAyOSAyNCAyOC41NTMgM'
-                                               'jQgMjggTCAyNCAyNiBDIDI0IDI1LjQ0NyAyMy41NTMgMjUgMjMgMjUgeiBNIDI4IDI1IEMg'
-                                               'MjcuNDQ3IDI1IDI3IDI1LjQ0NyAyNyAyNiBMIDI3IDI4IEMgMjcgMjguNTUzIDI3LjQ0NyA'
-                                               'yOSAyOCAyOSBDIDI4LjU1MyAyOSAyOSAyOC41NTMgMjkgMjggTCAyOSAyNiBDIDI5IDI1Lj'
-                                               'Q0NyAyOC41NTMgMjUgMjggMjUgeiBNIDMzIDI1IEMgMzIuNDQ3IDI1IDMyIDI1LjQ0NyAzM'
-                                               'iAyNiBMIDMyIDI4IEMgMzIgMjguNTUzIDMyLjQ0NyAyOSAzMyAyOSBDIDMzLjU1MyAyOSAz'
-                                               'NCAyOC41NTMgMzQgMjggTCAzNCAyNiBDIDM0IDI1LjQ0NyAzMy41NTMgMjUgMzMgMjUgeiB'
-                                               'NIDQ5IDI1Ljc5Mjk2OSBDIDQ5LjY2NyAyNS43OTI5NjkgNTAuMjA3MDMxIDI2LjMzNCA1MC'
-                                               '4yMDcwMzEgMjcgQyA1MC4yMDcwMzEgMjcuNjY3IDQ5LjY2NiAyOC4yMDcwMzEgNDkgMjguM'
-                                               'jA3MDMxIEMgNDguMzM0IDI4LjIwNzAzMSA0Ny43OTI5NjkgMjcuNjY3IDQ3Ljc5Mjk2OSAy'
-                                               'NyBDIDQ3Ljc5Mjk2OSAyNi4zMzMgNDguMzMzIDI1Ljc5Mjk2OSA0OSAyNS43OTI5NjkgeiB'
-                                               'NIDM3IDI2IEMgMzYuNDQ3IDI2IDM2IDI2LjQ0NyAzNiAyNyBDIDM2IDI3LjU1MyAzNi40ND'
-                                               'cgMjggMzcgMjggTCA0MyAyOCBDIDQzLjU1MyAyOCA0NCAyNy41NTMgNDQgMjcgQyA0NCAyN'
-                                               'i40NDcgNDMuNTUzIDI2IDQzIDI2IEwgMzcgMjYgeiBNIDEwIDM0IEwgNTQgMzQgQyA1NS4x'
-                                               'MDMgMzQgNTYgMzQuODk3IDU2IDM2IEwgNTYgNDIgQyA1NiA0My4xMDMgNTUuMTAzIDQ0IDU'
-                                               '0IDQ0IEwgMTAgNDQgQyA4Ljg5NyA0NCA4IDQzLjEwMyA4IDQyIEwgOCAzNiBDIDggMzQuOD'
-                                               'k3IDguODk3IDM0IDEwIDM0IHogTSA0OSAzNiBDIDQ3LjM0NiAzNiA0NiAzNy4zNDYgNDYgM'
-                                               'zkgQyA0NiA0MC42NTQgNDcuMzQ2IDQyIDQ5IDQyIEMgNTAuNjU0IDQyIDUyIDQwLjY1NCA1'
-                                               'MiAzOSBDIDUyIDM3LjM0NiA1MC42NTQgMzYgNDkgMzYgeiBNIDEzIDM3IEMgMTIuNDQ3IDM'
-                                               '3IDEyIDM3LjQ0NyAxMiAzOCBMIDEyIDQwIEMgMTIgNDAuNTUzIDEyLjQ0NyA0MSAxMyA0MS'
-                                               'BDIDEzLjU1MyA0MSAxNCA0MC41NTMgMTQgNDAgTCAxNCAzOCBDIDE0IDM3LjQ0NyAxMy41N'
-                                               'TMgMzcgMTMgMzcgeiBNIDE4IDM3IEMgMTcuNDQ3IDM3IDE3IDM3LjQ0NyAxNyAzOCBMIDE3'
-                                               'IDQwIEMgMTcgNDAuNTUzIDE3LjQ0NyA0MSAxOCA0MSBDIDE4LjU1MyA0MSAxOSA0MC41NTM'
-                                               'gMTkgNDAgTCAxOSAzOCBDIDE5IDM3LjQ0NyAxOC41NTMgMzcgMTggMzcgeiBNIDIzIDM3IE'
-                                               'MgMjIuNDQ3IDM3IDIyIDM3LjQ0NyAyMiAzOCBMIDIyIDQwIEMgMjIgNDAuNTUzIDIyLjQ0N'
-                                               'yA0MSAyMyA0MSBDIDIzLjU1MyA0MSAyNCA0MC41NTMgMjQgNDAgTCAyNCAzOCBDIDI0IDM3'
-                                               'LjQ0NyAyMy41NTMgMzcgMjMgMzcgeiBNIDI4IDM3IEMgMjcuNDQ3IDM3IDI3IDM3LjQ0NyA'
-                                               'yNyAzOCBMIDI3IDQwIEMgMjcgNDAuNTUzIDI3LjQ0NyA0MSAyOCA0MSBDIDI4LjU1MyA0MS'
-                                               'AyOSA0MC41NTMgMjkgNDAgTCAyOSAzOCBDIDI5IDM3LjQ0NyAyOC41NTMgMzcgMjggMzcge'
-                                               'iBNIDMzIDM3IEMgMzIuNDQ3IDM3IDMyIDM3LjQ0NyAzMiAzOCBMIDMyIDQwIEMgMzIgNDAu'
-                                               'NTUzIDMyLjQ0NyA0MSAzMyA0MSBDIDMzLjU1MyA0MSAzNCA0MC41NTMgMzQgNDAgTCAzNCA'
-                                               'zOCBDIDM0IDM3LjQ0NyAzMy41NTMgMzcgMzMgMzcgeiBNIDQ5IDM3Ljc5Mjk2OSBDIDQ5Lj'
-                                               'Y2NiAzNy43OTI5NjkgNTAuMjA3MDMxIDM4LjMzNCA1MC4yMDcwMzEgMzkgQyA1MC4yMDcwM'
-                                               'zEgMzkuNjY3IDQ5LjY2NyA0MC4yMDcwMzEgNDkgNDAuMjA3MDMxIEMgNDguMzMzIDQwLjIw'
-                                               'NzAzMSA0Ny43OTI5NjkgMzkuNjY2IDQ3Ljc5Mjk2OSAzOSBDIDQ3Ljc5Mjk2OSAzOC4zMzM'
-                                               'gNDguMzM0IDM3Ljc5Mjk2OSA0OSAzNy43OTI5NjkgeiBNIDM3IDM4IEMgMzYuNDQ3IDM4ID'
-                                               'M2IDM4LjQ0NyAzNiAzOSBDIDM2IDM5LjU1MyAzNi40NDcgNDAgMzcgNDAgTCA0MyA0MCBDI'
-                                               'DQzLjU1MyA0MCA0NCAzOS41NTMgNDQgMzkgQyA0NCAzOC40NDcgNDMuNTUzIDM4IDQzIDM4'
-                                               'IEwgMzcgMzggeiBNIDEwIDQ2IEwgNTQgNDYgQyA1NS4xMDMgNDYgNTYgNDYuODk3IDU2IDQ'
-                                               '4IEwgNTYgNTQgQyA1NiA1NS4xMDMgNTUuMTAzIDU2IDU0IDU2IEwgMTAgNTYgQyA4Ljg5Ny'
-                                               'A1NiA4IDU1LjEwMyA4IDU0IEwgOCA0OCBDIDggNDYuODk3IDguODk3IDQ2IDEwIDQ2IHogT'
-                                               'SA0OSA0OCBDIDQ3LjM0NiA0OCA0NiA0OS4zNDYgNDYgNTEgQyA0NiA1Mi42NTQgNDcuMzQ2'
-                                               'IDU0IDQ5IDU0IEMgNTAuNjU0IDU0IDUyIDUyLjY1NCA1MiA1MSBDIDUyIDQ5LjM0NiA1MC4'
-                                               '2NTQgNDggNDkgNDggeiBNIDEzIDQ5IEMgMTIuNDQ3IDQ5IDEyIDQ5LjQ0NyAxMiA1MCBMID'
-                                               'EyIDUyIEMgMTIgNTIuNTUzIDEyLjQ0NyA1MyAxMyA1MyBDIDEzLjU1MyA1MyAxNCA1Mi41N'
-                                               'TMgMTQgNTIgTCAxNCA1MCBDIDE0IDQ5LjQ0NyAxMy41NTMgNDkgMTMgNDkgeiBNIDE4IDQ5'
-                                               'IEMgMTcuNDQ3IDQ5IDE3IDQ5LjQ0NyAxNyA1MCBMIDE3IDUyIEMgMTcgNTIuNTUzIDE3LjQ'
-                                               '0NyA1MyAxOCA1MyBDIDE4LjU1MyA1MyAxOSA1Mi41NTMgMTkgNTIgTCAxOSA1MCBDIDE5ID'
-                                               'Q5LjQ0NyAxOC41NTMgNDkgMTggNDkgeiBNIDIzIDQ5IEMgMjIuNDQ3IDQ5IDIyIDQ5LjQ0N'
-                                               'yAyMiA1MCBMIDIyIDUyIEMgMjIgNTIuNTUzIDIyLjQ0NyA1MyAyMyA1MyBDIDIzLjU1MyA1'
-                                               'MyAyNCA1Mi41NTMgMjQgNTIgTCAyNCA1MCBDIDI0IDQ5LjQ0NyAyMy41NTMgNDkgMjMgNDk'
-                                               'geiBNIDI4IDQ5IEMgMjcuNDQ3IDQ5IDI3IDQ5LjQ0NyAyNyA1MCBMIDI3IDUyIEMgMjcgNT'
-                                               'IuNTUzIDI3LjQ0NyA1MyAyOCA1MyBDIDI4LjU1MyA1MyAyOSA1Mi41NTMgMjkgNTIgTCAyO'
-                                               'SA1MCBDIDI5IDQ5LjQ0NyAyOC41NTMgNDkgMjggNDkgeiBNIDMzIDQ5IEMgMzIuNDQ3IDQ5'
-                                               'IDMyIDQ5LjQ0NyAzMiA1MCBMIDMyIDUyIEMgMzIgNTIuNTUzIDMyLjQ0NyA1MyAzMyA1MyB'
-                                               'DIDMzLjU1MyA1MyAzNCA1Mi41NTMgMzQgNTIgTCAzNCA1MCBDIDM0IDQ5LjQ0NyAzMy41NT'
-                                               'MgNDkgMzMgNDkgeiBNIDQ5IDQ5Ljc1IEMgNDkuNjkgNDkuNzUgNTAuMjUgNTAuMzEgNTAuM'
-                                               'jUgNTEgQyA1MC4yNSA1MS42OSA0OS42OSA1Mi4yNSA0OSA1Mi4yNSBDIDQ4LjMxIDUyLjI1'
-                                               'IDQ3Ljc1IDUxLjY5IDQ3Ljc1IDUxIEMgNDcuNzUgNTAuMzEgNDguMzEgNDkuNzUgNDkgNDk'
-                                               'uNzUgeiBNIDM3IDUwIEMgMzYuNDQ3IDUwIDM2IDUwLjQ0NyAzNiA1MSBDIDM2IDUxLjU1My'
-                                               'AzNi40NDcgNTIgMzcgNTIgTCA0MyA1MiBDIDQzLjU1MyA1MiA0NCA1MS41NTMgNDQgNTEgQ'
-                                               'yA0NCA1MC40NDcgNDMuNTUzIDUwIDQzIDUwIEwgMzcgNTAgeiIvPgo8L3N2Zz4K')
-        
+        buf = buf.replace(cwd + '/resources/computer.png',
+                          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6'
+                          'eAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAACu5JREFUeJzt'
+                          '3W2MHVUdx/Hv3W1pkQcrsCJPlVIhCLSoiEAETHmmBRQlig8xCBJRERARJUUjMURFX'
+                          '4ggEA3RREgQtUTlSR4VRR6CAQsUqARBQMUisKmFtpSuL86WNLPn/Luzu3fn3t3vJ5'
+                          'kQzj1z53Tv/O7MOXPuTIuhdgdOBg4FZgKbZupIE8Vq4EngVuAyYHGp4lTgIuA1YMD'
+                          'FZRIua4EfAtMY1Br871TgBuBgJN0GLABW9g4WXAgc31x7pI4yC9gCuL5F6nMsBnoa'
+                          'bZLUWQaAPXuBhcB+DTdG6jQtYG0LeBjYreHGSJ3o0RawHIdypZxVLdK5lqQMO+ZSw'
+                          'IBIgSk16+8I9LehHdJ4ugo4fDgV6wakH3ipdnOkzrJmuBU9xZICBkQKGBApYECkgA'
+                          'GRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWB'
+                          'ApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoY'
+                          'EClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECB'
+                          'kQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgA'
+                          'GRAgZEChgQKWBApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWB'
+                          'ApIABkQIGRAoYEClgQKSAAZECBkQKGBApYECkgAGRAgZEChgQKWBApIABkQIGRAoY'
+                          'EClgQKSAAZECBkQKGBApMKVm/bOAle1oiDSO3jbcii1goI0Nkbqap1hSwIBIAQMiB'
+                          'QyIFDAgUsCASAEDIgUMiBQwIFLAgEgBAyIFDIgUqDubV+3zCvAb4D7SjOkdgWOAnR'
+                          'tsk0izeV2aXRYBW2c+mxZwIrCiA9o4KRenuzfvCuCTxJ/DgcDNwEbj0iK9zj5Is54'
+                          'FPsOGv6TuAL7d/uaoyoA061Lg5WHWvRBY08a2KMOANOv2GnVfAP7aroYoz4A06/k2'
+                          '19coGZBmbVWzfl9bWqEiA9Ksg2rU3QqY266GKM+ANOtzwKbDrPtFvLA77npIV3DVj'
+                          'G2Ay9nwF9VBwNntb44qVvQAS5tuxST3YeBaYIfMa1OAzwPX4dGjCY9NAW4A9my6JZ'
+                          'PckcDjwO9Ic7FeAXYCFpAPjsbHjS1gJukoMq3hxkidZCWwcy/QT7pCe0iz7ZE6yjn'
+                          'Ajb2D/3MnsC2wV3PtkTrGZcBCgN71Cn8LLAP2B6Y30CipaS8BZwDnrStoZSrNAI4H'
+                          'DgZmYVg0sa0EngBuBa4idTkkSRql3CmWYucA72+6ESPwIul6i2rw6mx9s4F9mm7EC'
+                          'CxrugHdyMmK9fkb/knEgNS3tukGjJDBHgEDIgUMSH3degTRCBgQKWBA6nNofBIxIP'
+                          'VNbboBI+TPGUbAgNT35qYbMEKb461LazMg9e3UdANGqEW6Y7xqMCD1TAd2aboRozC'
+                          'n6QZ0GwNSz7509/ScA5puQLcxIPUc03QDRumophugiWsj4N90wENdRrl4FFFbrHuO'
+                          'R7cv1431H0Z6ExPj6LFuOWxs/zya7K6m+Z16LJdn8E7xGiPfpPkduh3LXQz/xtnSE'
+                          'C3gAprfkdsdEo8kqm0rUme26R14PJanSNd3pGGZD/yT5nfc8VxeJd0srVsnYmocTA'
+                          'EuovmdtcnlXtLNzKUhrqD5HbQTln9Q/9mJmuB2oPkds5OWU0f355w4nIuVPAf8vel'
+                          'GdIjXSA/xEf58dH0zgUtIN+2erH+XJ4HTSU+6kiRJkiSNs3Z3RvcgdXznjMO2NHmt'
+                          'AH7Eeo9O6wbbM/mmbLg0u5zBGGvXt/omwB+Bd7bp/aWclcDewENj9YbtCEgLWAR8o'
+                          'PD6z0mP2V3fNOBKYMtK+QBwEkMv4u0I/CTz3ktJP42tmg98OVN+KenHUFVfBQ7PlB'
+                          '8H/DdTfjVDp40/CJyWqbsdaVpL1SXALzLlHwS+kCn/KOlXjlUXkHaS9T0FnJCpOxW'
+                          '4KVP+K+DiTPk84OuZ8nOAuzPl5wEHVsrWkp7Q9b9K+Sak/aZ6c7vHgZMz770AOCtT'
+                          'vhh4D7Aq81pH+A7lQ+D9wMaZdb5fqP+DwjauKdTP3bWjBTyQqbuC/Jyj6cALmfr3F'
+                          'Noyq9CW7xbqLyjUP7ZQ/2uF+tsU6i/K1H22UBfSrwur9UsXCrcvtOWCQv2PF+p/ul'
+                          'D/8kL9asggBWlpof73Cu9f21jf4+kE4OzCa2tJ35LvrZTvRP6bdjlwC3BIpXwX8ke'
+                          'nv5EOsdX6c4A9M/XvAt6RKd+H9Bv0qocy7w1waKYM4OVC/QWF+lsX6u9RqL8v6W9U'
+                          'tXmmbIvCe0P6MtiuUla6wdwzpJ2yevO8o8kfiZaTpq70Vso/S7pqX/UX4MRM+fnkO'
+                          '+DXkN/fzgSuB27LvNaYA0mHtaY7ai5js5Rm9F7SAW0bzvI0MKPwbxi2sZqsOJv8+a'
+                          'O619xC+S3j2oqR256hfd3axiIgM4BrGdrBVncrnWbdTvc8ZesjwCdG8waj7YNMIY3'
+                          'g7Fp4/XnyHcQtSQmvehVYUnivOeQDvRR4JVP+FtJ5fdVz5Ed/esmf768CHi20aSb5'
+                          '/spjpP5Q1RuAnTPl/wH+VdjGrgx9tsca4OFC/T5g20z5E+T7LCWbFcpfJA227JV57'
+                          'eHBtlVtQfrNTVXdz2ItaXQwZzb5u7RcTLrk8FRhvbaKzkeXA2/PrDOV9HuD3DrnFr'
+                          'ZzdKH+Esohv7ewzn6F+kcV6v+0UB9Sp7Ja/1XSkGXOhwrbODPYxpOZ+tGHfWphG8c'
+                          'F69RVGqmcV6i/R6H+74Nt3FNY532F+tGdL/9AA799Oi1oUPSBfKtQ/x6GjnZAGnZ9'
+                          'orDOEYVtHFGof0fw78kNjw5QHqXqI32jVevfFWzjG4VtHB2s81Km/iNB/U8VtpG7l'
+                          'jBShxW2URruhXTUya2TO6JCGqnM1S+NTPUE2xgAvjKsf1nFSC8UHkHqd+R2aEhHj9'
+                          'zO2BpcN5fmB8ifjvWRLvxUrQZuLmx/DvmbDzxCClvOYeTv6nED+XPuLcnfLudp0sW'
+                          'qnLnkTzX+BPQX1pnP0M+p9PeFdHqVm8GwhLH71eQ08sPGy0hH7pzdyT/AZzHpb1bV'
+                          'Ao4kv4/eRDpSV80CditsfzXp87q/8HrWSAKyO/Bn8uPtUid7hNR3yvVZs0pHgJI+0'
+                          'ihGrvMrdbo+4I2ks4JhqROQaaSrk6Xxcakb7E3q7z4+nMp1TrF+Rjym/CXyHai3Ar'
+                          '8kP9p0Nvl+xMakMOauhC4cfC3nSvLnoOcPtmEymE3+33of5Y76DNKZQdWzlJ9KtRF'
+                          'wJ0M/19XA/uT7CL2D28kNIR9Dvi/SA9xI/h7Cp5GGcHPr/Jr8pQRIQ+pzSZchxsRC'
+                          '4hGrHxfW6yF1JnPrlHZySPNucus8SPmod0BhnReYXHcxL02e3FDntD+zzmvkJ5euc'
+                          '3dhW6XhXkjD5rl1crOE1zm3sE401+pjhXXWLYuCdV83nAuFx5EeAVDSTxrPzg3rHk'
+                          'D+kV8DpG+F3DrTKU94vJ3yrNfTC+X3UR4OnohK84+2Jb4W8iJDB156gFPIf7ND+vL'
+                          'JOYXyzIplhfKTKF8kfo60z1TPeOaRPvfc6OfqwfVK/eVjB7d5eeF1yGywqo80NFi6'
+                          '8CV1s+WkoedS0Dd4dfHdGA5NXJsB74oqbCggS0jnodJEtIZ4VsIGh3n7Sedx83Aqu'
+                          'yaW5aQfbuVGwV73f18dfj8mwSVzAAAAAElFTkSuQmCC')
+
+        buf = buf.replace(cwd + '/resources/SE.svg',
+                          'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxzdmcgeG1sbnM9I'
+                          'mh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNjQgNjQiPgoJPHBh'
+                          'dGggZD0iTSAxNC44NTM1MTYgNiBDIDEzLjMyODUxNiA2IDExLjk1NzM5MSA2Ljg0NzkzNzU'
+                          'gMTEuMjc1MzkxIDguMjEwOTM3NSBMIDYuNTI3MzQzOCAxNy43MDg5ODQgQyA2LjE4MzM0Mz'
+                          'cgMTguMzk4OTg0IDYgMTkuMTcyMzU5IDYgMTkuOTQzMzU5IEwgNiAzMCBDIDYgMzEuMjAxI'
+                          'DYuNTQyODEyNSAzMi4yNjYgNy4zODI4MTI1IDMzIEMgNi41NDI4MTI1IDMzLjczNCA2IDM0'
+                          'Ljc5OSA2IDM2IEwgNiA0MiBDIDYgNDMuMjAxIDYuNTQyODEyNSA0NC4yNjYgNy4zODI4MTI'
+                          '1IDQ1IEMgNi41NDI4MTI1IDQ1LjczNCA2IDQ2Ljc5OSA2IDQ4IEwgNiA1NCBDIDYgNTYuMj'
+                          'A2IDcuNzk0IDU4IDEwIDU4IEwgNTQgNTggQyA1Ni4yMDYgNTggNTggNTYuMjA2IDU4IDU0I'
+                          'EwgNTggNDggQyA1OCA0Ni43OTkgNTcuNDU3MTg4IDQ1LjczNCA1Ni42MTcxODggNDUgQyA1'
+                          'Ny40NTcxODcgNDQuMjY2IDU4IDQzLjIwMSA1OCA0MiBMIDU4IDM2IEMgNTggMzQuNzk5IDU'
+                          '3LjQ1NzE4OCAzMy43MzQgNTYuNjE3MTg4IDMzIEMgNTcuNDU3MTg3IDMyLjI2NiA1OCAzMS'
+                          '4yMDEgNTggMzAgTCA1OCAxOS45NDMzNTkgQyA1OCAxOS4xNzIzNTkgNTcuODE2NjU2IDE4L'
+                          'jM5ODAzMSA1Ny40NzI2NTYgMTcuNzA3MDMxIEwgNTIuNzI0NjA5IDguMjEwOTM3NSBDIDUy'
+                          'LjA0MjYwOSA2Ljg0NzkzNzUgNTAuNjcxNDg0IDYgNDkuMTQ2NDg0IDYgTCAxNC44NTM1MTY'
+                          'gNiB6IE0gMTQuODUzNTE2IDggTCA0OS4xNDQ1MzEgOCBDIDQ5LjkwNzUzMSA4IDUwLjU5Mj'
+                          'U5NCA4LjQyNDQ2ODcgNTAuOTMzNTk0IDkuMTA1NDY4OCBMIDU1LjY4MzU5NCAxOC42MDE1N'
+                          'jIgQyA1NS44OTE1OTQgMTkuMDE3NTYzIDU2IDE5LjQ4MDM1OSA1NiAxOS45NDMzNTkgTCA1'
+                          'NiAyMCBMIDggMjAgTCA4IDE5Ljk0MzM1OSBDIDggMTkuNDgwMzU5IDguMTA5NDA2MyAxOS4'
+                          'wMTU1NjMgOC4zMTY0MDYyIDE4LjYwMTU2MiBMIDEzLjA2NDQ1MyA5LjEwNTQ2ODggQyAxMy'
+                          '40MDU0NTMgOC40MjQ0Njg3IDE0LjA5MTUxNiA4IDE0Ljg1MzUxNiA4IHogTSAxNSAxMCBDI'
+                          'DE0LjQ0NyAxMCAxNCAxMC40NDcgMTQgMTEgQyAxNCAxMS41NTMgMTQuNDQ3IDEyIDE1IDEy'
+                          'IEwgNDEgMTIgQyA0MS41NTMgMTIgNDIgMTEuNTUzIDQyIDExIEMgNDIgMTAuNDQ3IDQxLjU'
+                          '1MyAxMCA0MSAxMCBMIDE1IDEwIHogTSA0NSAxMCBDIDQ0LjQ0NyAxMCA0NCAxMC40NDcgND'
+                          'QgMTEgQyA0NCAxMS41NTMgNDQuNDQ3IDEyIDQ1IDEyIEwgNDkgMTIgQyA0OS41NTMgMTIgN'
+                          'TAgMTEuNTUzIDUwIDExIEMgNTAgMTAuNDQ3IDQ5LjU1MyAxMCA0OSAxMCBMIDQ1IDEwIHog'
+                          'TSA4IDIyIEwgNTYgMjIgTCA1NiAzMCBDIDU2IDMxLjEwMyA1NS4xMDMgMzIgNTQgMzIgTCA'
+                          'xMCAzMiBDIDguODk3IDMyIDggMzEuMTAzIDggMzAgTCA4IDIyIHogTSA0OSAyNCBDIDQ3Lj'
+                          'M0NiAyNCA0NiAyNS4zNDYgNDYgMjcgQyA0NiAyOC42NTQgNDcuMzQ2IDMwIDQ5IDMwIEMgN'
+                          'TAuNjU0IDMwIDUyIDI4LjY1NCA1MiAyNyBDIDUyIDI1LjM0NiA1MC42NTQgMjQgNDkgMjQg'
+                          'eiBNIDEzIDI1IEMgMTIuNDQ3IDI1IDEyIDI1LjQ0NyAxMiAyNiBMIDEyIDI4IEMgMTIgMjg'
+                          'uNTUzIDEyLjQ0NyAyOSAxMyAyOSBDIDEzLjU1MyAyOSAxNCAyOC41NTMgMTQgMjggTCAxNC'
+                          'AyNiBDIDE0IDI1LjQ0NyAxMy41NTMgMjUgMTMgMjUgeiBNIDE4IDI1IEMgMTcuNDQ3IDI1I'
+                          'DE3IDI1LjQ0NyAxNyAyNiBMIDE3IDI4IEMgMTcgMjguNTUzIDE3LjQ0NyAyOSAxOCAyOSBD'
+                          'IDE4LjU1MyAyOSAxOSAyOC41NTMgMTkgMjggTCAxOSAyNiBDIDE5IDI1LjQ0NyAxOC41NTM'
+                          'gMjUgMTggMjUgeiBNIDIzIDI1IEMgMjIuNDQ3IDI1IDIyIDI1LjQ0NyAyMiAyNiBMIDIyID'
+                          'I4IEMgMjIgMjguNTUzIDIyLjQ0NyAyOSAyMyAyOSBDIDIzLjU1MyAyOSAyNCAyOC41NTMgM'
+                          'jQgMjggTCAyNCAyNiBDIDI0IDI1LjQ0NyAyMy41NTMgMjUgMjMgMjUgeiBNIDI4IDI1IEMg'
+                          'MjcuNDQ3IDI1IDI3IDI1LjQ0NyAyNyAyNiBMIDI3IDI4IEMgMjcgMjguNTUzIDI3LjQ0NyA'
+                          'yOSAyOCAyOSBDIDI4LjU1MyAyOSAyOSAyOC41NTMgMjkgMjggTCAyOSAyNiBDIDI5IDI1Lj'
+                          'Q0NyAyOC41NTMgMjUgMjggMjUgeiBNIDMzIDI1IEMgMzIuNDQ3IDI1IDMyIDI1LjQ0NyAzM'
+                          'iAyNiBMIDMyIDI4IEMgMzIgMjguNTUzIDMyLjQ0NyAyOSAzMyAyOSBDIDMzLjU1MyAyOSAz'
+                          'NCAyOC41NTMgMzQgMjggTCAzNCAyNiBDIDM0IDI1LjQ0NyAzMy41NTMgMjUgMzMgMjUgeiB'
+                          'NIDQ5IDI1Ljc5Mjk2OSBDIDQ5LjY2NyAyNS43OTI5NjkgNTAuMjA3MDMxIDI2LjMzNCA1MC'
+                          '4yMDcwMzEgMjcgQyA1MC4yMDcwMzEgMjcuNjY3IDQ5LjY2NiAyOC4yMDcwMzEgNDkgMjguM'
+                          'jA3MDMxIEMgNDguMzM0IDI4LjIwNzAzMSA0Ny43OTI5NjkgMjcuNjY3IDQ3Ljc5Mjk2OSAy'
+                          'NyBDIDQ3Ljc5Mjk2OSAyNi4zMzMgNDguMzMzIDI1Ljc5Mjk2OSA0OSAyNS43OTI5NjkgeiB'
+                          'NIDM3IDI2IEMgMzYuNDQ3IDI2IDM2IDI2LjQ0NyAzNiAyNyBDIDM2IDI3LjU1MyAzNi40ND'
+                          'cgMjggMzcgMjggTCA0MyAyOCBDIDQzLjU1MyAyOCA0NCAyNy41NTMgNDQgMjcgQyA0NCAyN'
+                          'i40NDcgNDMuNTUzIDI2IDQzIDI2IEwgMzcgMjYgeiBNIDEwIDM0IEwgNTQgMzQgQyA1NS4x'
+                          'MDMgMzQgNTYgMzQuODk3IDU2IDM2IEwgNTYgNDIgQyA1NiA0My4xMDMgNTUuMTAzIDQ0IDU'
+                          '0IDQ0IEwgMTAgNDQgQyA4Ljg5NyA0NCA4IDQzLjEwMyA4IDQyIEwgOCAzNiBDIDggMzQuOD'
+                          'k3IDguODk3IDM0IDEwIDM0IHogTSA0OSAzNiBDIDQ3LjM0NiAzNiA0NiAzNy4zNDYgNDYgM'
+                          'zkgQyA0NiA0MC42NTQgNDcuMzQ2IDQyIDQ5IDQyIEMgNTAuNjU0IDQyIDUyIDQwLjY1NCA1'
+                          'MiAzOSBDIDUyIDM3LjM0NiA1MC42NTQgMzYgNDkgMzYgeiBNIDEzIDM3IEMgMTIuNDQ3IDM'
+                          '3IDEyIDM3LjQ0NyAxMiAzOCBMIDEyIDQwIEMgMTIgNDAuNTUzIDEyLjQ0NyA0MSAxMyA0MS'
+                          'BDIDEzLjU1MyA0MSAxNCA0MC41NTMgMTQgNDAgTCAxNCAzOCBDIDE0IDM3LjQ0NyAxMy41N'
+                          'TMgMzcgMTMgMzcgeiBNIDE4IDM3IEMgMTcuNDQ3IDM3IDE3IDM3LjQ0NyAxNyAzOCBMIDE3'
+                          'IDQwIEMgMTcgNDAuNTUzIDE3LjQ0NyA0MSAxOCA0MSBDIDE4LjU1MyA0MSAxOSA0MC41NTM'
+                          'gMTkgNDAgTCAxOSAzOCBDIDE5IDM3LjQ0NyAxOC41NTMgMzcgMTggMzcgeiBNIDIzIDM3IE'
+                          'MgMjIuNDQ3IDM3IDIyIDM3LjQ0NyAyMiAzOCBMIDIyIDQwIEMgMjIgNDAuNTUzIDIyLjQ0N'
+                          'yA0MSAyMyA0MSBDIDIzLjU1MyA0MSAyNCA0MC41NTMgMjQgNDAgTCAyNCAzOCBDIDI0IDM3'
+                          'LjQ0NyAyMy41NTMgMzcgMjMgMzcgeiBNIDI4IDM3IEMgMjcuNDQ3IDM3IDI3IDM3LjQ0NyA'
+                          'yNyAzOCBMIDI3IDQwIEMgMjcgNDAuNTUzIDI3LjQ0NyA0MSAyOCA0MSBDIDI4LjU1MyA0MS'
+                          'AyOSA0MC41NTMgMjkgNDAgTCAyOSAzOCBDIDI5IDM3LjQ0NyAyOC41NTMgMzcgMjggMzcge'
+                          'iBNIDMzIDM3IEMgMzIuNDQ3IDM3IDMyIDM3LjQ0NyAzMiAzOCBMIDMyIDQwIEMgMzIgNDAu'
+                          'NTUzIDMyLjQ0NyA0MSAzMyA0MSBDIDMzLjU1MyA0MSAzNCA0MC41NTMgMzQgNDAgTCAzNCA'
+                          'zOCBDIDM0IDM3LjQ0NyAzMy41NTMgMzcgMzMgMzcgeiBNIDQ5IDM3Ljc5Mjk2OSBDIDQ5Lj'
+                          'Y2NiAzNy43OTI5NjkgNTAuMjA3MDMxIDM4LjMzNCA1MC4yMDcwMzEgMzkgQyA1MC4yMDcwM'
+                          'zEgMzkuNjY3IDQ5LjY2NyA0MC4yMDcwMzEgNDkgNDAuMjA3MDMxIEMgNDguMzMzIDQwLjIw'
+                          'NzAzMSA0Ny43OTI5NjkgMzkuNjY2IDQ3Ljc5Mjk2OSAzOSBDIDQ3Ljc5Mjk2OSAzOC4zMzM'
+                          'gNDguMzM0IDM3Ljc5Mjk2OSA0OSAzNy43OTI5NjkgeiBNIDM3IDM4IEMgMzYuNDQ3IDM4ID'
+                          'M2IDM4LjQ0NyAzNiAzOSBDIDM2IDM5LjU1MyAzNi40NDcgNDAgMzcgNDAgTCA0MyA0MCBDI'
+                          'DQzLjU1MyA0MCA0NCAzOS41NTMgNDQgMzkgQyA0NCAzOC40NDcgNDMuNTUzIDM4IDQzIDM4'
+                          'IEwgMzcgMzggeiBNIDEwIDQ2IEwgNTQgNDYgQyA1NS4xMDMgNDYgNTYgNDYuODk3IDU2IDQ'
+                          '4IEwgNTYgNTQgQyA1NiA1NS4xMDMgNTUuMTAzIDU2IDU0IDU2IEwgMTAgNTYgQyA4Ljg5Ny'
+                          'A1NiA4IDU1LjEwMyA4IDU0IEwgOCA0OCBDIDggNDYuODk3IDguODk3IDQ2IDEwIDQ2IHogT'
+                          'SA0OSA0OCBDIDQ3LjM0NiA0OCA0NiA0OS4zNDYgNDYgNTEgQyA0NiA1Mi42NTQgNDcuMzQ2'
+                          'IDU0IDQ5IDU0IEMgNTAuNjU0IDU0IDUyIDUyLjY1NCA1MiA1MSBDIDUyIDQ5LjM0NiA1MC4'
+                          '2NTQgNDggNDkgNDggeiBNIDEzIDQ5IEMgMTIuNDQ3IDQ5IDEyIDQ5LjQ0NyAxMiA1MCBMID'
+                          'EyIDUyIEMgMTIgNTIuNTUzIDEyLjQ0NyA1MyAxMyA1MyBDIDEzLjU1MyA1MyAxNCA1Mi41N'
+                          'TMgMTQgNTIgTCAxNCA1MCBDIDE0IDQ5LjQ0NyAxMy41NTMgNDkgMTMgNDkgeiBNIDE4IDQ5'
+                          'IEMgMTcuNDQ3IDQ5IDE3IDQ5LjQ0NyAxNyA1MCBMIDE3IDUyIEMgMTcgNTIuNTUzIDE3LjQ'
+                          '0NyA1MyAxOCA1MyBDIDE4LjU1MyA1MyAxOSA1Mi41NTMgMTkgNTIgTCAxOSA1MCBDIDE5ID'
+                          'Q5LjQ0NyAxOC41NTMgNDkgMTggNDkgeiBNIDIzIDQ5IEMgMjIuNDQ3IDQ5IDIyIDQ5LjQ0N'
+                          'yAyMiA1MCBMIDIyIDUyIEMgMjIgNTIuNTUzIDIyLjQ0NyA1MyAyMyA1MyBDIDIzLjU1MyA1'
+                          'MyAyNCA1Mi41NTMgMjQgNTIgTCAyNCA1MCBDIDI0IDQ5LjQ0NyAyMy41NTMgNDkgMjMgNDk'
+                          'geiBNIDI4IDQ5IEMgMjcuNDQ3IDQ5IDI3IDQ5LjQ0NyAyNyA1MCBMIDI3IDUyIEMgMjcgNT'
+                          'IuNTUzIDI3LjQ0NyA1MyAyOCA1MyBDIDI4LjU1MyA1MyAyOSA1Mi41NTMgMjkgNTIgTCAyO'
+                          'SA1MCBDIDI5IDQ5LjQ0NyAyOC41NTMgNDkgMjggNDkgeiBNIDMzIDQ5IEMgMzIuNDQ3IDQ5'
+                          'IDMyIDQ5LjQ0NyAzMiA1MCBMIDMyIDUyIEMgMzIgNTIuNTUzIDMyLjQ0NyA1MyAzMyA1MyB'
+                          'DIDMzLjU1MyA1MyAzNCA1Mi41NTMgMzQgNTIgTCAzNCA1MCBDIDM0IDQ5LjQ0NyAzMy41NT'
+                          'MgNDkgMzMgNDkgeiBNIDQ5IDQ5Ljc1IEMgNDkuNjkgNDkuNzUgNTAuMjUgNTAuMzEgNTAuM'
+                          'jUgNTEgQyA1MC4yNSA1MS42OSA0OS42OSA1Mi4yNSA0OSA1Mi4yNSBDIDQ4LjMxIDUyLjI1'
+                          'IDQ3Ljc1IDUxLjY5IDQ3Ljc1IDUxIEMgNDcuNzUgNTAuMzEgNDguMzEgNDkuNzUgNDkgNDk'
+                          'uNzUgeiBNIDM3IDUwIEMgMzYuNDQ3IDUwIDM2IDUwLjQ0NyAzNiA1MSBDIDM2IDUxLjU1My'
+                          'AzNi40NDcgNTIgMzcgNTIgTCA0MyA1MiBDIDQzLjU1MyA1MiA0NCA1MS41NTMgNDQgNTEgQ'
+                          'yA0NCA1MC40NDcgNDMuNTUzIDUwIDQzIDUwIEwgMzcgNTAgeiIvPgo8L3N2Zz4K')
+
         buf = buf.replace(cwd + '/resources/PC.png',
-                                               'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHgCAYAAABjMUxjAAAdD'
-                                               'klEQVR4nO3debhddX3v8fc5CYHEkBCGMM+EEAYZFAHFItZaLUhFy6QgVtSi0oFHb6/X4oCi'
-                                               'PN6rtZZSixdrbW+pbbkXZLZKnZmcmCEMQglEICGBhATCSc6+f/xOICYn5+y9fr+91v6e/X4'
-                                               '9z3kIyV7f9T0nyees/PZvGKB7dgO2BbYH5gEHAbsDWwGzgcldvLckdcsw8AzwGLAI+CVwF/'
-                                               'AIsBj4FfBC6ZsOFK43B/ht4ADgLcDOhetLUi9bCVwO/Ay4CbixVOFSYX0E8AHgMGDvQjUlK'
-                                               'bLFwE+AbwNfyS2WG9YHA+cDhwJb5jYjSRNQizRM8kngSmCoSpGqYb0T8EHgz4FJFWtIUr/5'
-                                               'D1Ju3tbphVWC9g3APwJvBwYrXC9J/WpP4ERgFXBzJxd2+mT9CeAjwOYdXidJ+k3/DPwRsKK'
-                                               'dF7cb1pOBLwFnVWxKkrShHwCnAo+O98J2wnoKcDFwWmZTkqQN3QScAjw81ovaCeuLgTMKNC'
-                                               'RJGt3NwLGk6X6jGu8Nwi9iUEtStx1GGsPeZGMvGGs2yOnA50t3JEka1Z7AdsDVpLnZv2FjY'
-                                               'T0X+Cowq3t9SZLWczDwAHDH+r8w2pj1dNLj+HFdbkqStKH7gaNJG0W9aLQn62OBj1N+kydJ'
-                                               '0vi2AjYDrln3J9cP5GnAfNJy8pIWActIWwf+fOT/V41yf0nqZS3Sm4BbAPsAh5Byc8fC9xk'
-                                               'GDgTu3NgL3jfSTKmPn5NmlMwt/IlIUq/YmrTfx/WUzc9LN3bDKcC9hW7yLPBp0uEDktQPJp'
-                                               'GmOs+nTI4+Qzq0ZQN/QBqayL3BPcDrCn3ykhTNLqTx5hKBfdFoN/hmgcJ3k8ZxJKmfbUI6M'
-                                               'SY3U28hjY+/aGfS5tg5RRezkUd2SepDU4Efk5era0ijHi96x8hP5hT9w658upIU177Ar8nL'
-                                               '1v8BL+0Nsit5BwlcCvxDxvWSNBHdTf75i4eQntKZBHyN6qn/HHB8ZjOSNFHtSpp4UTVjlwB'
-                                               'zBkmrZQ7MaOQm4LqM6yVpIvsv0huFVc0CZg4Cs4EDMgo9SHq6liSN7grycnKLQdIa9CkVC6'
-                                               'wirdqRJG3c90jDGVVtNUi1E87XWk6FI9Ulqc8sAV7IuH76IGOcTNCGIdKSSEnS2IYzrp2R+'
-                                               '2TdAlZnXC9JGt9mOXOrJUk1MawlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpIC'
-                                               'MKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpI'
-                                               'CMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWp'
-                                               'ICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDW'
-                                               'pICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDD'
-                                               'WpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQD'
-                                               'DWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQ'
-                                               'DDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlK'
-                                               'QDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwl'
-                                               'KQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKw'
-                                               'lKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMK'
-                                               'wlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICM'
-                                               'KwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpIC'
-                                               'MKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpI'
-                                               'CMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKYASYd'
-                                               '0qUEOSNIbcsB7AsJakdmRl5eTMm88GfgGszqwjSRPdTjkX54b1pNwGJEnj8w1GSQrAsJakA'
-                                               'AxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQogd9e9'
-                                               '54CLgYcK1JKkiahFejD+KDCrapHcgF0KfAZYlFlHkia695MR1iWGQRxKkaQuM2glKQDDWpI'
-                                               'CMKwlKQDDWpICMKwlKQDDWpICGASGM64fwMCXpG4bGgSGMgpMBmYUakaSJrKcB9tnBoE1GQ'
-                                               'WmA/tkXC9J/WAGsEnG9c8OAqtIa9ermAq8KaMBSeoHhwNbZFy/ZBBYDNyTUWR3YFLG9ZI00'
-                                               'R1PGomoaukgaROmWzOKvAo4OuN6SZrItiU9WVe1Ali29g3GnCfrWcDJGddL0kR2AvDyjOt/'
-                                               'ADy69n/eTRq3rvqxGseuJWl9u5P2+8/J10+sW3AO8EBmwYeB3brwyUpSVN8kL1eHgdPWL3p'
-                                               'ZZtEW8H1gh9KfrSQF9CXyM/U2YLv1C59BGr/OLf5jYN/Cn7QkRTEV+Cr5WdoC/nG0G7wM+F'
-                                               'WhGzwBnAJsXuqzl6QAjgRuoEyOrgRet7EbnVPoJms/rgHeBeyS/SWQpN40gzSP+m8pm5/Xr'
-                                               '3uTgfVuOpP0zmXlQx034nbgbmA56el9MXnL3CWpKQOkUYM5pKDeFfitLtzntaRh5Rdvur73'
-                                               'Axd14cbrWkP6ziFJ0QzQ/VXblwDvXP+m65sJXM4YYyWSpK55GngNaTTiRaNt2fcMaex6SQ1'
-                                               'NSZJesgb4GOsFNWz8UX4BaTe+NzL607ckqbyrgI8zyjkDY427/Iy0V/X+XWpKkvSSu4HfB5'
-                                               'aN9otjhXULuBY4FNizfF+SpBGPkvZXemxjLxjvmJkVwKmsM31EklTUQ8CxpP2ZNqqd6ScrS'
-                                               'OMo+wJ75/clSRoxH3grcMd4L2x3ruBK0kZPs4ED8URzScp1I/AW4MF2XtzJxO7VwJXAI8Bh'
-                                               'uO+HJFWxCriAtPXp0nYvqrIK5zbgh8AU4KAK10tSv7oJOBv4Mh1uuZE7h/o44FPAwZl1JGk'
-                                               'iWwR8Gvh30q6kHSux4GU66cDcc0kbmmxZoKYkRfc8KZi/RtqR76mcYqVXJ76ctBHUPsA8PD'
-                                               'VGUn95lrTL6ELSkV6XU2iH0W4tJR8AXkk6fn0W6ViaPUd+vBXpoAPFMUz6PZuRUeNZ0ha5/'
-                                               'TKTaJD0r8yqu7OtJm3osxq3fOg1A8BzpDcHnyFt+/wY6ffrDtLhA89246Z1mUk67mYq6c1J'
-                                               'xdEC3gBcWPH6xcCZpD/I/RI8A8B/A95T8fqfAO8lfaPsl69ZFAOkvTueI83sWEr6feqqyd2'
-                                               '+wTqeGflQTDnnai4FfkAK7X5yT8a1Q6QFE+77LqB//kmqfBucsNyB50lDIP3mhYxrtwZ2Kt'
-                                               'WI4jOs1a6csF418tFvcsJ6G2D7Uo0oPsNa7ZhEmpZZVb+et5kz7LMNHjStdRjWasdU8jbxW'
-                                               'lGqkWAWAE9WvHYQ2LZgLwrOsFY7NgP2y7j+rlKNBPM41cMaYJNSjSg+w1rt2JQ09bKKFv0b'
-                                               '1ovIW7U2rVQjis+wVjs2zbh2iLS5ej9aSd4smC1KNaL4DGu1o+pTNaQ3Fzd6VFEfeC7j2m2'
-                                               'ovgJSE4xhrXbMzrh2DZkb2AS3wSnVHdiJtFGaZFirLTnT9obZyGnNfSJnGGQPHArRCMNa7Z'
-                                               'iTeX3O02V08zOu3Y20+ZlkWKst+2dcu4C0c1y/up/q88wHSdMmJcNabclZEHMb/b0Z0SOkW'
-                                               'SFVGdYCDGu1J2fq3r3FuojpcdJGVlU5Zi3AsNb4NiNvP+VHSjUS1FLyxuxzZuJoAjGsNZ5Z'
-                                               '5O17/nipRoIaIm8jq51LNaLYDGuNZ3vyhkGWlGoksJwn6zn491T4h0Dj25W8sO7nOdZrPZh'
-                                               'x7QG4oZOo91gvxbQXeTMS3kbaG6RfA2eIdOpLVXuS/p724+ENWodhrfHkbI0K8LkiXfSvQf'
-                                               'r3G53W4TCIxpPzVKgyNm+6ATXPsNZ4/DPSrEH8hin8i6jxuYKuWYPADk03oeYZ1hrLdOBlT'
-                                               'TfR5waA3ZtuQs0zrDWW2eQdPKAyct/k1QRgWGssW2NY94K5TTeg5hnWGstkPFaqFzjFVoa1'
-                                               'xvQE8HTTTahvT4fXOgxrjeUhYGHTTYjLmm5AzTOsNZZh4Jqmm+hzTwA3NN2EpN43BfgZ6bQ'
-                                               'XP+r/OGn83yJJSvYF7qH54Oq3jy/ioiRJHdoDuJLmA6wfPpYBHyD9q0YC8o5rUv+ZBhwK/B'
-                                               'Hw2/jnp6QWsBj4KukNxX4/Dk3r8S+bckzCN6lLyTlNRpIkSZIkSZIkSZIkSZIkSZIkSZJ6z'
-                                               '0RawThIWlE3kT4nSXnWjHyENxGCbQ5wNHAKcAgeQyXpJQ8ClwLX8dJWvyFFDuvJwNnAx4HN'
-                                               'G+5FUu+7iJQXi5pupIqoYT0I/D1wetONSArlJuAYYEnTjXQq6o5pH8GgltS5w4FvNN1EFRH'
-                                               'Hd3cmPVVPb7oRSSHtATwA3Nl0I52I+GT9EWC7ppuQFNZk4Cxgi6Yb6US0sH45adaHJOV4FX'
-                                               'Bs0010IlpYnwZs03QTksKbDPwxMKvpRtoVacx6X+BiYJOmG5E0IewI3A7c0XQj7Yj0ZP1hY'
-                                               'GrTTUiaUD4DbNp0E+2I8mS9H2lCe9R54ZJ60yzgaeDGphsZT5Qn688Tp1dJsZxJgJkhEQLw'
-                                               'aOA1TTchacLai/RmY0/r9bCeAvwJAb7rSQrtdGD3ppsYS6+H9dHAG5tuQtKEtydwYtNNjKW'
-                                               'X37DbBPhX4PjMOlcA14/8uJc/X0nVDAFzgQ+RN2liCXAQsKBEU/3k9aS9Z3M+FpK+Y0qa2D'
-                                               'YFvkV+ZpxXd+MTwY3kf+E/UXvXkppyDLCUvMxYCexQd+OR/QH5QX0vaYWSpP4wCFxLfnZ8v'
-                                               'e7Go5rCS8fv5HycW3fjkhr3amAVednxa9KmcRrHe8j/Yi/A/a6lfnUZ+Q97F+OEhDFtC9xM'
-                                               '/hf6g3U3Lqln7AcMk5chTwKvrLvxSE4nP6jvwwN0pX73N+RnifsRbcRM4B7yv8Cn1t24pJ5'
-                                               'zMLCcvCwZBg6su/EIPkh+UN8MzK67cUk96QLyM+Xy2rvucdOBR8n7og4BZ9TduKSetT/5ud'
-                                               'IiLdDTiHPJ/4LeAmxWd+OSetrfkp8t38GxayAtXLmP/C/oyXU3LqnnbUf+qsbngbfV3Xgv+'
-                                               'jT5QX39BlUlKfkL8jPmWmBG3Y2va3KTNwfmAO8tUOdG0pzIKMeUSarHGuDuAnV+F3gtcHWB'
-                                               'WpU0PQ7zKeCTBeosB1YXqCNp4hmgzAEmN5H22H++QK2ONRnWuwDz8U1BSXG8Hfh/Tdy4yZN'
-                                               'iPoZBLSmWz9DQcGtTY7z7ABeSToORpCi2Ap4iTRWuVVNP1h8FpjV0b0mqahA4iQYmZzQR1t'
-                                               'OBeQ3cV5JK2B/4nbpv2kRY7wvs1MB9JamEmTRwOEETYb0FbmEqKba+GAZZTJoXLUlR1b6uo'
-                                               '4mwng881sB9JamEZaTtmGvVRFivIB2IK0kR3QbcUPdNm5q6dx6wqKF7S1JVLwB/NfLfWjUV'
-                                               '1gtJp5ivbOj+klTFBTS03LzJXeruA+4CXkFaFSRJveoZ4LPAOU010PSuewB7kzb2/j3SFoS'
-                                               'S1CvuBS4DrgN+2GQjvRDWa21JOjXG/UIk9YIW8CQ9MnttoNVqNd2DJGkcTW6RKklqk2EtSQ'
-                                               'EY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtS'
-                                               'QEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEt'
-                                               'SQEY1pIUgGEtSQEY1pIUwOSmG1B7BgYGmm5B+XYDDgDmjfx4N2ArYEtgM2Dzkdc9N/Lx1Mj'
-                                               'Hr4AHgduBnwNLSjfWarVKl1RhA/4mxTAwMDAXmNrQ7ZcDa0Y+lgPPAP7BGd/ewJuA1wNHAL'
-                                               'ML1b0L+E/gW8D3Sb8vWcyB3mdYBzEwMHArcGDTfazjKdIT3pOkJ7+HRz7uAu4EVjTVWMPmA'
-                                               'O8CTgDm1nC/RcA/AV8BHqhaxBzofYZ1ED0Y1mNpAfcDPwW+B1xPCvKJahB4G3AWcFRDPbSA'
-                                               'S4HzSMMlnV1sDvQ8wzqIYGE9mvuBfwH+z8iPJ4LJpKfovwD2aLiXtVrA14BzgCfavsgc6Hm'
-                                               'GdRATIKzXdSPwP0ljrlH/AB4HfBHYq+lGNmI5cD7wBWBovBebA73PqXtqwhHAZaR/rp8ARJ'
-                                               'rqsgtwDekbTa8GNaSZJZ8DbgL2b7gXFWBYq0n7A/9GmtGwT7OttOW9pDdP39x0Ix04hDTd7'
-                                               '2PApIZ7UQbDWr3gt4BbSW/Q9aLNgW8C/5uX5kJHMgX4LHAtaV63AjKs1Ss2BS4ALhn5ca/Y'
-                                               'nTSUcFLTjRTwO8DPgH2bbkSdM6zVa04hPQFOa7oR4FDgFiZWuO0G3AC8puE+1CHDWr3oaNK'
-                                               'beE2t2IS06vC7wNYN9tAtM4HvkD5HBWFYq1cdBXyDZmaKHAVcBcxo4N51mQp8sukm1D7DWr'
-                                               '3sBODPa77nIcAVNPtUX4dfk4acFIRhrV53HilA67ALE/+JGuB54K3AwqYbUfvcIrW/XEXaa'
-                                               'rMTU0hv9r0MmEXaOW4X0rhnHSaTpsy9igK7y41hKmmhy/ZdvMdaq0h7ptxImrc9n7Q0fPnI'
-                                               'r00mTRHcljT/fD/gdaQpjlMK3P8M0hunCsTl5kEUWm5+PHB5gXYAtiDtzXwgcCTpTcFSW4C'
-                                               'O5n3AxV2s/3Xg3V2s3wKuJO3b8V1gZYUamwNvAf6U9M2rivNJC2R+szlzoOcZ1kH0YFivb5'
-                                               'A0Hew04FTKj/kuIC3vfqFwXYCTSZtMdcMa4CLgf1F258EjSft+HNbBNVeQ/gwMr/8L5kDvc'
-                                               '8xapQwDPwLeD+wEfJ40NlrKzqRQLW1H0l7Q3fAd0jfYD1F+i9gfk/ZYOY20t/h47gTeyShB'
-                                               'rRgMa3XDEuCjwMHAbQXrnlmw1loXkIZ0SlpFGqr4XdJhDN3SIm05uz/p/YiNeYo0fPJsF3t'
-                                               'RlxnW6qZ7gVeT3kwr4QjK7ht9LGlYoKRHgMOBv6a+7V8fJ23Z+t/Z8Ml5iHQwwsM19aIuMa'
-                                               'zVbStJ08R+VajeWwrV2YS0H3VJd5LGkG8tXLcdLdIe4ccAy9b5+bOAHzbQjwozrFWHZZSba'
-                                               'fGGQnXOJB1oW8qdpOXbjxesWcV1pK/RYtIQz1ebbUelOM9adfkRaR7z72fWeXWBXqYyyvS1'
-                                               'DI+R9rheVLBmjp+ShowearoRleOTtep0YYEaW5J2jsvxfmC7/FaA9GbiccCjheqV8gDdXUS'
-                                               'kmhnWqtP1wJMF6szLuHYycHaBHtY6G/hFwXrSqAxr1WmYdIRXrt0yrj0e2LVAD5BWIv5doV'
-                                               'rSmAxr1e3mAjV2ybj2AwXuD7CaNNPCpX+qhWGtupWYwld1KftepD1MSriQtAGTVAvDWnUr8'
-                                               'UZc1RWHpxe4N8AK4NxCtaS2GNaq27LxXzKuqk/WJxa4N6QtW5cWqiW1xbBW3Ursmlfl9POD'
-                                               'KbMIZg3w5QJ1pI4Y1qpbiYVYVQL/mAL3Bbga99lQAwxr1a3EkVlVNu5/U4H7AlxSqI7UEcN'
-                                               'adduhQI2nO3z9NNJOeLlWkDbwl2pnWKtuJbY4XdHh6w8HJhW479XAcwXqSB0zrFW3QwvUeK'
-                                               'TD15fY/AnSikWpEYa16vbaAjU6PaH94AL3BPjPQnWkjhnWqtMrKLMvx50dvv6gAvdcQOffJ'
-                                               'KRiDGvV6YwCNRbS2Qb/UykzTv7LAjWkygxr1WV74A8L1PlRh6/fq8A9Ae4oVEeqxLBWXf4S'
-                                               '2KxAnW93+PpSB+x2OvQiFWVYqw6nACcXqDNMmj7XiR0L3BfgvkJ1pEoMa3XbUcDfF6r1H3R'
-                                               '+0sxOhe69sFAdqRLDWt10HHAtZYY/oNqpLLML3HcNZY4jkyozrNUNLwO+RDrNvOp2put7AL'
-                                               'iywnVV975e15OkIRipMSV2QJPWmgqcBnyKNPujpHOpFpgzC9zbvavVOMNauSaRlnOfCLwD2'
-                                               'LIL9/g51Xe7m1bg/kMFakhZDGu1YzNgOrA1sC2wJzAXOAQ4gjTs0S3DwIeoPgxRordON46S'
-                                               'ijOs+8tlTTdQwRcocyJ6Dp+s1TjfYFQvuwU4p+kmpF5gWKtXPQYcT2881Zaa0SJVZlirFz0'
-                                               'FvJkyC1FKTLmrckCvVJRhrV6zGHgj5TZOWlagxiYFakhZDGv1kgeAI4FfFKy5vECNrQvUkL'
-                                               'IY1uoVVwGHAfML1y3xZL0N/l1Rw/wDqKatAM4i7SOypAv1S9QcIAW21BjDWk36d2AecCHQ6'
-                                               'tI9Su2Wt12hOlIlhrXq1gKuAQ4nLVFf0OX7PVGozpxCdaRKXMGouiwDvgFcANxf430fLlRn'
-                                               'XqE6UiWGtbppCXA5aZn7d4BVDfRQ6kTyuYXqSJUY1iplCLgXuB34Melg27vp3lh0uxaQvkn'
-                                               'kLmw5uEAvUmWGdX+5i7TopIplpNWAz478+Nek8eCFpOl2DwGrC/RY2jDp8z4ks8480vav3Z'
-                                               'ixIo3LsO4v55CGJfrN7eSH9QBpO9hOD+yVinA2iPrBTwvVeV2hOlLHDGv1g58UqnN8oTpSx'
-                                               'wxr9YM7KbPsfE/ggAJ1pI4Z1uoHa4DrC9U6qVAdqSOGtfrFdYXqvAe3TFUDDGv1i6soM+d7'
-                                               'e+DtBepIHTGs1S8WUu6NxrML1ZHaZlirn/xLoTqvwpkhqplhrX5yCfB8oVrn46Iy1ciwVj9'
-                                               '5mrSHdglzSYcmSLUwrNVvLihY67O4z7VqYlir3/yUcm80TiONg+fu6Nct04ArgVc03YjyGd'
-                                               'bqR+cVrPUK4KKC9UqZRpqueOzIf3duth3lMqzVj66j3OZOAKcDnypYL9dWwLeBo0f+fzvgC'
-                                               'mB6Yx0pm2GtfvWxwvU+2YWaVcwFbgKOXO/nDyIN2UyqvSMVYVirX30XuLZwzc+S3sBsakrf'
-                                               'ycAtwF4b+fVjgS/U145KMqzVz/6M8udCnkX6RrBj4bpjmQn8A+nJecY4r/0z4MxuN6TyDGv'
-                                               '1s/uAz3Wh7lGko8TOpLt/xwaAd5E+j9M7uO5vgDd2pSN1jWGtfnc+8Msu1J0JfIV0pNhJwJ'
-                                               'SCtQeAN5PGpr8BzO7w+kmkxUHzCvakLjOs1e+GgHcCK7tUfz/gm6RT1s8HDqP6m3x7AR8F7'
-                                               'gGuIe1RUtWMkRqdBr0aMtBqldg1Ut02MDBwK3BgZpnj6c8Dc9txKvBPNd1rKfBD0lDJfOAR'
-                                               '0lL4Z0knxG9BCtOtgf1Jp9McAuzRhV5uAF7farVKj92rMMM6CMO6Fn8F/GnTTTTg661W6z1'
-                                               'NN6GxOQwiveTDwLeabqJmQ8C/Nd2ExmdYSy9ZA7wD+F7TjdRkGHg35Y48UxcZ1tJvWklaPP'
-                                               'L9hvvotmHStL9Lmm5E7TGspQ2tBI4Brm66kS55ATgR+OemG1H7DGtpdCuBt5IWkEwkS0gLY'
-                                               'v5v042oM4a1tHGrgT8G3ku548CadAfwSuAHTTeizhnW0vi+Rgq525puJMPfkRbkPNR0I6rG'
-                                               'sJbacxdwKPAJYj1lP0p6w/QDwHMN96IMhrXUviHgM6Q9NS5tuJfxDAF/SVruPlHfKO0rhrX'
-                                               'UuYeBE0hLwC8DemkZcAv4V9Iy9Q8Dy5ptR6UY1lJ1vwTeBuwNfBl4qsFengcuJj1Jn0zaNl'
-                                               'UTiGEt5XuAtKn/DsDbSYcA1PFE2yJtk/qhkXu/j7Qjnyag/w+NgjXnuXdnbQAAAABJRU5Er'
-                                               'kJggg==')
-        
+                          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHgCAYAAABjMUxjAAAdD'
+                          'klEQVR4nO3debhddX3v8fc5CYHEkBCGMM+EEAYZFAHFItZaLUhFy6QgVtSi0oFHb6/X4oCi'
+                          'PN6rtZZSixdrbW+pbbkXZLZKnZmcmCEMQglEICGBhATCSc6+f/xOICYn5+y9fr+91v6e/X4'
+                          '9z3kIyV7f9T0nyees/PZvGKB7dgO2BbYH5gEHAbsDWwGzgcldvLckdcsw8AzwGLAI+CVwF/'
+                          'AIsBj4FfBC6ZsOFK43B/ht4ADgLcDOhetLUi9bCVwO/Ay4CbixVOFSYX0E8AHgMGDvQjUlK'
+                          'bLFwE+AbwNfyS2WG9YHA+cDhwJb5jYjSRNQizRM8kngSmCoSpGqYb0T8EHgz4FJFWtIUr/5'
+                          'D1Ju3tbphVWC9g3APwJvBwYrXC9J/WpP4ERgFXBzJxd2+mT9CeAjwOYdXidJ+k3/DPwRsKK'
+                          'dF7cb1pOBLwFnVWxKkrShHwCnAo+O98J2wnoKcDFwWmZTkqQN3QScAjw81ovaCeuLgTMKNC'
+                          'RJGt3NwLGk6X6jGu8Nwi9iUEtStx1GGsPeZGMvGGs2yOnA50t3JEka1Z7AdsDVpLnZv2FjY'
+                          'T0X+Cowq3t9SZLWczDwAHDH+r8w2pj1dNLj+HFdbkqStKH7gaNJG0W9aLQn62OBj1N+kydJ'
+                          '0vi2AjYDrln3J9cP5GnAfNJy8pIWActIWwf+fOT/V41yf0nqZS3Sm4BbAPsAh5Byc8fC9xk'
+                          'GDgTu3NgL3jfSTKmPn5NmlMwt/IlIUq/YmrTfx/WUzc9LN3bDKcC9hW7yLPBp0uEDktQPJp'
+                          'GmOs+nTI4+Qzq0ZQN/QBqayL3BPcDrCn3ykhTNLqTx5hKBfdFoN/hmgcJ3k8ZxJKmfbUI6M'
+                          'SY3U28hjY+/aGfS5tg5RRezkUd2SepDU4Efk5era0ijHi96x8hP5hT9w658upIU177Ar8nL'
+                          '1v8BL+0Nsit5BwlcCvxDxvWSNBHdTf75i4eQntKZBHyN6qn/HHB8ZjOSNFHtSpp4UTVjlwB'
+                          'zBkmrZQ7MaOQm4LqM6yVpIvsv0huFVc0CZg4Cs4EDMgo9SHq6liSN7grycnKLQdIa9CkVC6'
+                          'wirdqRJG3c90jDGVVtNUi1E87XWk6FI9Ulqc8sAV7IuH76IGOcTNCGIdKSSEnS2IYzrp2R+'
+                          '2TdAlZnXC9JGt9mOXOrJUk1MawlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpIC'
+                          'MKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpI'
+                          'CMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWp'
+                          'ICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDW'
+                          'pICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDD'
+                          'WpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQD'
+                          'DWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQ'
+                          'DDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlK'
+                          'QDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwl'
+                          'KQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKw'
+                          'lKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMK'
+                          'wlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICM'
+                          'KwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpIC'
+                          'MKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpI'
+                          'CMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKQDDWpICMKwlKYASYd'
+                          '0qUEOSNIbcsB7AsJakdmRl5eTMm88GfgGszqwjSRPdTjkX54b1pNwGJEnj8w1GSQrAsJakA'
+                          'AxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQrAsJakAAxrSQogd9e9'
+                          '54CLgYcK1JKkiahFejD+KDCrapHcgF0KfAZYlFlHkia695MR1iWGQRxKkaQuM2glKQDDWpI'
+                          'CMKwlKQDDWpICMKwlKQDDWpICGASGM64fwMCXpG4bGgSGMgpMBmYUakaSJrKcB9tnBoE1GQ'
+                          'WmA/tkXC9J/WAGsEnG9c8OAqtIa9ermAq8KaMBSeoHhwNbZFy/ZBBYDNyTUWR3YFLG9ZI00'
+                          'R1PGomoaukgaROmWzOKvAo4OuN6SZrItiU9WVe1Ali29g3GnCfrWcDJGddL0kR2AvDyjOt/'
+                          'ADy69n/eTRq3rvqxGseuJWl9u5P2+8/J10+sW3AO8EBmwYeB3brwyUpSVN8kL1eHgdPWL3p'
+                          'ZZtEW8H1gh9KfrSQF9CXyM/U2YLv1C59BGr/OLf5jYN/Cn7QkRTEV+Cr5WdoC/nG0G7wM+F'
+                          'WhGzwBnAJsXuqzl6QAjgRuoEyOrgRet7EbnVPoJms/rgHeBeyS/SWQpN40gzSP+m8pm5/Xr'
+                          '3uTgfVuOpP0zmXlQx034nbgbmA56el9MXnL3CWpKQOkUYM5pKDeFfitLtzntaRh5Rdvur73'
+                          'Axd14cbrWkP6ziFJ0QzQ/VXblwDvXP+m65sJXM4YYyWSpK55GngNaTTiRaNt2fcMaex6SQ1'
+                          'NSZJesgb4GOsFNWz8UX4BaTe+NzL607ckqbyrgI8zyjkDY427/Iy0V/X+XWpKkvSSu4HfB5'
+                          'aN9otjhXULuBY4FNizfF+SpBGPkvZXemxjLxjvmJkVwKmsM31EklTUQ8CxpP2ZNqqd6ScrS'
+                          'OMo+wJ75/clSRoxH3grcMd4L2x3ruBK0kZPs4ED8URzScp1I/AW4MF2XtzJxO7VwJXAI8Bh'
+                          'uO+HJFWxCriAtPXp0nYvqrIK5zbgh8AU4KAK10tSv7oJOBv4Mh1uuZE7h/o44FPAwZl1JGk'
+                          'iWwR8Gvh30q6kHSux4GU66cDcc0kbmmxZoKYkRfc8KZi/RtqR76mcYqVXJ76ctBHUPsA8PD'
+                          'VGUn95lrTL6ELSkV6XU2iH0W4tJR8AXkk6fn0W6ViaPUd+vBXpoAPFMUz6PZuRUeNZ0ha5/'
+                          'TKTaJD0r8yqu7OtJm3osxq3fOg1A8BzpDcHnyFt+/wY6ffrDtLhA89246Z1mUk67mYq6c1J'
+                          'xdEC3gBcWPH6xcCZpD/I/RI8A8B/A95T8fqfAO8lfaPsl69ZFAOkvTueI83sWEr6feqqyd2'
+                          '+wTqeGflQTDnnai4FfkAK7X5yT8a1Q6QFE+77LqB//kmqfBucsNyB50lDIP3mhYxrtwZ2Kt'
+                          'WI4jOs1a6csF418tFvcsJ6G2D7Uo0oPsNa7ZhEmpZZVb+et5kz7LMNHjStdRjWasdU8jbxW'
+                          'lGqkWAWAE9WvHYQ2LZgLwrOsFY7NgP2y7j+rlKNBPM41cMaYJNSjSg+w1rt2JQ09bKKFv0b'
+                          '1ovIW7U2rVQjis+wVjs2zbh2iLS5ej9aSd4smC1KNaL4DGu1o+pTNaQ3Fzd6VFEfeC7j2m2'
+                          'ovgJSE4xhrXbMzrh2DZkb2AS3wSnVHdiJtFGaZFirLTnT9obZyGnNfSJnGGQPHArRCMNa7Z'
+                          'iTeX3O02V08zOu3Y20+ZlkWKst+2dcu4C0c1y/up/q88wHSdMmJcNabclZEHMb/b0Z0SOkW'
+                          'SFVGdYCDGu1J2fq3r3FuojpcdJGVlU5Zi3AsNb4NiNvP+VHSjUS1FLyxuxzZuJoAjGsNZ5Z'
+                          '5O17/nipRoIaIm8jq51LNaLYDGuNZ3vyhkGWlGoksJwn6zn491T4h0Dj25W8sO7nOdZrPZh'
+                          'x7QG4oZOo91gvxbQXeTMS3kbaG6RfA2eIdOpLVXuS/p724+ENWodhrfHkbI0K8LkiXfSvQf'
+                          'r3G53W4TCIxpPzVKgyNm+6ATXPsNZ4/DPSrEH8hin8i6jxuYKuWYPADk03oeYZ1hrLdOBlT'
+                          'TfR5waA3ZtuQs0zrDWW2eQdPKAyct/k1QRgWGssW2NY94K5TTeg5hnWGstkPFaqFzjFVoa1'
+                          'xvQE8HTTTahvT4fXOgxrjeUhYGHTTYjLmm5AzTOsNZZh4Jqmm+hzTwA3NN2EpN43BfgZ6bQ'
+                          'XP+r/OGn83yJJSvYF7qH54Oq3jy/ioiRJHdoDuJLmA6wfPpYBHyD9q0YC8o5rUv+ZBhwK/B'
+                          'Hw2/jnp6QWsBj4KukNxX4/Dk3r8S+bckzCN6lLyTlNRpIkSZIkSZIkSZIkSZIkSZIkSZJ6z'
+                          '0RawThIWlE3kT4nSXnWjHyENxGCbQ5wNHAKcAgeQyXpJQ8ClwLX8dJWvyFFDuvJwNnAx4HN'
+                          'G+5FUu+7iJQXi5pupIqoYT0I/D1wetONSArlJuAYYEnTjXQq6o5pH8GgltS5w4FvNN1EFRH'
+                          'Hd3cmPVVPb7oRSSHtATwA3Nl0I52I+GT9EWC7ppuQFNZk4Cxgi6Yb6US0sH45adaHJOV4FX'
+                          'Bs0010IlpYnwZs03QTksKbDPwxMKvpRtoVacx6X+BiYJOmG5E0IewI3A7c0XQj7Yj0ZP1hY'
+                          'GrTTUiaUD4DbNp0E+2I8mS9H2lCe9R54ZJ60yzgaeDGphsZT5Qn688Tp1dJsZxJgJkhEQLw'
+                          'aOA1TTchacLai/RmY0/r9bCeAvwJAb7rSQrtdGD3ppsYS6+H9dHAG5tuQtKEtydwYtNNjKW'
+                          'X37DbBPhX4PjMOlcA14/8uJc/X0nVDAFzgQ+RN2liCXAQsKBEU/3k9aS9Z3M+FpK+Y0qa2D'
+                          'YFvkV+ZpxXd+MTwY3kf+E/UXvXkppyDLCUvMxYCexQd+OR/QH5QX0vaYWSpP4wCFxLfnZ8v'
+                          'e7Go5rCS8fv5HycW3fjkhr3amAVednxa9KmcRrHe8j/Yi/A/a6lfnUZ+Q97F+OEhDFtC9xM'
+                          '/hf6g3U3Lqln7AcMk5chTwKvrLvxSE4nP6jvwwN0pX73N+RnifsRbcRM4B7yv8Cn1t24pJ5'
+                          'zMLCcvCwZBg6su/EIPkh+UN8MzK67cUk96QLyM+Xy2rvucdOBR8n7og4BZ9TduKSetT/5ud'
+                          'IiLdDTiHPJ/4LeAmxWd+OSetrfkp8t38GxayAtXLmP/C/oyXU3LqnnbUf+qsbngbfV3Xgv+'
+                          'jT5QX39BlUlKfkL8jPmWmBG3Y2va3KTNwfmAO8tUOdG0pzIKMeUSarHGuDuAnV+F3gtcHWB'
+                          'WpU0PQ7zKeCTBeosB1YXqCNp4hmgzAEmN5H22H++QK2ONRnWuwDz8U1BSXG8Hfh/Tdy4yZN'
+                          'iPoZBLSmWz9DQcGtTY7z7ABeSToORpCi2Ap4iTRWuVVNP1h8FpjV0b0mqahA4iQYmZzQR1t'
+                          'OBeQ3cV5JK2B/4nbpv2kRY7wvs1MB9JamEmTRwOEETYb0FbmEqKba+GAZZTJoXLUlR1b6uo'
+                          '4mwng881sB9JamEZaTtmGvVRFivIB2IK0kR3QbcUPdNm5q6dx6wqKF7S1JVLwB/NfLfWjUV'
+                          '1gtJp5ivbOj+klTFBTS03LzJXeruA+4CXkFaFSRJveoZ4LPAOU010PSuewB7kzb2/j3SFoS'
+                          'S1CvuBS4DrgN+2GQjvRDWa21JOjXG/UIk9YIW8CQ9MnttoNVqNd2DJGkcTW6RKklqk2EtSQ'
+                          'EY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtS'
+                          'QEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEtSQEY1pIUgGEt'
+                          'SQEY1pIUgGEtSQEY1pIUwOSmG1B7BgYGmm5B+XYDDgDmjfx4N2ArYEtgM2Dzkdc9N/Lx1Mj'
+                          'Hr4AHgduBnwNLSjfWarVKl1RhA/4mxTAwMDAXmNrQ7ZcDa0Y+lgPPAP7BGd/ewJuA1wNHAL'
+                          'ML1b0L+E/gW8D3Sb8vWcyB3mdYBzEwMHArcGDTfazjKdIT3pOkJ7+HRz7uAu4EVjTVWMPmA'
+                          'O8CTgDm1nC/RcA/AV8BHqhaxBzofYZ1ED0Y1mNpAfcDPwW+B1xPCvKJahB4G3AWcFRDPbSA'
+                          'S4HzSMMlnV1sDvQ8wzqIYGE9mvuBfwH+z8iPJ4LJpKfovwD2aLiXtVrA14BzgCfavsgc6Hm'
+                          'GdRATIKzXdSPwP0ljrlH/AB4HfBHYq+lGNmI5cD7wBWBovBebA73PqXtqwhHAZaR/rp8ARJ'
+                          'rqsgtwDekbTa8GNaSZJZ8DbgL2b7gXFWBYq0n7A/9GmtGwT7OttOW9pDdP39x0Ix04hDTd7'
+                          '2PApIZ7UQbDWr3gt4BbSW/Q9aLNgW8C/5uX5kJHMgX4LHAtaV63AjKs1Ss2BS4ALhn5ca/Y'
+                          'nTSUcFLTjRTwO8DPgH2bbkSdM6zVa04hPQFOa7oR4FDgFiZWuO0G3AC8puE+1CHDWr3oaNK'
+                          'beE2t2IS06vC7wNYN9tAtM4HvkD5HBWFYq1cdBXyDZmaKHAVcBcxo4N51mQp8sukm1D7DWr'
+                          '3sBODPa77nIcAVNPtUX4dfk4acFIRhrV53HilA67ALE/+JGuB54K3AwqYbUfvcIrW/XEXaa'
+                          'rMTU0hv9r0MmEXaOW4X0rhnHSaTpsy9igK7y41hKmmhy/ZdvMdaq0h7ptxImrc9n7Q0fPnI'
+                          'r00mTRHcljT/fD/gdaQpjlMK3P8M0hunCsTl5kEUWm5+PHB5gXYAtiDtzXwgcCTpTcFSW4C'
+                          'O5n3AxV2s/3Xg3V2s3wKuJO3b8V1gZYUamwNvAf6U9M2rivNJC2R+szlzoOcZ1kH0YFivb5'
+                          'A0Hew04FTKj/kuIC3vfqFwXYCTSZtMdcMa4CLgf1F258EjSft+HNbBNVeQ/gwMr/8L5kDvc'
+                          '8xapQwDPwLeD+wEfJ40NlrKzqRQLW1H0l7Q3fAd0jfYD1F+i9gfk/ZYOY20t/h47gTeyShB'
+                          'rRgMa3XDEuCjwMHAbQXrnlmw1loXkIZ0SlpFGqr4XdJhDN3SIm05uz/p/YiNeYo0fPJsF3t'
+                          'RlxnW6qZ7gVeT3kwr4QjK7ht9LGlYoKRHgMOBv6a+7V8fJ23Z+t/Z8Ml5iHQwwsM19aIuMa'
+                          'zVbStJ08R+VajeWwrV2YS0H3VJd5LGkG8tXLcdLdIe4ccAy9b5+bOAHzbQjwozrFWHZZSba'
+                          'fGGQnXOJB1oW8qdpOXbjxesWcV1pK/RYtIQz1ebbUelOM9adfkRaR7z72fWeXWBXqYyyvS1'
+                          'DI+R9rheVLBmjp+ShowearoRleOTtep0YYEaW5J2jsvxfmC7/FaA9GbiccCjheqV8gDdXUS'
+                          'kmhnWqtP1wJMF6szLuHYycHaBHtY6G/hFwXrSqAxr1WmYdIRXrt0yrj0e2LVAD5BWIv5doV'
+                          'rSmAxr1e3mAjV2ybj2AwXuD7CaNNPCpX+qhWGtupWYwld1KftepD1MSriQtAGTVAvDWnUr8'
+                          'UZc1RWHpxe4N8AK4NxCtaS2GNaq27LxXzKuqk/WJxa4N6QtW5cWqiW1xbBW3Ursmlfl9POD'
+                          'KbMIZg3w5QJ1pI4Y1qpbiYVYVQL/mAL3Bbga99lQAwxr1a3EkVlVNu5/U4H7AlxSqI7UEcN'
+                          'adduhQI2nO3z9NNJOeLlWkDbwl2pnWKtuJbY4XdHh6w8HJhW479XAcwXqSB0zrFW3QwvUeK'
+                          'TD15fY/AnSikWpEYa16vbaAjU6PaH94AL3BPjPQnWkjhnWqtMrKLMvx50dvv6gAvdcQOffJ'
+                          'KRiDGvV6YwCNRbS2Qb/UykzTv7LAjWkygxr1WV74A8L1PlRh6/fq8A9Ae4oVEeqxLBWXf4S'
+                          '2KxAnW93+PpSB+x2OvQiFWVYqw6nACcXqDNMmj7XiR0L3BfgvkJ1pEoMa3XbUcDfF6r1H3R'
+                          '+0sxOhe69sFAdqRLDWt10HHAtZYY/oNqpLLML3HcNZY4jkyozrNUNLwO+RDrNvOp2put7AL'
+                          'iywnVV975e15OkIRipMSV2QJPWmgqcBnyKNPujpHOpFpgzC9zbvavVOMNauSaRlnOfCLwD2'
+                          'LIL9/g51Xe7m1bg/kMFakhZDGu1YzNgOrA1sC2wJzAXOAQ4gjTs0S3DwIeoPgxRordON46S'
+                          'ijOs+8tlTTdQwRcocyJ6Dp+s1TjfYFQvuwU4p+kmpF5gWKtXPQYcT2881Zaa0SJVZlirFz0'
+                          'FvJkyC1FKTLmrckCvVJRhrV6zGHgj5TZOWlagxiYFakhZDGv1kgeAI4FfFKy5vECNrQvUkL'
+                          'IY1uoVVwGHAfML1y3xZL0N/l1Rw/wDqKatAM4i7SOypAv1S9QcIAW21BjDWk36d2AecCHQ6'
+                          'tI9Su2Wt12hOlIlhrXq1gKuAQ4nLVFf0OX7PVGozpxCdaRKXMGouiwDvgFcANxf430fLlRn'
+                          'XqE6UiWGtbppCXA5aZn7d4BVDfRQ6kTyuYXqSJUY1iplCLgXuB34Melg27vp3lh0uxaQvkn'
+                          'kLmw5uEAvUmWGdX+5i7TopIplpNWAz478+Nek8eCFpOl2DwGrC/RY2jDp8z4ks8480vav3Z'
+                          'ixIo3LsO4v55CGJfrN7eSH9QBpO9hOD+yVinA2iPrBTwvVeV2hOlLHDGv1g58UqnN8oTpSx'
+                          'wxr9YM7KbPsfE/ggAJ1pI4Z1uoHa4DrC9U6qVAdqSOGtfrFdYXqvAe3TFUDDGv1i6soM+d7'
+                          'e+DtBepIHTGs1S8WUu6NxrML1ZHaZlirn/xLoTqvwpkhqplhrX5yCfB8oVrn46Iy1ciwVj9'
+                          '5mrSHdglzSYcmSLUwrNVvLihY67O4z7VqYlir3/yUcm80TiONg+fu6Nct04ArgVc03YjyGd'
+                          'bqR+cVrPUK4KKC9UqZRpqueOzIf3duth3lMqzVj66j3OZOAKcDnypYL9dWwLeBo0f+fzvgC'
+                          'mB6Yx0pm2GtfvWxwvU+2YWaVcwFbgKOXO/nDyIN2UyqvSMVYVirX30XuLZwzc+S3sBsakrf'
+                          'ycAtwF4b+fVjgS/U145KMqzVz/6M8udCnkX6RrBj4bpjmQn8A+nJecY4r/0z4MxuN6TyDGv'
+                          '1s/uAz3Wh7lGko8TOpLt/xwaAd5E+j9M7uO5vgDd2pSN1jWGtfnc+8Msu1J0JfIV0pNhJwJ'
+                          'SCtQeAN5PGpr8BzO7w+kmkxUHzCvakLjOs1e+GgHcCK7tUfz/gm6RT1s8HDqP6m3x7AR8F7'
+                          'gGuIe1RUtWMkRqdBr0aMtBqldg1Ut02MDBwK3BgZpnj6c8Dc9txKvBPNd1rKfBD0lDJfOAR'
+                          '0lL4Z0knxG9BCtOtgf1Jp9McAuzRhV5uAF7farVKj92rMMM6CMO6Fn8F/GnTTTTg661W6z1'
+                          'NN6GxOQwiveTDwLeabqJmQ8C/Nd2ExmdYSy9ZA7wD+F7TjdRkGHg35Y48UxcZ1tJvWklaPP'
+                          'L9hvvotmHStL9Lmm5E7TGspQ2tBI4Brm66kS55ATgR+OemG1H7DGtpdCuBt5IWkEwkS0gLY'
+                          'v5v042oM4a1tHGrgT8G3ku548CadAfwSuAHTTeizhnW0vi+Rgq525puJMPfkRbkPNR0I6rG'
+                          'sJbacxdwKPAJYj1lP0p6w/QDwHMN96IMhrXUviHgM6Q9NS5tuJfxDAF/SVruPlHfKO0rhrX'
+                          'UuYeBE0hLwC8DemkZcAv4V9Iy9Q8Dy5ptR6UY1lJ1vwTeBuwNfBl4qsFengcuJj1Jn0zaNl'
+                          'UTiGEt5XuAtKn/DsDbSYcA1PFE2yJtk/qhkXu/j7Qjnyag/w+NgjXnuXdnbQAAAABJRU5Er'
+                          'kJggg==')
+
         buf = buf.replace(cwd + '/resources/HS.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZQkZ3nu+Y'
                           'ustfe9W63uVrf2pSW07wIhCQmDwIBYxG4wyJdruGZ8r+2Z8Xh8PGfmnDuMfT0eX19hMGYTCBAIBBI7CNC+L6i1qxe11C'
@@ -670,7 +675,7 @@ class GraphGenerator:
                           'CXlm5EjTGspdq2EWdaHw3cXriXkVpK7H5cUroRNc6wloa2GjgBeCvw28K91GsTcAYwE/hL4V6UxLCW6vMrYvfhDOAmoL'
                           'dsOzU9ClwMHA78pHAvSuZ2c2l47up/HUpMi3kf5cd8rQW+A1wD7CjciyrinbU0Mg8Dc4AXE6O+vgr8qYnX30wE9DHAZO'
                           'BbGNQd7b+l9i6EeCJP8AAAAABJRU5ErkJggg==')
-        
+
         buf = buf.replace(cwd + '/resources/IP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5Qc53nm++'
                           'ueiJwBIhFgABMIMYiZlChG2aJoSVSgskVL9GpXWvt61/bd6+vr43vunrNX116fXdtLWTlTEiWKlEhliaKYcwRJkCACQQ'
@@ -980,7 +985,7 @@ class GraphGenerator:
                           'fEGvY73u6yBEzF3SAACxBrgAWINcACxBpgAWINsACxBliAWAMsQKwBFiDWAAsQa4AFiDXAAsQaYAFiDbAAsQZYgFgDLE'
                           'CsARYg1gALEGuABYg1wALEGmABYg2wALEGWIBYAyxArAEWINYACxBrgAWINcACxBpgAWINsACxBliAWAMsQKwBFiDWAA'
                           'sQa4AF/A0bVjb6AzWIxQAAAABJRU5ErkJggg==')
-        
+
         buf = buf.replace(cwd + '/resources/DIR.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9d5gkd53m+c'
                           'ks2953q526ZVqu1cggL4GQZUBoAGGEBwGaYRdu2NmdmbuZm5tjb/e5PW5mZ3dn58TA4I0AgUAgAcIJkPdCqCW11Gqjlr'
@@ -1311,7 +1316,7 @@ class GraphGenerator:
                           'szwHxRlg1wWRvEXvQC4CRi0I8vDqiffrSXUPgon5jLup4OAk8Qb7GdBHwUWIfnUNfd/cDvRFkz8FE+Kf/LVw99wGaioB'
                           '8lxqXuLnVFVlVXA0+imTmzhHjT1d9rAi7r7tcPvDbw6xVgJ7CduBnkeeC5gV8HylqgdZWniIl8FwmyBo/yXS7Iqr3/Aw'
                           'MkQ3KXnLLlAAAAAElFTkSuQmCC')
-        
+
         buf = buf.replace(cwd + '/resources/RP.png',
                           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWsAAAHoCAYAAACPYs4OAAAgAElEQVR4nOy9eZRk5Xnm+Y'
                           'vItfa9itqoKoq9KLGIHQQCBLKEsCS0oN3CEra6pbHa3bZn2uPxcU/3OT0euz09tgdZsqxdSEJCIIF2CSH2fS2goKiFgi'
@@ -1636,39 +1641,39 @@ class GraphGenerator:
                           'X1mmWtaXsM+FYoaxGl/KXBs6zVwjJKaSecARwWypJ6y7JWC1uBi0JZ+5I7WV3qLctarfwYuDeU9SHghFCW1EuWtVp5jt'
                           'x5jeAonwbOslZLtwK/DmUdjqN8GjDLWq2dS3kdPcFRPg2WZa3W7gJ+HspylE+D9TybtRZt+3rk2wAAAABJRU5ErkJggg'
                           '==')
-        
+
         with open(svg_file, "w") as svg:
             svg.write(buf)
-    
+
     def generate_graph_legend(self, graph_type):
         graph = Digraph('test', format='svg')
         graph.attr(layout='dot', rankdir="TB", rankstep="0.8", constraint="false")
         graph.attr(size="3.5,5")
-        
+
         subgraph_legend = Digraph('cluster_legend')
         subgraph_legend.attr(label="Key")
-        
+
         if graph_type is 'hidden_service':
             dir_l = Digraph('cluster_dir_l')
             ip_l = Digraph('cluster_ip_l')
             rp_l = Digraph('cluster_rp_l')
             hs_l = Digraph('cluster_hs_l')
-            
+
             dir_l.attr(label="Directory\nauthority", penwidth="0")
             rp_l.attr(label="Rendezvous\npoint", penwidth="0")
             ip_l.attr(label="Introductory\npoint", penwidth="0")
             hs_l.attr(label="Hidden\nservice", penwidth="0")
-            
+
             rp_icon_path = self.cwd + '/resources/RP.png'
             ip_icon_path = self.cwd + '/resources/IP.png'
             hs_icon_path = self.cwd + '/resources/HS.png'
             dir_icon_path = self.cwd + '/resources/DIR.png'
-            
+
             dir_l.node("DIR_L", label="", shape="none", image=dir_icon_path, fixedsize="true", width="0.75", height="1")
             ip_l.node("IP_L", label="", shape="none", image=ip_icon_path, fixedsize="true", width="0.75", height="1")
             rp_l.node("RP_L", label="", shape="none", image=rp_icon_path, fixedsize="true", width="0.75", height="1")
             hs_l.node("HS_L", label="", shape="none", image=hs_icon_path, fixedsize="true", width="0.75", height="1")
-            
+
             subgraph_legend.subgraph(dir_l)
             subgraph_legend.subgraph(ip_l)
             subgraph_legend.subgraph(rp_l)
@@ -1679,13 +1684,13 @@ class GraphGenerator:
             friend_gu_l = Digraph('cluster_friend_gu_l')
             friend_ex_l = Digraph('cluster_friend_ex_l')
             unused_l = Digraph('cluster_unused_l')
-            
+
             enemy_gu_l.attr(label="Enemy\nGuard", penwidth="0")
             enemy_ex_l.attr(label="Enemy\nExit", penwidth="0")
             friend_gu_l.attr(label="Friendly\nGuard", penwidth="0")
             friend_ex_l.attr(label="Friendly\nExit", penwidth="0")
             unused_l.attr(label="Enemy\nUnused", penwidth="0")
-            
+
             enemy_gu_l.node("EN_GU", label="", shape="box", style='filled', fillcolor="red", height='0.3', width='0.3')
             enemy_ex_l.node("EN_EX", label="", shape="circle", style='filled', fillcolor="red", height='0.3',
                             width='0.3')
@@ -1695,20 +1700,19 @@ class GraphGenerator:
                              width='0.3')
             unused_l.node("UNSET", label="", shape="circle", style='filled', fillcolor="green", height='0.3',
                           width='0.3')
-            
+
             subgraph_legend.subgraph(unused_l)
             subgraph_legend.subgraph(enemy_gu_l)
             subgraph_legend.subgraph(enemy_ex_l)
             subgraph_legend.subgraph(friend_gu_l)
             subgraph_legend.subgraph(friend_ex_l)
-        
         else:
             guard_l = Digraph('cluster_guard_l')
             mid_l = Digraph('cluster_middle_l')
             exit_l = Digraph('cluster_exit_l')
             gu_mi_l = Digraph('cluster_gu_mi_l')
             ex_mi_l = Digraph('cluster_gu_ex_l')
-            
+
             guard_l.attr(label="Guard\nMiddle", penwidth="0")
             mid_l.attr(label="Middle", penwidth="0")
             exit_l.attr(label="Exit\nMiddle", penwidth="0")
@@ -1723,12 +1727,12 @@ class GraphGenerator:
                            width='0.3')
                 ex_mi_l.node("EX_MI", label="", style='filled', fillcolor="lawngreen", shape='box', height='0.3',
                              width='0.3')
-            
+
             else:
                 guard_l.node("GU", label="", shape='circle', color="blue", fillcolor="white", height='0.3', width='0.3',
                              penwidth="2")
-                exit_l.node("EX", label="", shape='circle', height='0.3', width='0.3', penwidth="2")
-                mid_l.node("MI", label="", shape='box', height='0.3', width='0.3', penwidth="2")
+                exit_l.node("EX", label="", shape='box', height='0.3', width='0.3', penwidth="2")
+                mid_l.node("MI", label="", shape='circle', height='0.3', width='0.3', penwidth="2")
                 ex_mi_l.node("GU_EX", label="", shape='box', color="blue", fillcolor="white", height='0.3', width='0.3',
                              penwidth="2")
             subgraph_legend.subgraph(exit_l)
@@ -1736,98 +1740,134 @@ class GraphGenerator:
             subgraph_legend.subgraph(gu_mi_l)
             subgraph_legend.subgraph(ex_mi_l)
             subgraph_legend.subgraph(guard_l)
-        
+
         graph.subgraph(subgraph_legend)
         try:
             graph.render('graph/legend.dot', view=False)
         except Exception:
-            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
             sys.exit(1)
         self.fix_svg_links(file='/graph/legend.dot.svg')
-    
+
     def generate_simple_graph(self):
         guard_node = []
         middle_node = []
         exit_node = []
 
         graph = Digraph('Path', format='svg')
-        
+
         graph.attr(layout="dot")
         graph.attr(rankdir='TB')
         graph.attr(fontsize='10')
-        
-        if len(self.paths) >= 15:
-            graph.attr(splines='false')
-        else:
-            graph.attr(splines="true")
-        
+        graph.attr(splines="false")
+
         layers = []
+        edge_usage_in_layers = {}
         for i in range(0, len(self.paths)):
             layers.append("path{}:".format(i))
-        
+            path0 = ('PC', self.paths[i][0])
+            path1 = (self.paths[i][0], self.paths[i][1])
+            path2 = (self.paths[i][1], self.paths[i][2])
+            path3 = (self.paths[i][2], "SERVER")
+            if path0 not in edge_usage_in_layers:
+                edge_usage_in_layers[path0] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path0].append('path{}'.format(i))
+            if path1 not in edge_usage_in_layers:
+                edge_usage_in_layers[path1] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path1].append('path{}'.format(i))
+            if path2 not in edge_usage_in_layers:
+                edge_usage_in_layers[path2] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path2].append('path{}'.format(i))
+            if path3 not in edge_usage_in_layers:
+                edge_usage_in_layers[path3] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path3].append('path{}'.format(i))
+
         graph.attr(layers=''.join(layers)[:-1])
-        
+
         subgraph_guards = Digraph('subgraph_guards')
         subgraph_pc = Digraph('subgraph_pc')
         subgraph_server = Digraph('subgraph_server')
         subgraph_middles = Digraph('subgraph_middles')
         subgraph_exits = Digraph('subgraph_exits')
-        
+
         subgraph_guards.graph_attr.update(rank='same')
         subgraph_middles.graph_attr.update(rank='same')
         subgraph_exits.graph_attr.update(rank='same')
         subgraph_pc.graph_attr.update(rank='same')
         subgraph_server.graph_attr.update(rank='same')
-        
+
         computer_icon_path = self.cwd + '/resources/computer.png'
         server_icon_path = self.cwd + '/resources/SE.svg'
         subgraph_pc.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="0.6",
                          height="0.6")
         subgraph_server.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="0.7",
                              height="0.7", margin="20")
-        
+
         guard_count = 0
         exit_count = 0
+        fake_guards = 0
+        fake_guard_to_generate = 0
+        color = 'blue'
+        if self.guards_to_generate == '3_guards':
+            fake_guard_to_generate = self.guard_len - 3 + round(self.guard_exit / 2)
+            color = 'darkorchid1'
+        elif self.guards_to_generate == '1_guard':
+            fake_guard_to_generate = self.guard_len - 1 + round(self.guard_exit / 2)
+            color = 'darkorchid1'
+
         for r in self.routers:
             if "Guard" in r.flags:
                 guard_node.append(r.address)
                 if guard_count >= self.guard_len:
                     subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
-                                         fontname='Verdana')
+                                         fontname='Verdana')  # gu_ex
                 else:
                     guard_count = guard_count + 1
-                    subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
-                                         fontsize='10', fontname='Verdana')
+                    subgraph_guards.node(str(r.address), shape='ellipse', color="{}".format(color), fillcolor="white",
+                                         fontsize='10', fontname='Verdana')  # gu
             elif "Exit" in r.flags:
                 exit_node.append(r.address)
                 if exit_count >= self.exit_len:
                     subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
-                                        fontname='Verdana')
+                                        fontname='Verdana')  # gu_ex
                 else:
                     exit_count = exit_count + 1
                     subgraph_exits.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
             else:
-                middle_node.append(r.address)
-                subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
-        
+                if fake_guards < fake_guard_to_generate:
+                    fake_guards = fake_guards + 1
+                    guard_node.append(r.address)
+                    if guard_count >= self.guard_len:  # gu_ex
+                        subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white",
+                                             fontsize='10', fontname='Verdana')  # gu_ex
+                    else:
+                        guard_count = guard_count + 1
+                        subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
+                                             fontsize='10', fontname='Verdana')  # gu
+                else:
+                    middle_node.append(r.address)
+                    subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
+
         graph.subgraph(subgraph_pc)
         graph.subgraph(subgraph_guards)
         graph.subgraph(subgraph_middles)
         graph.subgraph(subgraph_exits)
         graph.subgraph(subgraph_server)
-        
+
         for guard in guard_node:
             graph.edge("PC", guard, style='invis')
-        
+
         for exit_n in exit_node:
             graph.edge(exit_n, "SERVER", style='invis')
-        
-        for index, path in enumerate(self.paths, start=0):
-            graph.edge("PC", path[0], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[2], "SERVER", constraint="false", weight='0', layer="path{}".format(index))
-        
+
+        # normal edges
+        for key, value in edge_usage_in_layers.items():
+            graph.edge(key[0], key[1], constraint="false", weight='0', layer=",".join(edge_usage_in_layers[key]))
+
         if len(middle_node) == 0:
             for i in range(0, len(guard_node)):
                 for j in range(0, len(exit_node)):
@@ -1860,7 +1900,6 @@ class GraphGenerator:
                             graph.edge(guard_node[i], middle_node[j], style='invis')
                         if len(middle_node) - 1 == j and i > j:
                             graph.edge(guard_node[i], middle_node[j], style='invis')
-        
         for i in range(0, len(middle_node)):
             for j in range(0, len(exit_node)):
                 if len(middle_node) == len(exit_node):
@@ -1876,184 +1915,135 @@ class GraphGenerator:
                         graph.edge(middle_node[i], exit_node[j], style='invis')
                     if len(exit_node) - 1 == j and i > j:
                         graph.edge(middle_node[i], exit_node[j], style='invis')
+
         try:
             graph.render('graph/simulation.dot', view=False)
         except Exception:
-            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
             sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend("small")
-    
-    def generate_large_graph(self):
-        guard_node = []
-        middle_node = []
-        exit_node = []
 
+    def generate_large_graph(self):
         graph = Digraph('Path', format='svg')
-        
-        graph.attr(layout='twopi')
-        graph.attr(ranksep='5.5 2 2')
-        graph.attr(root='PC')
+
+        graph.attr(layout='neato')
         graph.attr(size="8.5")
-        graph.attr(overlap="false")
+        graph.attr(sep="0.2")
+        graph.attr(overlap="scalexy")
         graph.attr(splines="true")
-        # graph.attr(concentrate="true")
-        
-        layers = []
-        for i in range(0, len(self.paths)):
-            layers.append("path{}:".format(i))
-        
-        graph.attr(layers=''.join(layers)[:-1])
-        
-        subgraph_guards = Digraph('subgraph_guards')
-        subgraph_middles = Digraph('subgraph_middles')
-        subgraph_exits = Digraph('subgraph_exits')
-        
-        subgraph_guards.graph_attr.update(rank='same')
-        subgraph_middles.graph_attr.update(rank='same')
-        subgraph_exits.graph_attr.update(rank='same')
-        
-        computer_icon_path = self.cwd + '/resources/computer.png'
-        server_icon_path = self.cwd + '/resources/SE.svg'
-        graph.node("PC", label="", shape="none", image=computer_icon_path, fixedsize="true", width="1", height="1")
-        graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
-                   height="1.3", margin="20")
-        
-        x = 0
-        fill_color = 'coral2'  # blue / coral2
-        if self.guards_to_generate == '3_guards':
-            x = self.guard_len - 3 + round(self.guard_exit / 2)
-            fill_color = 'darkorchid1'  # coral2 / darkorchid1
-        elif self.guards_to_generate == '1_guard':
-            x = self.guard_len - 1 + round(self.guard_exit / 2)
-            fill_color = 'darkorchid1'  # coral2 / darkorchid1
-        # darkorchid1 forestgreen dodgerblue lawngreen
+        graph.attr(concentrate="true")
+        fake_guard_to_generate = 0
         fake_guards = 0
         guard_generated = 0
         exits_generated = 0
+
+        # generate graph layers and edge usage
+        layers = []
+        edge_usage_in_layers = {}
+        for i in range(0, len(self.paths)):
+            layers.append("path{}:".format(i))
+            path0 = ('PC', self.paths[i][0])
+            path1 = (self.paths[i][0], self.paths[i][1])
+            path2 = (self.paths[i][1], self.paths[i][2])
+            path3 = (self.paths[i][2], "SERVER")
+            if path0 not in edge_usage_in_layers:
+                edge_usage_in_layers[path0] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path0].append('path{}'.format(i))
+            if path1 not in edge_usage_in_layers:
+                edge_usage_in_layers[path1] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path1].append('path{}'.format(i))
+            if path2 not in edge_usage_in_layers:
+                edge_usage_in_layers[path2] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path2].append('path{}'.format(i))
+            if path3 not in edge_usage_in_layers:
+                edge_usage_in_layers[path3] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path3].append('path{}'.format(i))
+
+        graph.attr(layers=''.join(layers)[:-1])
+        pc_icon_path = self.cwd + '/resources/computer.png'
+        server_icon_path = self.cwd + '/resources/SE.svg'
+        graph.node("NODE", label="", shape="none")
+        graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
+        graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
+                   height="1.3", margin="20")
+
+        fill_color = 'coral2'  # blue / coral2
+        if self.guards_to_generate == '3_guards':
+            fake_guard_to_generate = self.guard_len - 3 + round(self.guard_exit / 2)
+            fill_color = 'darkorchid1'  # coral2 / darkorchid1
+        elif self.guards_to_generate == '1_guard':
+            fake_guard_to_generate = self.guard_len - 1 + round(self.guard_exit / 2)
+            fill_color = 'darkorchid1'  # coral2 / darkorchid1
+        # darkorchid1 forestgreen dodgerblue lawngreen
+
         for index, r in enumerate(self.routers, start=0):
             if "Guard" in r.flags:
-                guard_node.append(r.address)
                 if guard_generated >= self.guard_len:  # gu_ex
-                    subgraph_guards.node(str(r.address), label="", style='filled',
-                                         fillcolor='lawngreen'.format(fill_color), shape='box', height='0.3',
-                                         width='0.3')  # FILL / lawngreen
+                    graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen'.format(fill_color),
+                               shape='box', height='0.3', width='0.3')  # FILL / lawngreen
                 else:
                     guard_generated = guard_generated + 1
-                    subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
-                                         shape='circle', height='0.3', width='0.3')  # FILL / FILL
+                    graph.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
+                               shape='circle', height='0.3', width='0.3')  # FILL / FILL
             elif "Exit" in r.flags:
-                exit_node.append(r.address)
                 if exits_generated >= self.exit_len:  # gu_ex
-                    subgraph_exits.node(str(r.address), label="", style='filled', fillcolor='lawngreen', shape='box',
-                                        height='0.3', width='0.3')  # BLUE / lawngreen
+                    graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen', shape='box',
+                               height='0.3', width='0.3')  # BLUE / lawngreen
                 else:
                     exits_generated = exits_generated + 1
-                    subgraph_exits.node(str(r.address), label="", style='filled', fillcolor='forestgreen', shape='box',
-                                        height='0.3', width='0.3')  # WH / forestgreen
+                    graph.node(str(r.address), label="", style='filled', fillcolor='forestgreen', shape='box',
+                               height='0.3', width='0.3')  # WH / forestgreen
             else:
-                if fake_guards < x:
+                if fake_guards < fake_guard_to_generate:
                     fake_guards = fake_guards + 1
-                    guard_node.append(r.address)
                     if guard_generated >= self.guard_len:  # gu_ex
-                        subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='lawngreen',
-                                             shape='box', height='0.3', width='0.3')  # BLUE / lawngreen
+                        graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen',
+                                   shape='box', height='0.3', width='0.3')  # BLUE / lawngreen
                     else:
                         guard_generated = guard_generated + 1
-                        subgraph_guards.node(str(r.address), label="", style='filled', fillcolor='coral2',
-                                             shape='circle', height='0.3', width='0.3')  # BLUE / coral2
+                        graph.node(str(r.address), label="", style='filled', fillcolor='coral2',
+                                   shape='circle', height='0.3', width='0.3')  # BLUE / coral2
                 else:
-                    middle_node.append(r.address)
-                    subgraph_middles.node(str(r.address), label="", style='filled', fillcolor="dodgerblue",
-                                          shape='circle', height='0.3', width='0.3')  # WH / dodgerblue
-        
-        graph.subgraph(subgraph_guards)
-        graph.subgraph(subgraph_middles)
-        graph.subgraph(subgraph_exits)
-        
-        for i in range(0, len(guard_node)):
-            graph.edge("PC", guard_node[i], style="invis")
-        
-        if len(middle_node) > len(guard_node):
-            div = len(middle_node) / len(guard_node)
-            x = 0
-            for i in range(0, len(guard_node)):
-                for j in range(x, round(div) + x):
-                    if j < len(middle_node):
-                        graph.edge(guard_node[i], middle_node[j], style="invis")
-                x = x + round(div)
-                if i == (len(guard_node) - 1) and div != round(div):
-                    for j in range(x, len(middle_node)):
-                        graph.edge(guard_node[i], middle_node[j], style="invis")
-        else:
-            for i in range(0, len(guard_node)):
-                for j in range(0, len(middle_node)):
-                    if i == j:
-                        graph.edge(guard_node[i], middle_node[j], style="invis")
-        
-        if len(middle_node) == 0:
-            if len(exit_node) > len(guard_node):
-                div = len(exit_node) / len(guard_node)
-                x = 0
-                for i in range(0, len(guard_node)):
-                    for j in range(x, round(div) + x):
-                        if j < len(exit_node):
-                            graph.edge(guard_node[i], exit_node[j], style="invis")
-                    x = x + round(div)
-                    if i == (len(guard_node) - 1) and div != round(div):
-                        for j in range(x, len(exit_node)):
-                            graph.edge(guard_node[i], exit_node[j], style="invis")
-            else:
-                for i in range(0, len(guard_node)):
-                    for j in range(0, len(exit_node)):
-                        if i == j:
-                            graph.edge(guard_node[i], exit_node[j], style="invis")
-        
-        elif len(exit_node) > len(middle_node):
-            div = len(exit_node) / len(middle_node)
-            x = 0
-            for i in range(0, len(middle_node)):
-                for j in range(x, round(div) + x):
-                    if j < len(exit_node):
-                        graph.edge(middle_node[i], exit_node[j], style="invis")
-                x = x + round(div)
-                if i == (len(middle_node) - 1) and div != round(div):
-                    for j in range(x, len(exit_node)):
-                        graph.edge(middle_node[i], exit_node[j], style="invis")
-        else:
-            for i in range(0, len(middle_node)):
-                for j in range(0, len(exit_node)):
-                    if i == j:
-                        graph.edge(middle_node[i], exit_node[j], style="invis")
-        
-        for index, path in enumerate(self.paths, start=0):
-            graph.edge("PC", path[0], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[0], path[1], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[1], path[2], constraint="false", weight='0', layer="path{}".format(index))
-            graph.edge(path[2], "SERVER", constraint="false", layer="path{}".format(index))
+                    graph.node(str(r.address), label="", style='filled', fillcolor="dodgerblue",
+                               shape='circle', height='0.3', width='0.3')  # WH / dodgerblue
+
+        # invisible
+        for index, r in enumerate(self.routers, start=0):
+            graph.edge("NODE", str(r.address), style="invis", constraint="false")
+
+        # normal edges
+        for key, value in edge_usage_in_layers.items():
+            graph.edge(key[0], key[1], constraint="false", weight='0', layer=",".join(edge_usage_in_layers[key]))
+
+        graph.edge("NODE", "PC", style="invis", len="0.5")
         try:
             graph.render('graph/simulation.dot', view=False)
         except Exception:
-            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
             sys.exit(1)
         self.fix_svg_links()
-        self.generate_graph_legend("large")
-    
+        self.generate_graph_legend('large')
+
     def generate_hidden_service_graph(self):
         graph = Digraph('Hidden_service', format='svg')
-        
+
         graph.attr(layout='neato')
         graph.attr(size="8.5")
         graph.attr(sep="-0.5")
         graph.attr(overlap="scalexy")
         graph.attr(splines="true")
-        
+
         layers = []
         for i in range(0, 10):
             layers.append("path{}:".format(i))
-        
+
         graph.attr(layers=''.join(layers)[:-1])
-        
+
         pc_icon_path = self.cwd + '/resources/PC.png'
         rp_icon_path = self.cwd + '/resources/RP.png'
         ip_icon_path = self.cwd + '/resources/IP.png'
@@ -2067,11 +2057,11 @@ class GraphGenerator:
         graph.node("IP3", label="", shape="none", image=ip_icon_path, fixedsize="shape", width="0.75", height="1")
         graph.node("DIR", label="", shape="none", image=dir_icon_path, fixedsize="shape", width="0.75", height="1")
         graph.node("RP", label="", shape="none", image=rp_icon_path, fixedsize="shape", width="0.75", height="1")
-        
+
         for index, r in enumerate(self.routers, start=0):
             graph.node(str(r.address), label="", shape='box', height='0.3', width='0.3')
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
-        
+
         graph.edge("NODE", "PC", style="invis", len="1.1", constraint="false")
         graph.edge("NODE", "HS", style="invis", len="0.1", constraint="false")
         graph.edge("NODE", "IP1", style="invis", len="1", constraint="false")
@@ -2079,85 +2069,61 @@ class GraphGenerator:
         graph.edge("NODE", "IP3", style="invis", len="1", constraint="false")
         graph.edge("NODE", "DIR", style="invis", len="1", constraint="false")
         graph.edge("NODE", "RP", style="invis", len="1", constraint="false")
-        
+
         # HS -> IP1
-        graph.edge("HS", self.paths[0][0], layer="path0", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][0], self.paths[0][1], layer="path0", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][1], self.paths[0][2], layer="path0", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][2], "IP1", layer="path0", color="red", penwidth="1.8")
-        
+        graph.edge("HS", self.paths[0][0], layer="path0,path1,path2", color="red", penwidth="1.8")
+        graph.edge(self.paths[0][0], self.paths[0][1], layer="path0,path1,path2", color="red", penwidth="1.8")
+        graph.edge(self.paths[0][1], self.paths[0][2], layer="path0,path1,path2", color="red", penwidth="1.8")
+        graph.edge(self.paths[0][2], "IP1", layer="path0,path1,path2,", color="red", penwidth="1.8")
+
         # HS -> IP1 + HS -> IP2
-        graph.edge("HS", self.paths[0][0], layer="path1", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][0], self.paths[0][1], layer="path1", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][1], self.paths[0][2], layer="path1", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][2], "IP1", layer="path1", color="red", penwidth="1.8")
-        graph.edge("HS", self.paths[1][0], layer="path1", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][0], self.paths[1][1], layer="path1", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][1], self.paths[1][2], layer="path1", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][2], "IP2", layer="path1", color="navy", penwidth="1.8")
-        
+        graph.edge("HS", self.paths[1][0], layer="path1,path2", color="navy", penwidth="1.8")
+        graph.edge(self.paths[1][0], self.paths[1][1], layer="path1,path2", color="navy", penwidth="1.8")
+        graph.edge(self.paths[1][1], self.paths[1][2], layer="path1,path2", color="navy", penwidth="1.8")
+        graph.edge(self.paths[1][2], "IP2", layer="path1,path2", color="navy", penwidth="1.8")
+
         # HS -> IP1 + HS -> IP2 + HS -> IP3
-        graph.edge("HS", self.paths[0][0], layer="path2", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][0], self.paths[0][1], layer="path2", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][1], self.paths[0][2], layer="path2", color="red", penwidth="1.8")
-        graph.edge(self.paths[0][2], "IP1", layer="path2", color="red", penwidth="1.8")
-        graph.edge("HS", self.paths[1][0], layer="path2", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][0], self.paths[1][1], layer="path2", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][1], self.paths[1][2], layer="path2", color="navy", penwidth="1.8")
-        graph.edge(self.paths[1][2], "IP2", layer="path2", color="navy", penwidth="1.8")
         graph.edge("HS", self.paths[2][0], layer="path2", color="green", penwidth="1.8")
         graph.edge(self.paths[2][0], self.paths[2][1], layer="path2", color="green", penwidth="1.8")
         graph.edge(self.paths[2][1], self.paths[2][2], layer="path2", color="green", penwidth="1.8")
         graph.edge(self.paths[2][2], "IP3", layer="path2", color="green", penwidth="1.8")
-        
+
         # HS -> DIR
         graph.edge("HS", self.paths[7][0], layer="path3", penwidth="1.8")
         graph.edge(self.paths[7][0], self.paths[7][1], layer="path3", penwidth="1.8")
         graph.edge(self.paths[7][1], self.paths[7][2], layer="path3", penwidth="1.8")
         graph.edge(self.paths[7][2], "DIR", layer="path3", penwidth="1.8")
-        
+
         # PC -> DIR
         graph.edge("PC", self.paths[4][0], layer="path4", penwidth="1.8")
         graph.edge(self.paths[4][0], self.paths[4][1], layer="path4", penwidth="1.8")
         graph.edge(self.paths[4][1], self.paths[4][2], layer="path4", penwidth="1.8")
         graph.edge(self.paths[4][2], "DIR", layer="path4", penwidth="1.8")
-        
+
         # PC -> RP
-        graph.edge("PC", self.paths[3][0], layer="path5", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][0], self.paths[3][1], layer="path5", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][1], "RP", layer="path5", color="red", penwidth="2.3")
-        
+        graph.edge("PC", self.paths[3][0], layer="path5,path6,path7,path8,path9", color="red", penwidth="2.3")
+        graph.edge(self.paths[3][0], self.paths[3][1], layer="path5,path6,path7,path8,path9", color="red", penwidth="2.3")
+        graph.edge(self.paths[3][1], "RP", layer="path5,path6,path7,path8,path9", color="red", penwidth="2.3")
+
         # PC -> RP + PC -> IP3
-        graph.edge("PC", self.paths[3][0], layer="path6", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][0], self.paths[3][1], layer="path6", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][1], "RP", layer="path6", color="red", penwidth="2.3")
         graph.edge("PC", self.paths[5][0], layer="path6", penwidth="1.8")
         graph.edge(self.paths[5][0], self.paths[5][1], layer="path6", penwidth="1.8")
         graph.edge(self.paths[5][1], self.paths[5][2], layer="path6", penwidth="1.8")
         graph.edge(self.paths[5][2], "IP3", layer="path6", penwidth="1.8")
-        
+
         # PC -> RP + IP3 -> HS
-        graph.edge("PC", self.paths[3][0], layer="path7", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][0], self.paths[3][1], layer="path7", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][1], "RP", layer="path7", color="red", penwidth="2.3")
         graph.edge("IP3", self.paths[2][2], layer="path7", penwidth="1.8")
         graph.edge(self.paths[2][2], self.paths[2][1], layer="path7", penwidth="1.8")
         graph.edge(self.paths[2][1], self.paths[2][0], layer="path7", penwidth="1.8")
         graph.edge(self.paths[2][0], "HS", layer="path7", penwidth="1.8")
-        
+
         # PC -> RP + HS -> RP
-        graph.edge("PC", self.paths[3][0], layer="path8", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][0], self.paths[3][1], layer="path8", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][1], "RP", layer="path8", color="red", penwidth="2.3")
         graph.edge("HS", self.paths[6][0], layer="path8", color="black", penwidth="2.3")
         graph.edge(self.paths[6][0], self.paths[6][1], layer="path8", color="black", penwidth="2.3")
         graph.edge(self.paths[6][1], self.paths[6][2], layer="path8", color="black", penwidth="2.3")
         graph.edge(self.paths[6][2], "RP", layer="path8", color="black", penwidth="2.3")
-        
+
         # PC -> RP -> HS
-        graph.edge("PC", self.paths[3][0], layer="path9", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][0], self.paths[3][1], layer="path9", color="red", penwidth="2.3")
-        graph.edge(self.paths[3][1], "RP", layer="path9", color="red", penwidth="2.3")
         graph.edge("RP", self.paths[6][2], layer="path9", color="red", penwidth="2.3")
         graph.edge(self.paths[6][2], self.paths[6][1], layer="path9", color="red", penwidth="2.3")
         graph.edge(self.paths[6][1], self.paths[6][0], layer="path9", color="red", penwidth="2.3")
@@ -2166,29 +2132,24 @@ class GraphGenerator:
         try:
             graph.render('graph/simulation.dot', view=False)
         except Exception:
-            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
             sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend('hidden_service')
-    
+
     def generate_attack_graph(self):  # todo alpha by node usage, colr by True/Flase
         graph = Digraph('Attack', format='svg')
-        
+
         graph.attr(layout='neato')
         graph.attr(size="8.5")
         graph.attr(sep="-0.5")
         graph.attr(overlap="scalexy")
         graph.attr(splines="true")
 
-        # layers = []
-        # for i in range(0, 10):
-        #     layers.append("path{}:".format(i))
-
-        # graph.attr(layers=''.join(layers)[:-1])
         pc_icon_path = self.cwd + '/resources/computer.png'
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
-        
+
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit
             try:
                 graph.node(str(r.address), label="", style='filled',
@@ -2198,7 +2159,7 @@ class GraphGenerator:
                 graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box', height='0.3',
                            width='0.3')
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
-    
+
         for i in range(1, self.adv_guard_c + 1):
             if '10.{}.0.0'.format(i) in self.color.keys():
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
@@ -2216,15 +2177,15 @@ class GraphGenerator:
             else:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='circle',
                            height='0.3', width='0.3')  # exit was not used
-            
+
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
-        
+
         graph.edge("NODE", "PC", style="invis", len="0.1", constraint="false")
 
         try:
             graph.render('graph/simulation.dot', view=False)
         except Exception:
-            print('Graphviz: Please install Graphviz to your system and add it to $PATH')
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
             sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend('attack')
