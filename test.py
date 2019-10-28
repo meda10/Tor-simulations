@@ -4,6 +4,7 @@ import os
 import random
 import sys
 import math
+import pprint
 
 
 try:
@@ -173,7 +174,7 @@ def run_simulation():
     config = parse_config_file()
     routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
                                             config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
-                                            config[1]))
+                                            config[1], config[0]['simulation_type']))
     run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
                            config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                            config[0]['number_of_simulations'])
@@ -187,15 +188,11 @@ def run_simulation():
                            color=circuits_output[1])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
-        if config[0]['simulation_size'] == 'large':
-            g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
-                               guards_to_generate=config[0]['path_selection'], guard_len=config[0]['guard'],
-                               exit_len=config[0]['exit'])
-            GraphGenerator.generate_graph(g)
-        elif config[0]['simulation_size'] == 'small':
-            g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_len=config[0]['guard'],
-                               exit_len=config[0]['exit'])
-            GraphGenerator.generate_graph(g)
+        g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
+                           guards_to_generate=config[0]['path_selection'], guard_len=config[0]['guard'],
+                           exit_len=config[0]['exit'], sim_size=config[0]['simulation_size'],
+                           sim_type=config[0]['simulation_type'])
+        GraphGenerator.generate_graph(g)
     if config[0]['create_html'] and config[0]['generate_graph']:
         create_html()
 
@@ -574,16 +571,18 @@ def create_node_entries(node_type, same_bandwidth):
     return node
 
 
-def check_params(sim_type, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same_bandwidth=False, node_entries=None):
+def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same_bandwidth=False,
+                 node_entries=None, sim_type=None):
     """
     Creates node entries or checks if node entries are valid
-    :param sim_type: type of simulation
+    :param path_selection: type of path selection for Path simulations
     :param guard_c: guard count
     :param middle_c: middle count
     :param exit_c: exit count
     :param guard_exit_c: guard exit count
     :param same_bandwidth: True/False every node will have same bandwidth
     :param node_entries: node entries from config file
+    :param sim_type: type of simulation
     :return: list of nodes to generate, every node is represented as dictionary
     """
     all_names = []
@@ -599,7 +598,7 @@ def check_params(sim_type, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same
         guard_to_generate = guard_exit_c - round(guard_exit_c / 2)
         exit_to_generate = round(guard_exit_c / 2)
     
-    if sim_type == '3_guards':
+    if path_selection == '3_guards':
         if guard_c + guard_exit_c == 3:
             guard_to_generate = guard_exit_c
         if guard_c == 1 and guard_exit_c == 3:
@@ -619,13 +618,13 @@ def check_params(sim_type, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same
     for i in range(0, exit_c - len(exit_node) + exit_to_generate):
         exit_node.append(create_node_entries('exit', same_bandwidth))
     
-    if sim_type == '1_guard':
+    if path_selection == '1_guard' and sim_type == 'path':
         for node in guard_node[1:guard_c + guard_to_generate]:
             node['type'] = 'middle'
         middle_node = guard_node[1:guard_c + guard_to_generate] + middle_node[:middle_c]
         descriptor_entries = [guard_node[:1], middle_node, exit_node[:exit_c + exit_to_generate]]
         return descriptor_entries
-    elif sim_type == '3_guards':
+    elif path_selection == '3_guards' and sim_type == 'path':
         for node in guard_node[3:guard_c + guard_to_generate]:
             node['type'] = 'middle'
         middle_node = guard_node[3:guard_c + guard_to_generate] + middle_node[:middle_c]
@@ -634,6 +633,7 @@ def check_params(sim_type, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same
     else:
         descriptor_entries = [guard_node[:guard_c + guard_to_generate], middle_node[:middle_c],
                               exit_node[:exit_c + exit_to_generate]]
+        # pprint.pprint(descriptor_entries)
         return descriptor_entries
 
 
