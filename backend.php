@@ -346,7 +346,7 @@ function create_graph_page(){
                 <body>
                 <div class=\"wrap\">
                     <div class=\"header\">
-                        <h1>Simulator</h1>
+                        <h1><a href=\"index.html\">Simulator</a></h1>
                     </div>
                 </div>
                 <div class=\"wrap\">
