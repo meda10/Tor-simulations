@@ -171,8 +171,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     //$output = shell_exec($command);
     exec($command, $op, $ret);
     if($ret != 0) {
-        echo "Error: ";
-        echo $op[0];
+        # echo "Error: xx\n";
+        foreach ($op as $item) {
+            echo $item;
+            echo "<br>";
+        }
+        # echo $ret;
     }else{
         create_graph_page();
         header('Location:graph.html');
@@ -272,7 +276,7 @@ function parse_arguments($arr){
 
     $return_code = write_ini_file('config.ini', $config);
     if($return_code != true){
-        echo "Wrong premiisions: can not write to .ini file";
+        echo "Wrong permissions: can not write to .ini file\n";
     }
 }
 
