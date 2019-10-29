@@ -643,43 +643,53 @@ def create_html():
     output_file = Path(cwd + '/picture.html')
     svg_file = Path(cwd + '/graph/simulation.dot.svg')
     svg_file_legend = Path(cwd + '/graph/legend.dot.svg')
-    
-    with open(svg_file, 'r') as svg:
-        s = svg.read()
-        svg.close()
-
-    with open(svg_file_legend, 'r') as svg:
-        legend = svg.read()
-        svg.close()
-    
-    with open(output_file, 'w') as html_file:
-        html_file.write("<!DOCTYPE html>"
-                        "<html lang=\"en\">"
-                        "<head>"
-                        "<meta charset=\"utf-8\">"
-                        "<meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">"
-                        "<link rel=\"stylesheet\" href=\"resources//animation.css\">"
-                        "<script defer=\"\" src=\"resources//animation.js\"></script>"
-                        "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">"
-                        "<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">"
-                        "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>"
-                        "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>"
-                        "<script src=\"js/show.js\"></script>"
-                        "<title>Simulator</title>"
-                        "</head>"
-                        "<body>\n"
-                        "<ul id=\"link-container\" style=\"justify-content: flex-start\">"
-                        "<h3 id=\"current_num\"></h3>"
-                        "<button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>"
-                        "<button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>"
-                        "</ul>")
-        html_file.write(s)
-        html_file.write("<br>\n")
-        html_file.write(legend)
-        html_file.write("</body>\n"
-                        "</html>\n")
-        html_file.close()
-
+    try:
+        with open(svg_file, 'r') as svg:
+            s = svg.read()
+            svg.close()
+    except (OSError, IOError) as e:
+        print("File Error: Can not read file {}".format(svg_file))
+        sys.exit(1)
+    try:
+        with open(svg_file_legend, 'r') as svg:
+            legend = svg.read()
+            svg.close()
+    except (OSError, IOError) as e:
+        print("File Error: Can not read file {}".format(svg_file_legend))
+        print(e)
+        sys.exit(1)
+    try:
+        with open(output_file, 'w') as html_file:
+            html_file.write("<!DOCTYPE html>"
+                            "<html lang=\"en\">"
+                            "<head>"
+                            "<meta charset=\"utf-8\">"
+                            "<meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">"
+                            "<link rel=\"stylesheet\" href=\"resources//animation.css\">"
+                            "<script defer=\"\" src=\"resources//animation.js\"></script>"
+                            "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">"
+                            "<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">"
+                            "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>"
+                            "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>"
+                            "<script src=\"js/show.js\"></script>"
+                            "<title>Simulator</title>"
+                            "</head>"
+                            "<body>\n"
+                            "<ul id=\"link-container\" style=\"justify-content: flex-start\">"
+                            "<h3 id=\"current_num\"></h3>"
+                            "<button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>"
+                            "<button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>"
+                            "</ul>")
+            html_file.write(s)
+            html_file.write("<br>\n")
+            html_file.write(legend)
+            html_file.write("</body>\n"
+                            "</html>\n")
+            html_file.close()
+    except (OSError, IOError) as e:
+        print("File Error: Can not write to file {}".format(output_file))
+        print(e)
+        sys.exit(1)
 
 def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv_exit_bandwidth, n_samples=5):
     cwd = os.getcwd()
