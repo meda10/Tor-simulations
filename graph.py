@@ -1929,7 +1929,7 @@ class GraphGenerator:
 
         graph.attr(layout='neato')
         graph.attr(size="8.5")
-        graph.attr(sep="0.2")
+        graph.attr(sep="-0.2")
         graph.attr(overlap="scalexy")
         graph.attr(splines="true")
         graph.attr(concentrate="true")

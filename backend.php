@@ -165,9 +165,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     chdir($cwd);
     //echo getcwd();
     $log = "";
-    //$command = escapeshellcmd("python3.6 ./test.py 1> $log 2>&1");
+    //$command = escapeshellcmd("python3.6 ./sim.py 1> $log 2>&1");
 
-    $command = escapeshellcmd('./test.py');
+    $command = escapeshellcmd('./sim.py');
     //$output = shell_exec($command);
     exec($command, $op, $ret);
     if($ret != 0) {
@@ -281,7 +281,7 @@ function create_zip(){
     $zip = new ZipArchive;
     $res = $zip->open('simulation.zip', ZipArchive::CREATE);
     if ($res === TRUE) {
-        $zip->addFile('index.html', 'graph.html');
+        $zip->addFile('picture.html', 'graph.html');
         $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
         $zip->addFile('graph/legend.dot.svg', 'legend.svg');
         $zip->addFile('resources/animation.css');

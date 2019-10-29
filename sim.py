@@ -640,7 +640,7 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
 def create_html():
     cwd = os.getcwd()
     
-    output_file = Path(cwd + '/index.html')
+    output_file = Path(cwd + '/picture.html')
     svg_file = Path(cwd + '/graph/simulation.dot.svg')
     svg_file_legend = Path(cwd + '/graph/legend.dot.svg')
     
