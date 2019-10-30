@@ -4,6 +4,19 @@ body {
     margin: 0;
     color: #262626;
 }
+.header a {
+    color: black;
+    text-decoration: none;
+}
+
+.header a:hover {
+    color: black;
+    text-decoration: none;
+}
+
+.node_row_item{
+    margin: 5px;
+}
 
 .form {
     margin-left: 20px;
@@ -41,6 +54,7 @@ body {
     margin-right: 20px;
     min-width: 200px;
     width: 420px;
+    max-height: 700px;
 }
 
 .header h1 {

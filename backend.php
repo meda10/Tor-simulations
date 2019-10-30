@@ -25,6 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     }
 } elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
     $arr = array();
+    $number_of_user_nodes = 0;
 
     if (!empty($_POST['simulation_type'])) {
         $simulation_type = $_POST['simulation_type'];
@@ -109,6 +110,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             $path_selection = $_POST['path_selection'];
             $arr['path_selection'] = $path_selection;
         }
+
+
+        $number = count($_POST['name']);
+        $number_of_user_nodes = $number;
+        if($number > 0) {
+            for($i = 0; $i < $number; $i++) {
+                if(trim($_POST['name'][$i] != '')) {
+                    $arr['node'.$i]['type'] = $_POST['type'][$i];
+                    $arr['node'.$i]['name'] = $_POST['name'][$i];
+                    $arr['node'.$i]['ip'] = $_POST['ip'][$i];
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i];
+                }
+            }
+        }
+
     }else if ($simulation_type == 'hidden_service'){
         if (!empty($_POST['nodes_hs'])) {
             $nodes_hs = $_POST['nodes_hs'];
@@ -160,7 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         }
     }
 
-    parse_arguments($arr);
+    parse_arguments($arr, $number_of_user_nodes);
     $cwd = getcwd();
     chdir($cwd);
     //echo getcwd();
@@ -245,9 +261,14 @@ function write_ini_file($file, $array = []) {
 }
 
 
-function parse_arguments($arr){
+function parse_arguments($arr, $number_of_user_nodes){
     $config = parse_ini_file('config.ini', true, INI_SCANNER_RAW);
 
+    $i = 0;
+    while ($config['node'.$i] != NULL){
+        unset($config['node'.$i]);
+        $i++;
+    }
 
     $config['general']['simulation_type'] = $arr['simulation_type'];
     $config['general']['remove_duplicate_paths'] = $arr['remove_duplicate_paths'];
@@ -263,6 +284,16 @@ function parse_arguments($arr){
         $config['path_simulation']['number_of_simulations'] = $arr['number_of_simulations'];
         $config['path_simulation']['simulation_size'] = $arr['simulation_size'];
         $config['path_simulation']['path_selection'] = $arr['path_selection'];
+
+        for($i = 0; $i < $number_of_user_nodes; $i++){
+            $config['node'.$i]['type'] = $arr['node'.$i]['type'];
+            $config['node'.$i]['name'] = $arr['node'.$i]['name'];
+            $config['node'.$i]['ip'] = $arr['node'.$i]['ip'];
+            $config['node'.$i]['port'] = 413;
+            $band = $arr['node'.$i]['bandwidth'];
+            $config['node'.$i]['bandwidth'] = $band." ".$band." ".$band;
+        }
+
     } else if ($arr['simulation_type']  == 'hidden_service'){
         $config['hiden_service_simulation']['nodes'] = $arr['nodes_hs'];
     }else{
@@ -346,7 +377,7 @@ function create_graph_page(){
                 <body>
                 <div class=\"wrap\">
                     <div class=\"header\">
-                        <h1>Simulator</h1>
+                        <h1><a href=\"index.html\">Simulator</a></h1>
                     </div>
                 </div>
                 <div class=\"wrap\">
