@@ -14,6 +14,10 @@ body {
     text-decoration: none;
 }
 
+.node_row_item{
+    margin: 5px;
+}
+
 .form {
     margin-left: 20px;
     margin-right: 20px;
@@ -50,6 +54,7 @@ body {
     margin-right: 20px;
     min-width: 200px;
     width: 420px;
+    max-height: 700px;
 }
 
 .header h1 {

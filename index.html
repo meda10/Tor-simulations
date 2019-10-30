@@ -9,6 +9,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <script src="js/show.js"></script>
     <script src="js/fill.js"></script>
+    <script src="js/add_nodes.js"></script>
     <title>Simulator</title>
 </head>
 <body>
@@ -143,10 +144,35 @@
                                                          name="adv_exit_bandwidth" type="number"></div>
                         </div>
                     </div>
-                    <div class="control-group">
+                    <div class="control-group" id="not_path_submit" style="display: none">
                         <div class="control-label"></div>
                         <div class="controls">
                             <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset id="add_nodes_path">
+                    <legend>Nodes</legend>
+                    <div class="table-responsive">
+                        <table class="table" id="dynamic_field">
+                            <tr>
+                                <td>
+                                    <select class="second_row" name="type[]">
+                                        <option value="guard">Guard</option>
+                                        <option value="middle">Middle</option>
+                                        <option value="exit">Exit</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="name[]" placeholder="Name" class="form-control name_list" /></td>
+                                <td><input type="text" name="ip[]" placeholder="IP" class="form-control name_list" /></td>
+                                <td><input type="text" name="bandwidth[]" placeholder="Bandwidth" class="form-control name_list" /></td>
+                                <td><button type="button" name="add" id="add" class="btn btn-success">Add</button></td>
+                            </tr>
+                        </table>
+                        <div class="">
+                            <div class="">
+                                <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
+                            </div>
                         </div>
                     </div>
                 </fieldset>
@@ -237,7 +263,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>

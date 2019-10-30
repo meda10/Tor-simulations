@@ -9,7 +9,9 @@ function show(aval) {
         $('#info_path').show();
         $('#info_hidden_service').hide();
         $('#info_attack').hide();
-        Form.fileURL.focus();
+        add_nodes_path.style.display = 'block';
+        not_path_submit.style.display = 'none';
+        //Form.fileURL.focus();
     } else {
         hidden_div_path.style.display = 'none';
     }
@@ -24,7 +26,9 @@ function show(aval) {
         $('#info_path').hide();
         $('#info_hidden_service').show();
         $('#info_attack').hide();
-        Form.fileURL.focus();
+        add_nodes_path.style.display = 'none';
+        not_path_submit.style.display = 'unset';
+        //Form.fileURL.focus();
     } else {
         hidden_div_hs.style.display = 'none';
     }
@@ -40,7 +44,9 @@ function show(aval) {
         $('#info_path').hide();
         $('#info_hidden_service').hide();
         $('#info_attack').show();
-        Form.fileURL.focus();
+        add_nodes_path.style.display = 'none';
+        not_path_submit.style.display = 'unset';
+        //Form.fileURL.focus();
     } else {
         hidden_div_attack.style.display = 'none';
     }
