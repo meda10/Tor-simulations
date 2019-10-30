@@ -41,42 +41,48 @@ def parse_config_file():
     conf = []
     all_nodes = []
 
-    dic = {'guard': config['path_simulation']['guard'],
-           'middle': config['path_simulation']['middle'],
-           'exit': config['path_simulation']['exit'],
-           'guard_exit': config['path_simulation']['guard_exit'],
-           'number_of_simulations': config['path_simulation']['number_of_simulations'],
-           'simulation_size': config['path_simulation']['simulation_size'],
-           'path_selection': config['path_simulation']['path_selection'],
-           'remove_duplicate_paths': config['general']['remove_duplicate_paths'].upper() in ['TRUE'],
-           'generate_graph': config['general']['generate_graph'].upper() in ['TRUE'],
-           'create_html': config['general']['create_html'].upper() in ['TRUE'],
-           'path': config['general']['path'],
-           'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
-           'simulation_type': config['general']['simulation_type'],
-           'nodes': config['hiden_service_simulation']['nodes'],
-           'adv_guard_bandwidth': config['attack_simulation']['adv_guard_bandwidth'],
-           'adv_exit_bandwidth': config['attack_simulation']['adv_exit_bandwidth'],
-           'adv_guard': config['attack_simulation']['adv_guard'],
-           'adv_exit': config['attack_simulation']['adv_exit'],
-           }
+    try:
+        dic = {'guard': config['path_simulation']['guard'],
+               'middle': config['path_simulation']['middle'],
+               'exit': config['path_simulation']['exit'],
+               'guard_exit': config['path_simulation']['guard_exit'],
+               'number_of_simulations': config['path_simulation']['number_of_simulations'],
+               'simulation_size': config['path_simulation']['simulation_size'],
+               'path_selection': config['path_simulation']['path_selection'],
+               'remove_duplicate_paths': config['general']['remove_duplicate_paths'].upper() in ['TRUE'],
+               'generate_graph': config['general']['generate_graph'].upper() in ['TRUE'],
+               'create_html': config['general']['create_html'].upper() in ['TRUE'],
+               'path': config['general']['path'],
+               'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
+               'simulation_type': config['general']['simulation_type'],
+               'nodes': config['hiden_service_simulation']['nodes'],
+               'adv_guard_bandwidth': config['attack_simulation']['adv_guard_bandwidth'],
+               'adv_exit_bandwidth': config['attack_simulation']['adv_exit_bandwidth'],
+               'adv_guard': config['attack_simulation']['adv_guard'],
+               'adv_exit': config['attack_simulation']['adv_exit'],
+               }
+        conf.append(dic)
+    except KeyError:
+        print('Key Error: config.ini')
+        sys.exit(1)
 
-    conf.append(dic)
-
-    for n in config.sections():
-        node = {}
-        if 'node' in n:
-            node['type'] = config[n]['type']
-            if config[n]['name'].isalpha():
-                node['name'] = config[n]['name']
-            else:
-                node['name'] = ''
-            node['ip'] = config[n]['ip']
-            node['port'] = config[n]['port']
-            node['bandwidth'] = config[n]['bandwidth']
-            all_nodes.append(node)
-
-    conf.append(all_nodes)
+    try:
+        for n in config.sections():
+            node = {}
+            if 'node' in n:
+                node['type'] = config[n]['type']
+                if config[n]['name'].isalpha():
+                    node['name'] = config[n]['name']
+                else:
+                    node['name'] = ''
+                node['ip'] = config[n]['ip']
+                node['port'] = config[n]['port']
+                node['bandwidth'] = config[n]['bandwidth']
+                all_nodes.append(node)
+        conf.append(all_nodes)
+    except KeyError:
+        print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
+        sys.exit(1)
 
     try:
         conf[0]['number_of_simulations'] = int(conf[0]['number_of_simulations'])
@@ -166,7 +172,7 @@ def parse_config_file():
             if conf[0]['guard'] + conf[0]['guard_exit'] < 1:
                 print('Number of guards have to be > 1')
                 sys.exit(1)
-    
+
     return conf
 
 
@@ -660,26 +666,27 @@ def create_html():
         sys.exit(1)
     try:
         with open(output_file, 'w') as html_file:
-            html_file.write("<!DOCTYPE html>"
-                            "<html lang=\"en\">"
-                            "<head>"
-                            "<meta charset=\"utf-8\">"
-                            "<meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">"
-                            "<link rel=\"stylesheet\" href=\"resources//animation.css\">"
-                            "<script defer=\"\" src=\"resources//animation.js\"></script>"
-                            "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">"
-                            "<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">"
-                            "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>"
-                            "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>"
-                            "<script src=\"js/show.js\"></script>"
-                            "<title>Simulator</title>"
-                            "</head>"
-                            "<body>\n"
-                            "<ul id=\"link-container\" style=\"justify-content: flex-start\">"
-                            "<h3 id=\"current_num\"></h3>"
-                            "<button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>"
-                            "<button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>"
-                            "</ul>")
+            html_file.write(
+                "<!DOCTYPE html>"
+                "<html lang=\"en\">"
+                "<head>"
+                "<meta charset=\"utf-8\">"
+                "<meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">"
+                "<link rel=\"stylesheet\" href=\"resources//animation.css\">"
+                "<script defer=\"\" src=\"resources//animation.js\"></script>"
+                "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">"
+                "<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">"
+                "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>"
+                "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>"
+                "<script src=\"js/show.js\"></script>"
+                "<title>Simulator</title>"
+                "</head>"
+                "<body>\n"
+                "<ul id=\"link-container\" style=\"justify-content: flex-start\">"
+                "<h3 id=\"current_num\"></h3>"
+                "<button id=\"button_prev\" type=\"button\" class=\"btn btn-primary\" disabled>Prev</button>"
+                "<button id=\"button_next\" type=\"button\" class=\"btn btn-primary\" disabled>Next</button>"
+                "</ul>")
             html_file.write(s)
             html_file.write("<br>\n")
             html_file.write(legend)
