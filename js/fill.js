@@ -1,8 +1,6 @@
 $(function() {
     $("#path_example_1").click(function() {
         $("#simulation_type").val('path');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#guard").val(5);
         $("#middle").val(5);
         $("#exit").val(4);
@@ -14,8 +12,6 @@ $(function() {
 
     $("#path_example_2").click(function () {
         $("#simulation_type").val('path');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#guard").val(20);
         $("#middle").val(30);
         $("#exit").val(20);
@@ -28,8 +24,6 @@ $(function() {
 
     $("#path_example_3").click(function () {
         $("#simulation_type").val('path');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#guard").val(15);
         $("#middle").val(20);
         $("#exit").val(5);
@@ -42,8 +36,6 @@ $(function() {
 
     $("#path_example_4").click(function () {
         $("#simulation_type").val('path');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#guard").val(40);
         $("#middle").val(0);
         $("#exit").val(20);
@@ -56,22 +48,16 @@ $(function() {
 
     $("#hs_example_1").click(function () {
         $("#simulation_type").val('hidden_service');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#nodes_hs").val(180);
     });
 
     $("#hs_example_2").click(function () {
         $("#simulation_type").val('hidden_service');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#nodes_hs").val(250);
     });
 
     $("#attack_example_1").click(function () {
         $("#simulation_type").val('attack');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#nodes_attack").val(150);
         $("#number_of_simulations_attack").val(800);
         $("#adv_guard").val(50);
@@ -82,8 +68,6 @@ $(function() {
 
     $("#attack_example_2").click(function () {
         $("#simulation_type").val('attack');
-        $("#generate_graph").prop('checked', true);
-        $("#create_html").prop('checked', true);
         $("#nodes_attack").val(300);
         $("#number_of_simulations_attack").val(1200);
         $("#adv_guard").val(60);

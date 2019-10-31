@@ -48,23 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         $arr['same_bandwidth'] = $same_bandwidth;
     }
 
-    if (!empty($_POST['generate_graph'])) {
-        $generate_graph = "True";
-        $arr['generate_graph'] = $generate_graph;
-    } else{
-        $generate_graph = "False";
-        $arr['generate_graph'] = $generate_graph;
-    }
-
-    if (!empty($_POST['create_html'])) {
-        $create_html = "True";
-        $arr['create_html'] = $create_html;
-    } else{
-        $create_html = "False";
-        $arr['create_html'] = $create_html;
-    }
-
-
     if($simulation_type == 'path'){
         if (!empty($_POST['guard'])) {
             $guard = $_POST['guard'];
@@ -273,8 +256,8 @@ function parse_arguments($arr, $number_of_user_nodes){
     $config['general']['simulation_type'] = $arr['simulation_type'];
     $config['general']['remove_duplicate_paths'] = $arr['remove_duplicate_paths'];
     $config['general']['same_bandwidth'] = $arr['same_bandwidth'];
-    $config['general']['generate_graph'] = $arr['generate_graph'];
-    $config['general']['create_html'] = $arr['create_html'];
+    $config['general']['generate_graph'] = 'True';
+    $config['general']['create_html'] = 'True';
 
     if($arr['simulation_type'] == 'path'){
         $config['path_simulation']['guard'] = $arr['guard'];
