@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 
     if (!empty($_POST['bandwidth_value'])) {
         $bandwidth_value = $_POST['bandwidth_value'];
-        $arr['bandwidth_value'] = $bandwidth_value;
+        $arr['bandwidth_value'] = $bandwidth_value * pow(10,6);
     } else{
         $arr['bandwidth_value'] = 'None';
     }
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     $arr['node'.$i]['type'] = $_POST['type'][$i];
                     $arr['node'.$i]['name'] = $_POST['name'][$i];
                     $arr['node'.$i]['ip'] = $_POST['ip'][$i];
-                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i];
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
                 }
             }
         }
@@ -153,14 +153,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 
         if (!empty($_POST['adv_guard_bandwidth'])) {
             $adv_guard_bandwidth = $_POST['adv_guard_bandwidth'];
-            $arr['adv_guard_bandwidth'] = $adv_guard_bandwidth;
+            $arr['adv_guard_bandwidth'] = $adv_guard_bandwidth * pow(10,6);
         } else{
             $arr['adv_guard_bandwidth'] = "0";
         }
 
         if (!empty($_POST['adv_exit_bandwidth'])) {
             $adv_exit_bandwidth = $_POST['adv_exit_bandwidth'];
-            $arr['adv_exit_bandwidth'] = $adv_exit_bandwidth;
+            $arr['adv_exit_bandwidth'] = $adv_exit_bandwidth * pow(10,6);
         } else{
             $arr['adv_exit_bandwidth'] = "0";
         }
