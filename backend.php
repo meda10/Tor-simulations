@@ -326,12 +326,22 @@ function create_table(){
             if ($i >= 1) {
                 $parts = preg_split('/\s+/', $line);
                 $x = $i - 1;
-                $html = "<tr>
+
+                if(preg_match('/10.\d{1,3}.0.0/', $parts[2]) && preg_match('/10.\d{1,3}.0.0/', $parts[4])){
+                    $html = "<tr style='background-color: #ff7569'>
                         <th scope=\"row\">" . $x . "</th>
                         <td>" . $parts[2] . "</td>
                         <td>" . $parts[3] . "</td>
                         <td>" . $parts[4] . "</td>
                      </tr>";
+                }else{
+                    $html = "<tr>
+                        <th scope=\"row\">" . $x . "</th>
+                        <td>" . $parts[2] . "</td>
+                        <td>" . $parts[3] . "</td>
+                        <td>" . $parts[4] . "</td>
+                     </tr>";
+                }
                 $table = $table . $html;
             }
         }
@@ -340,6 +350,23 @@ function create_table(){
     return $table;
 }
 
+function create_usage_table(){
+    $table = "";
+    $cwd = getcwd();
+    $output = file_get_contents($cwd . "/torps/out/simulation/usage");
+
+    $arr = json_decode($output, true);
+    foreach ($arr as $key => $value){
+        $html = "<tr>
+                 <th>" . $key . "</th>
+                 <td>" . $value[0] . "</td>
+                 <td>" . $value[1] . "</td>
+                 </tr>";
+        $table = $table . $html;
+    }
+
+    return $table;
+}
 
 function create_graph_page(){
     $cwd = getcwd();
@@ -350,6 +377,7 @@ function create_graph_page(){
     //fclose($graph_file);
     //fclose($legend_file);
     $html_table = create_table();
+    $usage_table = create_usage_table();
 
     $html_start = "<!DOCTYPE html>
                 <html lang=\"en\">
@@ -397,6 +425,9 @@ function create_graph_page(){
                     <li class=\"nav-item\">
                         <a class=\"nav-link\" id=\"path_tab\" data-toggle=\"tab\" href=\"#path\" role=\"tab\" aria-controls=\"path\" aria-selected=\"false\">Paths</a>
                     </li>
+                    <li class=\"nav-item\">
+                        <a class=\"nav-link\" id=\"usage_tab\" data-toggle=\"tab\" href=\"#usage\" role=\"tab\" aria-controls=\"usage\" aria-selected=\"false\">Usage</a>
+                    </li>
                 </ul>
                 <div class=\"tab-content\" id=\"my_tab_content\">
                     <div class=\"tab-pane fade show active in\" id=\"info\" role=\"tabpanel\" aria-labelledby=\"info-info_tab\">
@@ -421,6 +452,20 @@ function create_graph_page(){
                             </thead>
                             <tbody>
                                 " . $html_table . "
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class=\"tab-pane fade\" id=\"usage\" role=\"tabpanel\" aria-labelledby=\"usage_tab\">
+                        <table class=\"table table-striped\">
+                            <thead>
+                            <tr>
+                                <th scope=\"col\">IP</th>
+                                <th scope=\"col\">Usage</th>
+                                <th scope=\"col\">MB/s</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                " .$usage_table. "
                             </tbody>
                         </table>
                     </div>
