@@ -15,7 +15,7 @@ $(document).ready(function(){
             </div>\
             <div class="part_2">\
             <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">\
-            <input type="text" name="bandwidth[]" placeholder="Bandwidth" class="form-control name_list">\
+            <input type="text" name="bandwidth[]" placeholder="Bandwidth B/s" class="form-control name_list">\
             <button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button>\
             </div>\
             </div>');
