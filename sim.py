@@ -193,7 +193,7 @@ def run_simulation():
                            config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                            config[0]['number_of_simulations'])
     circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, config[0]['adv_guard_bandwidth'],
-                                   config[0]['adv_exit_bandwidth'])
+                                   config[0]['adv_exit_bandwidth'], config[0]['simulation_type'])
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
@@ -253,95 +253,73 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth):
+def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth, sim_type):
     circuits = []
     attackers_guards = []
     attackers_exits = []
     attackers_middle = []
-    node_usage = {}
-    statistic = {'bad_guard_used': 0,
-                 'bad_exit_used': 0,
-                 'bad_circuit': 0,
-                 'bad_node': 0,
-                 'bad_gu_and_ex': 0}
+    ip_bandwidth = {}
+    node_usage = collections.Counter()
+    statistic = collections.Counter({'bad_guard_used': 0,
+                                     'bad_exit_used': 0,
+                                     'bad_circuit': 0,
+                                     'bad_node': 0,
+                                     'bad_gu_and_ex': 0})
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
 
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
-            guard_bad = False
-            exit_bad = False
-            middle_bad = False
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
+            node_usage.update(circuit)
             if circuit not in circuits and remove_duplicate_paths:
                 circuits.append(circuit)
             elif not remove_duplicate_paths:
                 circuits.append(circuit)
 
-            if circuit[0][:3] == '10.':
-                guard_bad = True
-                attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
-            if circuit[1][:3] == '10.':
-                middle_bad = True
-                attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
-            if circuit[2][:3] == '10.':
-                exit_bad = True
-                attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
-
-            if guard_bad and middle_bad and exit_bad:
-                statistic['bad_circuit'] = statistic['bad_circuit'] + 1
-            elif exit_bad and guard_bad:
-                statistic['bad_gu_and_ex'] = statistic['bad_gu_and_ex'] + 1
-            elif exit_bad or guard_bad:
-                statistic['bad_node'] = statistic['bad_node'] + 1
-                if exit_bad:
-                    statistic['bad_exit_used'] = statistic['bad_exit_used'] + 1
-                else:
-                    statistic['bad_guard_used'] = statistic['bad_guard_used'] + 1
-
-            if circuit[0] not in node_usage.keys():
-                node_usage[circuit[0]] = 1
-            else:
-                node_usage[circuit[0]] = node_usage[circuit[0]] + 1
-
-            if circuit[1] not in node_usage.keys():
-                node_usage[circuit[1]] = 1
-            else:
-                node_usage[circuit[1]] = node_usage[circuit[1]] + 1  # todo chcek middle?
-
-            if circuit[2] not in node_usage.keys():
-                node_usage[circuit[2]] = 1
-            else:
-                node_usage[circuit[2]] = node_usage[circuit[2]] + 1
+            # attack nodes
+            if sim_type == 'attack':
+                if circuit[0][:3] == '10.':
+                    statistic.update(['bad_guard_used', 'bad_node'])
+                    attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
+                if circuit[1][:3] == '10.':
+                    statistic.update(['bad_node'])
+                    attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
+                if circuit[2][:3] == '10.':
+                    statistic.update(['bad_exit_used', 'bad_node'])
+                    attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
+                if circuit[0][:3] == '10.' and circuit[1][:3] == '10.' and circuit[2][:3] == '10.':
+                    statistic.update(['bad_circuit'])
+                elif circuit[2][:3] == '10.' and circuit[0][:3] == '10.':
+                    statistic.update(['bad_gu_and_ex'])
 
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/simulation')
+    output_file = output_folder / 'usage'
 
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
 
-    ip_bandwidth = {}
     for r in routers:
         try:
             ip_bandwidth['{}'.format(r.address)] = (node_usage['{}'.format(r.address)], round(r.bandwidth / math.pow(10, 6), 3))
         except KeyError:
             ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
 
-    for node in attackers_guards:
-        ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
+    if sim_type == 'attack':
+        for node in attackers_guards:
+            ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
 
-    for node in attackers_exits:
-        ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
+        for node in attackers_exits:
+            ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
 
-    for node in attackers_middle:
-        if node not in ip_bandwidth.keys():
-            ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], '-')
+        for node in attackers_middle:
+            if node not in ip_bandwidth.keys():
+                ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], '-')
 
-    output_file = output_folder / 'usage'
     with open(output_file, 'w') as file:
-        sorted_dict = collections.OrderedDict(sorted(ip_bandwidth.items(), key=lambda kv: kv[1], reverse=True))
-        json.dump(sorted_dict, file)
+        json.dump(collections.OrderedDict(sorted(ip_bandwidth.items(), key=lambda kv: kv[1], reverse=True)), file)
 
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
