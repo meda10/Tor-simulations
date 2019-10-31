@@ -300,6 +300,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
                 node_usage[circuit[0]] = 1
                 attackers_guards.append(circuit[0])
             else:
+                attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
                 node_usage[circuit[0]] = node_usage[circuit[0]] + 1
 
             if circuit[1] not in node_usage.keys():
@@ -311,6 +312,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
                 node_usage[circuit[2]] = 1
                 attackers_exits.append(circuit[2])
             else:
+                attackers_exits.append(circuit[0]) if circuit[0] not in attackers_exits else None
                 node_usage[circuit[2]] = node_usage[circuit[2]] + 1
 
     cwd = os.getcwd()
