@@ -281,8 +281,7 @@ function parse_arguments($arr, $number_of_user_nodes){
             $config['node'.$i]['name'] = $arr['node'.$i]['name'];
             $config['node'.$i]['ip'] = $arr['node'.$i]['ip'];
             $config['node'.$i]['port'] = 413;
-            $band = $arr['node'.$i]['bandwidth'];
-            $config['node'.$i]['bandwidth'] = $band." ".$band." ".$band;
+            $config['node'.$i]['bandwidth'] = $arr['node'.$i]['bandwidth'];;
         }
 
     } else if ($arr['simulation_type']  == 'hidden_service'){
@@ -358,7 +357,7 @@ function create_usage_table(){
     $arr = json_decode($output, true);
     foreach ($arr as $key => $value){
         $html = "<tr>
-                 <th>" . $key . "</th>
+                 <td>" . $key . "</td>
                  <td>" . $value[0] . "</td>
                  <td>" . $value[1] . "</td>
                  </tr>";
