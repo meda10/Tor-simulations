@@ -192,7 +192,8 @@ def run_simulation():
     run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
                            config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                            config[0]['number_of_simulations'])
-    circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers)
+    circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, config[0]['adv_guard_bandwidth'],
+                                   config[0]['adv_exit_bandwidth'])
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
@@ -252,8 +253,10 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_circuits(remove_duplicate_paths, routers):
+def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth):
     circuits = []
+    attackers_guards = []
+    attackers_exits = []
     node_usage = {}
     statistic = {'bad_guard_used': 0,
                  'bad_exit_used': 0,
@@ -295,6 +298,7 @@ def get_circuits(remove_duplicate_paths, routers):
 
             if circuit[0] not in node_usage.keys():
                 node_usage[circuit[0]] = 1
+                attackers_guards.append(circuit[0])
             else:
                 node_usage[circuit[0]] = node_usage[circuit[0]] + 1
 
@@ -305,6 +309,7 @@ def get_circuits(remove_duplicate_paths, routers):
 
             if circuit[2] not in node_usage.keys():
                 node_usage[circuit[2]] = 1
+                attackers_exits.append(circuit[2])
             else:
                 node_usage[circuit[2]] = node_usage[circuit[2]] + 1
 
@@ -320,6 +325,14 @@ def get_circuits(remove_duplicate_paths, routers):
             ip_bandwidth['{}'.format(r.address)] = (node_usage['{}'.format(r.address)], round(r.bandwidth / math.pow(10, 6), 3))
         except KeyError:
             ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
+
+    for node in attackers_guards:
+        ip_bandwidth['{}'.format(node)] = (
+        node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
+
+    for node in attackers_exits:
+        ip_bandwidth['{}'.format(node)] = (
+        node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
 
     output_file = output_folder / 'usage'
     with open(output_file, 'w') as file:
