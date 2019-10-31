@@ -54,6 +54,7 @@ def parse_config_file():
                'create_html': config['general']['create_html'].upper() in ['TRUE'],
                'path': config['general']['path'],
                'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
+               'bandwidth_value': config['general']['bandwidth_value'],
                'simulation_type': config['general']['simulation_type'],
                'nodes': config['hiden_service_simulation']['nodes'],
                'adv_guard_bandwidth': config['attack_simulation']['adv_guard_bandwidth'],
@@ -77,7 +78,8 @@ def parse_config_file():
                     node['name'] = ''
                 node['ip'] = config[n]['ip']
                 node['port'] = config[n]['port']
-                node['bandwidth'] = config[n]['bandwidth']
+                node['bandwidth'] = "{} {} {}".format(config[n]['bandwidth'], config[n]['bandwidth'],
+                                                      config[n]['bandwidth'])
                 all_nodes.append(node)
         conf.append(all_nodes)
     except KeyError:
@@ -89,6 +91,11 @@ def parse_config_file():
     except ValueError:
         print('Number of simulations have to be >= 1')
         sys.exit(1)
+
+    try:
+        conf[0]['bandwidth_value'] = int(conf[0]['bandwidth_value'])
+    except ValueError:
+        conf[0]['bandwidth_value'] = None
 
     if conf[0]['simulation_type'] == 'path':
         try:
@@ -180,7 +187,7 @@ def run_simulation():
     config = parse_config_file()
     routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
                                             config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
-                                            config[1], config[0]['simulation_type']))
+                                            config[1], config[0]['simulation_type'], config[0]['bandwidth_value']))
     run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
                            config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                            config[0]['number_of_simulations'])
@@ -405,8 +412,12 @@ def generate_port():
     return '%i' % (random.randint(1, 65535))
 
 
-def generate_bandwidth(same_bandwidth, variance=30):
-    if same_bandwidth:
+def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
+    if same_bandwidth and bandwidth_value is not None:
+        # bandwidth = "229311978 259222236 199401720"
+        bandwidth = "{} {} {}".format(bandwidth_value, bandwidth_value, bandwidth_value)
+        return bandwidth
+    elif same_bandwidth:
         bandwidth = "229311978 259222236 199401720"
         return bandwidth
     observed = random.randint(20 * 2 ** 10, 2 * 2 ** 30)
@@ -415,7 +426,7 @@ def generate_bandwidth(same_bandwidth, variance=30):
     bandwidths = [burst, observed]
     nitems = len(bandwidths) if (len(bandwidths) > 0) else float('nan')
     avg = int(math.ceil(float(sum(bandwidths)) / nitems))
-    bandwidth = "%s %s %s" % (avg, burst, observed)
+    bandwidth = "{} {} {}".format(avg, burst, observed)
     return bandwidth
 
 
@@ -517,13 +528,14 @@ def make_descriptors(descriptor_entries):
     return consensus_entries
 
 
-def validate_node_entries(node_entries, list_of_names, list_of_ip, same_bandwidth):
+def validate_node_entries(node_entries, list_of_names, list_of_ip, same_bandwidth, bandwidth_value):
     """
     Checks if node entries from config file are valid
     :param node_entries: node entries from config file
     :param list_of_names: list of used names
     :param list_of_ip: list of used IP adresses
     :param same_bandwidth: True/False every node will have same bandwidth
+    :param bandwidth_value: value of bandwidth
     :return: valid node
     """
     if node_entries['name'] not in list_of_names and node_entries['name'] != '':
@@ -548,37 +560,38 @@ def validate_node_entries(node_entries, list_of_names, list_of_ip, same_bandwidt
         node_entries['port'] = generate_port()
     
     if same_bandwidth:
-        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
+        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth, bandwidth_value)
     else:
         try:
             bandwidth = node_entries['bandwidth'].split(' ')
             if len(bandwidth) == 3:
                 for b in bandwidth:
                     if int(b) <= 0:
-                        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
+                        node_entries['bandwidth'] = generate_bandwidth(same_bandwidth, bandwidth_value)
             else:
-                node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
+                node_entries['bandwidth'] = generate_bandwidth(same_bandwidth, bandwidth_value)
         except ValueError:
-            node_entries['bandwidth'] = generate_bandwidth(same_bandwidth)
+            node_entries['bandwidth'] = generate_bandwidth(same_bandwidth, bandwidth_value)
 
 
-def create_node_entries(node_type, same_bandwidth):
+def create_node_entries(node_type, same_bandwidth, bandwidth_value):
     """
     Creates node
     :param node_type: type of node (guard/middle/exit)
     :param same_bandwidth: True/False every node will have same bandwidth
+    :param bandwidth_value: value of bandwidth
     :return: valid node
     """
     node = {'type': '{}'.format(node_type),
             'name': '{}'.format(generate_nickname()),
             'ip': '{}'.format(generate_ipv4_address()),
             'port': '{}'.format(generate_port()),
-            'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth))}
+            'bandwidth': '{}'.format(generate_bandwidth(same_bandwidth, bandwidth_value))}
     return node
 
 
 def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same_bandwidth=False,
-                 node_entries=None, sim_type=None):
+                 node_entries=None, sim_type=None, bandwidth_value=None):
     """
     Creates node entries or checks if node entries are valid
     :param path_selection: type of path selection for Path simulations
@@ -589,6 +602,7 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     :param same_bandwidth: True/False every node will have same bandwidth
     :param node_entries: node entries from config file
     :param sim_type: type of simulation
+    :param bandwidth_value: value od bandwidth
     :return: list of nodes to generate, every node is represented as dictionary
     """
     all_names = []
@@ -613,16 +627,16 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     
     if node_entries is not None:
         for node in node_entries:
-            validate_node_entries(node, all_names, all_ip, same_bandwidth)
+            validate_node_entries(node, all_names, all_ip, same_bandwidth, bandwidth_value)
             guard_node.append(node) if node['type'] == 'guard' and len(guard_node) < guard_c else None
             middle_node.append(node) if node['type'] == 'middle' and len(middle_node) < middle_c else None
             exit_node.append(node) if node['type'] == 'exit' and len(exit_node) < exit_c else None
     for i in range(0, guard_c - len(guard_node) + guard_to_generate):
-        guard_node.append(create_node_entries('guard', same_bandwidth))
+        guard_node.append(create_node_entries('guard', same_bandwidth, bandwidth_value))
     for i in range(0, middle_c - len(middle_node)):
-        middle_node.append(create_node_entries('middle', same_bandwidth))
+        middle_node.append(create_node_entries('middle', same_bandwidth, bandwidth_value))
     for i in range(0, exit_c - len(exit_node) + exit_to_generate):
-        exit_node.append(create_node_entries('exit', same_bandwidth))
+        exit_node.append(create_node_entries('exit', same_bandwidth, bandwidth_value))
     
     if path_selection == '1_guard' and sim_type == 'path':
         for node in guard_node[1:guard_c + guard_to_generate]:
