@@ -48,6 +48,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         $arr['same_bandwidth'] = $same_bandwidth;
     }
 
+    if (!empty($_POST['bandwidth_value'])) {
+        $bandwidth_value = $_POST['bandwidth_value'];
+        $arr['bandwidth_value'] = $bandwidth_value;
+    } else{
+        $arr['bandwidth_value'] = 'None';
+    }
+
     if($simulation_type == 'path'){
         if (!empty($_POST['guard'])) {
             $guard = $_POST['guard'];
@@ -256,6 +263,7 @@ function parse_arguments($arr, $number_of_user_nodes){
     $config['general']['simulation_type'] = $arr['simulation_type'];
     $config['general']['remove_duplicate_paths'] = $arr['remove_duplicate_paths'];
     $config['general']['same_bandwidth'] = $arr['same_bandwidth'];
+    $config['general']['bandwidth_value'] = $arr['bandwidth_value'];
     $config['general']['generate_graph'] = 'True';
     $config['general']['create_html'] = 'True';
 

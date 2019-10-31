@@ -51,3 +51,11 @@ function show(aval) {
         hidden_div_attack.style.display = 'none';
     }
 }
+
+function show_bandwidth() {
+    if ($('#same_bandwidth').is(":checked")) {
+        bandwidth_value_div.style.display = 'block';
+    } else {
+        bandwidth_value_div.style.display = 'none';
+    }
+}

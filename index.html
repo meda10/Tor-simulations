@@ -22,7 +22,7 @@
     <div class="content">
         <div class="form">
             <form action="backend.php" class="form-horizontal" method="post">
-                <fieldset>
+                <fieldset id="main_form">
                     <legend>Simulation</legend>
                     <div class="control-group required">
                         <div class="control-label"><label for="simulation_type">Simulation type:</label></div>
@@ -42,8 +42,15 @@
                     </div>
                     <div class="control-group required">
                         <div class="control-label"><label for="same_bandwidth">Same bandwidth:</label></div>
-                        <div class="controls"><input class="second_row" id="same_bandwidth" name="same_bandwidth"
-                                                     type="checkbox"></div>
+                        <div class="controls">
+                            <input class="second_row" id="same_bandwidth" name="same_bandwidth" type="checkbox"
+                                   onchange="java_script_:show_bandwidth()">
+                        </div>
+                    </div>
+                    <div id="bandwidth_value_div" class="control-group" style="display: none">
+                        <div class="control-label"><label for="bandwidth_value">Bandwidth (optional):</label></div>
+                        <div class="controls"><input class="second_row" id="bandwidth_value" min="1" name="bandwidth_value" type="number">
+                        </div>
                     </div>
                     <div id="hidden_div_path" style="display:grid">
                         <div class="control-group required">
@@ -143,112 +150,112 @@
                 </fieldset>
                 <fieldset id="add_nodes_path">
                     <legend>Nodes</legend>
-                    <div class="table-responsive">
-                        <table class="table" id="dynamic_field">
-                            <tr>
-                                <td>
-                                    <select class="second_row" name="type[]">
-                                        <option value="guard">Guard</option>
-                                        <option value="middle">Middle</option>
-                                        <option value="exit">Exit</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" name="name[]" placeholder="Name" class="form-control name_list" /></td>
-                                <td><input type="text" name="ip[]" placeholder="IP" class="form-control name_list" /></td>
-                                <td><input type="text" name="bandwidth[]" placeholder="Bandwidth" class="form-control name_list" /></td>
-                                <td><button type="button" name="add" id="add" class="btn btn-success">Add</button></td>
-                            </tr>
-                        </table>
+                    <div class="path_node_item" id="dynamic_field">
+                        <div class="part_1">
+                            <select class="second_row" name="type[]">
+                                <option value="guard">Guard</option>
+                                <option value="middle">Middle</option>
+                                <option value="exit">Exit</option>
+                            </select>
+                            <input type="text" name="name[]" placeholder="Name" class="form-control name_list">
+                        </div>
+                        <div class="part_2">
+                            <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">
+                            <input type="text" name="bandwidth[]" placeholder="Bandwidth" class="form-control name_list">
+                            <button type="button" name="add" id="add" class="btn btn-success">Add</button>
+                        </div>
+                    </div>
+                    <div class="sumbit_btn">
                         <div class="">
-                            <div class="">
-                                <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
-                            </div>
+                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
                         </div>
                     </div>
                 </fieldset>
             </form>
         </div>
         <div id="tabs" class="tabs">
-            <ul class="nav nav-tabs" id="my_tab" role="tablist">
-                <li class="nav-item active">
-                    <a class="nav-link active" id="info_tab" data-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected="true" aria-expanded="true">Info</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="example_tab" data-toggle="tab" href="#example" role="tab" aria-controls="example" aria-selected="false">Examples</a>
-                </li>
-            </ul>
-            <div class="tab-content" id="my_tab_content">
-                <div class="tab-pane fade show active in" id="info" role="tabpanel" aria-labelledby="info-info_tab">
-                    <div id="info_path">
-                        <div class="example">
-                            <p>INFO Path 1</p>
+            <div id="tabs_div">
+                <ul class="nav nav-tabs" id="my_tab" role="tablist">
+                    <li class="nav-item active">
+                        <a class="nav-link active" id="info_tab" data-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected="true" aria-expanded="true">Info</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="example_tab" data-toggle="tab" href="#example" role="tab" aria-controls="example" aria-selected="false">Examples</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="my_tab_content">
+                    <div class="tab-pane fade show active in" id="info" role="tabpanel" aria-labelledby="info-info_tab">
+                        <div id="info_path">
+                            <div class="example">
+                                <p>INFO Path 1</p>
+                            </div>
+                            <div class="example">
+                                <p>INFO Path 2</p>
+                            </div>
                         </div>
-                        <div class="example">
-                            <p>INFO Path 2</p>
+                        <div id="info_hidden_service" style="display: none;">
+                            <div class="example">
+                                <p>INFO HS 3</p>
+                            </div>
+                            <div class="example">
+                                <p>INFO HS 4</p>
+                            </div>
                         </div>
-                    </div>
-                    <div id="info_hidden_service" style="display: none;">
-                        <div class="example">
-                            <p>INFO HS 3</p>
-                        </div>
-                        <div class="example">
-                            <p>INFO HS 4</p>
-                        </div>
-                    </div>
-                    <div id="info_attack" style="display: none;">
-                        <div class="example">
-                            <p>INFO attack 5</p>
-                        </div>
-                        <div class="example">
-                            <p>INFO attack 6</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
-                    <div id="example_path">
-                        <div class="example">
-                            <h5>Example 1</h5>
-                            <p>Small simulation + random</p>
-                            <button class="btn btn-secondary" id="path_example_1" type="button">Run</button>
-                        </div>
-                        <div class="example">
-                            <h5>Example 2</h5>
-                            <p>Large simulation + random</p>
-                            <button class="btn btn-secondary" id="path_example_2" type="button">Run</button>
-                        </div>
-                        <div class="example">
-                            <h5>Example 3</h5>
-                            <p>Large simulation + 3 Guards</p>
-                            <button class="btn btn-secondary" id="path_example_3" type="button">Run</button>
-                        </div>
-                        <div class="example">
-                            <h5>Example 4</h5>
-                            <p>Large simulation no middle</p>
-                            <button class="btn btn-secondary" id="path_example_4" type="button">Run</button>
+                        <div id="info_attack" style="display: none;">
+                            <div class="example">
+                                <p>INFO attack 5</p>
+                            </div>
+                            <div class="example">
+                                <p>INFO attack 6</p>
+                            </div>
                         </div>
                     </div>
-                    <div id="example_hidden_service" style="display: none;">
-                        <div class="example">
-                            <h5>Example 1</h5>
-                            <p>Hidden service 180</p>
-                            <button class="btn btn-secondary" id="hs_example_1" type="button">Run</button>
+                    <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
+                        <div id="example_path">
+                            <div class="example">
+                                <h5>Example 1</h5>
+                                <p>Small simulation + random</p>
+                                <button class="btn btn-secondary" id="path_example_1" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 2</h5>
+                                <p>Large simulation + random</p>
+                                <button class="btn btn-secondary" id="path_example_2" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 3</h5>
+                                <p>Large simulation + 3 Guards</p>
+                                <button class="btn btn-secondary" id="path_example_3" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 4</h5>
+                                <p>Large simulation no middle</p>
+                                <button class="btn btn-secondary" id="path_example_4" type="button">Run</button>
+                            </div>
                         </div>
-                        <div class="example">
-                            <h5>Example 2</h5>
-                            <p>Hidden service 250</p>
-                            <button class="btn btn-secondary" id="hs_example_2" type="button">Run</button>
+                        <div id="example_hidden_service" style="display: none;">
+                            <div class="example">
+                                <h5>Example 1</h5>
+                                <p>Hidden service 180</p>
+                                <button class="btn btn-secondary" id="hs_example_1" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 2</h5>
+                                <p>Hidden service 250</p>
+                                <button class="btn btn-secondary" id="hs_example_2" type="button">Run</button>
+                            </div>
                         </div>
-                    </div>
-                    <div id="example_attack" style="display: none;">
-                        <div class="example">
-                            <h5>Example 1</h5>
-                            <p>Attack 150 50 80</p>
-                            <button class="btn btn-secondary" id="attack_example_1" type="button">Run</button>
-                        </div>
-                        <div class="example">
-                            <h5>Example 2</h5>
-                            <p>Attack 300 60 60</p>
-                            <button class="btn btn-secondary" id="attack_example_2" type="button">Run</button>
+                        <div id="example_attack" style="display: none;">
+                            <div class="example">
+                                <h5>Example 1</h5>
+                                <p>Attack 150 50 80</p>
+                                <button class="btn btn-secondary" id="attack_example_1" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 2</h5>
+                                <p>Attack 300 60 60</p>
+                                <button class="btn btn-secondary" id="attack_example_2" type="button">Run</button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -195,17 +195,88 @@ text-transform: uppercase;
         flex-flow: wrap;
     }
 
-    .form {
+    .content .form {
         width: 80vw;
         min-width: unset;
     }
 
-    .tabs {
+    .content .tabs {
         width: 80vw;
         min-width: unset;
     }
+
     .tabs_graph{
         width: 80vw;
         min-width: unset;
     }
+
+    .form #add_nodes_path {
+        width: 100%
+    }
+}
+
+/*-------------------------------------*/
+
+#tabs_div {
+    margin: 10px;
+}
+
+#my_tab {
+    margin-top: 0px;
+}
+
+.path_node_item{
+    display: flex;
+    flex-flow: wrap;
+
+}
+
+.path_node_item select{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.path_node_item input {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.path_node_item button {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+
+#add_nodes_path{
+    width: 200%;
+    display: block;
+}
+
+.tabs {
+    min-width: 200px;
+    width: 50%;
+    max-height: 650px;
+    margin: 0;
+}
+
+#main_form{
+    margin: 10px;
+}
+
+
+.form {
+    width: 50%;
+    margin: 0;
+}
+
+.sumbit_btn {
+    margin: 10px;
+}
+
+.part_1 {
+    margin-top: 10px;
+}
+
+.part_2 {
+    margin-top: 10px;
 }
