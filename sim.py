@@ -4,6 +4,7 @@ import os
 import random
 import sys
 import math
+import collections
 import pprint
 
 
@@ -191,8 +192,7 @@ def run_simulation():
     run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
                            config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                            config[0]['number_of_simulations'])
-    circuits_output = get_circuits(config[0]['remove_duplicate_paths'])
-
+    circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers)
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
@@ -252,7 +252,7 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_circuits(remove_duplicate_paths):
+def get_circuits(remove_duplicate_paths, routers):
     circuits = []
     node_usage = {}
     statistic = {'bad_guard_used': 0,
@@ -263,7 +263,7 @@ def get_circuits(remove_duplicate_paths):
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
-    
+
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
             guard_bad = False
@@ -314,10 +314,18 @@ def get_circuits(remove_duplicate_paths):
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
 
+    ip_bandwidth = {}
+    for r in routers:
+        try:
+            ip_bandwidth['{}'.format(r.address)] = (node_usage['{}'.format(r.address)], round(r.bandwidth / math.pow(10, 6), 3))
+        except KeyError:
+            ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
+
     output_file = output_folder / 'usage'
     with open(output_file, 'w') as file:
-        json.dump(node_usage, file)
-    
+        sorted_dict = collections.OrderedDict(sorted(ip_bandwidth.items(), key=lambda kv: kv[1], reverse=True))
+        json.dump(sorted_dict, file)
+
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
         node_usage[k] = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
