@@ -281,10 +281,13 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
 
             if circuit[0][:3] == '10.':
                 guard_bad = True
+                attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
             if circuit[1][:3] == '10.':
                 middle_bad = True
+                attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
             if circuit[2][:3] == '10.':
                 exit_bad = True
+                attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
 
             if guard_bad and middle_bad and exit_bad:
                 statistic['bad_circuit'] = statistic['bad_circuit'] + 1
@@ -299,23 +302,17 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
 
             if circuit[0] not in node_usage.keys():
                 node_usage[circuit[0]] = 1
-                attackers_guards.append(circuit[0])
             else:
-                attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
                 node_usage[circuit[0]] = node_usage[circuit[0]] + 1
 
             if circuit[1] not in node_usage.keys():
                 node_usage[circuit[1]] = 1
-                attackers_middle.append(circuit[1])
             else:
-                attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
                 node_usage[circuit[1]] = node_usage[circuit[1]] + 1  # todo chcek middle?
 
             if circuit[2] not in node_usage.keys():
                 node_usage[circuit[2]] = 1
-                attackers_exits.append(circuit[2])
             else:
-                attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
                 node_usage[circuit[2]] = node_usage[circuit[2]] + 1
 
     cwd = os.getcwd()
@@ -332,12 +329,10 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
             ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
 
     for node in attackers_guards:
-        ip_bandwidth['{}'.format(node)] = (
-        node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
+        ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
 
     for node in attackers_exits:
-        ip_bandwidth['{}'.format(node)] = (
-        node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
+        ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
 
     for node in attackers_middle:
         if node not in ip_bandwidth.keys():
