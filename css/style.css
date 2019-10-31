@@ -159,6 +159,15 @@ body {
     font-size: 11.6px;
 }
 
+#usage {
+    max-height: 82vh;
+}
+
+#usage table {
+    font-size: 11.6px;
+}
+
+
 /*
 text-transform: uppercase;
 */
@@ -222,7 +231,7 @@ text-transform: uppercase;
 }
 
 #my_tab {
-    margin-top: 0px;
+    margin-top: 4px;
 }
 
 .path_node_item{

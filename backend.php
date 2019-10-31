@@ -328,14 +328,14 @@ function create_table(){
 
                 if(preg_match('/10.\d{1,3}.0.0/', $parts[2]) && preg_match('/10.\d{1,3}.0.0/', $parts[4])){
                     $html = "<tr style='background-color: #ff7569'>
-                        <th scope=\"row\">" . $x . "</th>
-                        <td>" . $parts[2] . "</td>
-                        <td>" . $parts[3] . "</td>
-                        <td>" . $parts[4] . "</td>
+                        <th style='background-color: #ff7569'>" . $x . "</th>
+                        <td style='background-color: #ff7569'>" . $parts[2] . "</td>
+                        <td style='background-color: #ff7569'>" . $parts[3] . "</td>
+                        <td style='background-color: #ff7569'>" . $parts[4] . "</td>
                      </tr>";
                 }else{
                     $html = "<tr>
-                        <th scope=\"row\">" . $x . "</th>
+                        <th>" . $x . "</th>
                         <td>" . $parts[2] . "</td>
                         <td>" . $parts[3] . "</td>
                         <td>" . $parts[4] . "</td>
@@ -356,11 +356,19 @@ function create_usage_table(){
 
     $arr = json_decode($output, true);
     foreach ($arr as $key => $value){
-        $html = "<tr>
-                 <td>" . $key . "</td>
-                 <td>" . $value[0] . "</td>
-                 <td>" . $value[1] . "</td>
-                 </tr>";
+        if(preg_match('/10.\d{1,3}.0.0/', $key)){
+            $html = "<tr style='background-color: #ff7569'>
+                     <td style='background-color: #ff7569'>" . $key . "</td>
+                     <td style='background-color: #ff7569'>" . $value[0] . "</td>
+                     <td style='background-color: #ff7569'>" . $value[1] . "</td>
+                     </tr>";
+        }else{
+            $html = "<tr>
+                     <td>" . $key . "</td>
+                     <td>" . $value[0] . "</td>
+                     <td>" . $value[1] . "</td>
+                     </tr>";
+        }
         $table = $table . $html;
     }
 
