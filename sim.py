@@ -257,6 +257,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     circuits = []
     attackers_guards = []
     attackers_exits = []
+    attackers_middle = []
     node_usage = {}
     statistic = {'bad_guard_used': 0,
                  'bad_exit_used': 0,
@@ -305,14 +306,16 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
 
             if circuit[1] not in node_usage.keys():
                 node_usage[circuit[1]] = 1
+                attackers_middle.append(circuit[1])
             else:
+                attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
                 node_usage[circuit[1]] = node_usage[circuit[1]] + 1  # todo chcek middle?
 
             if circuit[2] not in node_usage.keys():
                 node_usage[circuit[2]] = 1
                 attackers_exits.append(circuit[2])
             else:
-                attackers_exits.append(circuit[0]) if circuit[0] not in attackers_exits else None
+                attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
                 node_usage[circuit[2]] = node_usage[circuit[2]] + 1
 
     cwd = os.getcwd()
@@ -335,6 +338,10 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     for node in attackers_exits:
         ip_bandwidth['{}'.format(node)] = (
         node_usage['{}'.format(node)], round(exit_bandwidth / math.pow(10, 6), 3))
+
+    for node in attackers_middle:
+        if node not in ip_bandwidth.keys():
+            ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], '-')
 
     output_file = output_folder / 'usage'
     with open(output_file, 'w') as file:
