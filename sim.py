@@ -944,7 +944,7 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
 
 
 if __name__ == '__main__':
-    input_file = 'config.ini'
+    input_file = 'conf/config.ini'
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hi:", ["ifile="])
     except getopt.GetoptError:
