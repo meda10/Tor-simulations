@@ -348,7 +348,7 @@ function parse_arguments($arr, $number_of_user_nodes){
         $config['attack_simulation']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth'];
     }
 
-    $return_code = write_ini_file('config.ini', $config);
+    $return_code = write_ini_file('conf/config.ini', $config);
     if($return_code != true){
         echo "Wrong permissions: can not write to .ini file\n";
     }
