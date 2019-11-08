@@ -44,8 +44,8 @@ function show(aval) {
         $('#info_path').hide();
         $('#info_hidden_service').hide();
         $('#info_attack').show();
-        add_nodes_path.style.display = 'none';
-        not_path_submit.style.display = 'unset';
+        add_nodes_path.style.display = 'block';
+        not_path_submit.style.display = 'none';
         //Form.fileURL.focus();
     } else {
         hidden_div_attack.style.display = 'none';

@@ -227,11 +227,7 @@ text-transform: uppercase;
 /*-------------------------------------*/
 
 #tabs_div {
-    margin: 10px;
-}
-
-#my_tab {
-    margin-top: 4px;
+    margin: 14px;
 }
 
 .path_node_item{
@@ -269,6 +265,10 @@ text-transform: uppercase;
 }
 
 #main_form{
+    margin: 10px;
+}
+
+#file_upload{
     margin: 10px;
 }
 
