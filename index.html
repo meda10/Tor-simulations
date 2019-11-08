@@ -21,7 +21,7 @@
 <div class="wrap">
     <div class="content">
         <div class="form">
-            <form action="backend.php" class="form-horizontal" method="post">
+            <form action="backend.php" class="form-horizontal" method="post" enctype="multipart/form-data">
                 <fieldset id="main_form">
                     <legend>Simulation</legend>
                     <div class="control-group required">
@@ -146,6 +146,17 @@
                         <div class="controls">
                             <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
                         </div>
+                    </div>
+                </fieldset>
+                <fieldset id="file_upload">
+                    <div class="control-group">
+                        <div class="control-label"><label for="file_to_upload">Select .ini file</label></div>
+                        <div class="controls"><input class="form-control-file" type="file" name="file_to_upload" id="file_to_upload"></div>
+                        <div class="control-group" id="file_upload_submit">
+                        <div class="controls">
+                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
+                        </div>
+                    </div>
                     </div>
                 </fieldset>
                 <fieldset id="add_nodes_path">
