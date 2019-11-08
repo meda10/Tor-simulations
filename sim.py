@@ -5,6 +5,7 @@ import random
 import sys
 import math
 import collections
+import getopt
 import pprint
 
 
@@ -110,6 +111,8 @@ def parse_config_file(file):
         except ValueError:
             print()
             sys.exit(1)
+        except KeyError:
+            ...
 
         try:
             for s in config.sections():
@@ -312,7 +315,7 @@ def parse_config_file_old():
     return conf
 
 
-def run_simulation(file='config.ini'):
+def run_simulation(file):
     loop_count = 0
     config = parse_config_file(file)
 
@@ -878,6 +881,7 @@ def create_html():
         print(e)
         sys.exit(1)
 
+
 def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv_exit_bandwidth, n_samples=5):
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/network-state-2019-02')
@@ -917,9 +921,10 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
     initial_descriptors_dir = Path(cwd + '/torps/in/server-descriptors-2019-02')
     
     ret = os.system("python {} process --start_year {} --start_month {} --end_year {} --end_month {} --in_dir {} "
-              "--out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1".format(torps_path, start_year, start_month,
-                                                                                 end_year, end_month, in_dir, out_dir,
-                                                                                 initial_descriptors_dir))
+                    "--out_dir {} --initial_descriptor_dir {} > /dev/null 2>&1".format(torps_path, start_year,
+                                                                                       start_month, end_year,
+                                                                                       end_month, in_dir, out_dir,
+                                                                                       initial_descriptors_dir))
 
     if ret != 0:
         print('Path Simulator requires: Python2.7 and stem. Make sure torps has right permissions')
@@ -939,9 +944,26 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
 
 
 if __name__ == '__main__':
-    run_simulation('config.ini')
+    input_file = 'config.ini'
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hi:", ["ifile="])
+    except getopt.GetoptError:
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            sys.exit(0)
+        elif opt in ("-i", "--ifile"):
+            cwd = os.getcwd()
+            input_file_path = Path(cwd + '/' + arg)
+            if input_file_path.exists():
+                input_file = input_file_path
+            elif Path(arg).exists():
+                input_file = arg
+            else:
+                print('Invalid file')
+                sys.exit(1)
 
-    # get_circuits(False)
+    run_simulation(input_file)
 
     # todo grapph size in config file
     # todo ip generate function
