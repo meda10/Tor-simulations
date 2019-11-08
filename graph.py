@@ -1,5 +1,6 @@
 import os
 import sys
+import matplotlib.pyplot as plt
 from pathlib import Path
 
 from graphviz import Digraph
@@ -8,7 +9,8 @@ from graphviz import Digraph
 class GraphGenerator:
 
     def __init__(self, routers=None, paths=None, graph_type=None, guard_len=None, exit_len=None, sim_type=None,
-                 sim_size=None, guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None, color=None):
+                 sim_size=None, guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None,
+                 color=None, output_from_all_sims=None):
         self.routers = routers
         self.paths = paths
         self.graph_type = graph_type
@@ -22,6 +24,7 @@ class GraphGenerator:
         self.cwd = os.getcwd()
         self.sim_type = sim_type
         self.sim_size = sim_size
+        self.output_from_all_sims = output_from_all_sims
 
     def generate_graph(self):
         if self.sim_type == 'path':
@@ -29,10 +32,12 @@ class GraphGenerator:
                 self.generate_large_graph()
             elif self.sim_size == 'small':
                 self.generate_simple_graph()
-        elif self.adv_guard_c is not None:
+        elif self.sim_type == 'attack':
             self.generate_attack_graph()
-        else:
+        elif self.sim_type == 'hidden_service':
             self.generate_hidden_service_graph()
+        elif self.sim_type == 'multiple_sim':
+            self.generate_x_y_graph()
 
     @staticmethod
     def fix_svg_links(file='/graph/simulation.dot.svg'):
@@ -2152,12 +2157,21 @@ class GraphGenerator:
 
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit
             try:
-                graph.node(str(r.address), label="", style='filled',
-                           fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='box', height='0.3',
-                           width='0.3')
+                if 'Guard' in r.flags:
+                    graph.node(str(r.address), label="", style='filled',
+                               fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='box', height='0.3',
+                               width='0.3')
+                elif 'Exit' in r.flags:
+                    graph.node(str(r.address), label="", style='filled',
+                               fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='circle', height='0.3',
+                               width='0.3')
             except KeyError:
-                graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box', height='0.3',
-                           width='0.3')
+                if 'Guard' in r.flags:
+                    graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box',
+                               height='0.3', width='0.3')
+                elif 'Exit' in r.flags:
+                    graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='circle',
+                               height='0.3', width='0.3')
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
 
         for i in range(1, self.adv_guard_c + 1):
@@ -2189,3 +2203,23 @@ class GraphGenerator:
             sys.exit(1)
         self.fix_svg_links()
         self.generate_graph_legend('attack')
+
+    def generate_x_y_graph(self):
+        x = []
+        y = []
+        for sim in self.output_from_all_sims:
+            print(sim[2])
+            y.append(sim[2]['bad_exit_used'])
+            x.append(sim[2]['adv_exit_bandwidth'] / pow(10, 6))
+
+        print(x)
+        print(y)
+
+        plt.scatter(x, y, color="blue")
+
+        plt.xlabel('adversary exit bandwidth MB/s')
+        plt.ylabel('adversary exit usage')
+        # plt.title('My plot!')
+        plt.legend()
+
+        plt.show()

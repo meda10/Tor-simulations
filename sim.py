@@ -31,14 +31,143 @@ except ImportError:
     sys.exit(1)
 
 
-def parse_config_file():
+def parse_config_file(file):
+    config = configparser.ConfigParser(allow_no_value=True)
+
+    try:
+        config.read(file)
+    except configparser.DuplicateSectionError:
+        print('Duplicate sections in .ini file')  # todo
+        sys.exit(1)
+
+    conf = []
+    all_nodes = []
+    all_sims = []
+
+    try:
+        dic = {'remove_duplicate_paths': config.getboolean('general', 'remove_duplicate_paths'),
+               'generate_graph': config.getboolean('general', 'generate_graph'),
+               'create_html': config.getboolean('general', 'create_html'),
+               'path': config['general']['path'],
+               'same_bandwidth': config.getboolean('general', 'same_bandwidth'),
+               'bandwidth_value': None if config['general']['bandwidth_value'] == '' else config.getint('general', 'bandwidth_value'),
+               'simulation_type': config['general']['simulation_type'],
+               }
+    except KeyError:
+        print('Key Error: config.ini')
+        sys.exit(1)
+
+    if config['general']['simulation_type'] == 'path':
+        try:
+            dic['guard'] = config.getint('path_simulation', 'guard')
+            dic['middle'] = config.getint('path_simulation', 'middle')
+            dic['exit'] = config.getint('path_simulation', 'exit')
+            dic['guard_exit'] = config.getint('path_simulation', 'guard_exit')
+            dic['number_of_simulations'] = config.getint('path_simulation', 'number_of_simulations')
+            dic['adv_exit'] = 0
+            dic['adv_guard'] = 0
+            dic['adv_guard_bandwidth'] = 0
+            dic['adv_exit_bandwidth'] = 0
+            dic['path_selection'] = config['path_simulation']['path_selection']
+            dic['simulation_size'] = config['path_simulation']['simulation_size']
+        except ValueError:
+            print()
+            sys.exit(1)
+    elif config['general']['simulation_type'] == 'hidden_service':
+        try:
+            dic['guard'] = 0
+            dic['middle'] = 0
+            dic['exit'] = 0
+            dic['guard_exit'] = config.getint('hiden_service_simulation', 'nodes')
+            dic['number_of_simulations'] = 8
+            dic['adv_exit'] = 0
+            dic['adv_guard'] = 0
+            dic['adv_guard_bandwidth'] = 0
+            dic['adv_exit_bandwidth'] = 0
+            dic['path_selection'] = 'random'
+        except ValueError:
+            print()
+            sys.exit()
+    elif config['general']['simulation_type'] == 'attack':
+        try:
+            dic['guard'] = config.getint('attack_simulation', 'guard')
+            dic['middle'] = 0
+            dic['exit'] = config.getint('attack_simulation', 'exit')
+            dic['guard_exit'] = 0
+            dic['number_of_simulations'] = config.getint('attack_simulation', 'number_of_simulations')
+            dic['adv_exit'] = config.getint('attack_simulation', 'adv_exit')
+            dic['adv_guard'] = config.getint('attack_simulation', 'adv_guard')
+            dic['adv_guard_bandwidth'] = config.getint('attack_simulation', 'adv_guard_bandwidth')
+            dic['adv_exit_bandwidth'] = config.getint('attack_simulation', 'adv_exit_bandwidth')
+            dic['path_selection'] = 'random'
+        except ValueError:
+            print()
+            sys.exit(1)
+    elif config['general']['simulation_type'] == 'multiple_sim':
+        try:
+            dic['number_of_simulations'] = config.getint('attack_simulation', 'number_of_simulations')
+            dic['path_selection'] = 'random'
+        except ValueError:
+            print()
+            sys.exit(1)
+
+        try:
+            for s in config.sections():
+                sim = {}
+                if 'sim_' in s:
+                    sim['guard'] = config.getint(s, 'guard')
+                    sim['middle'] = 0
+                    sim['exit'] = config.getint(s, 'exit')
+                    sim['guard_exit'] = 0
+                    sim['number_of_simulations'] = config.getint('multiple_sim', 'number_of_simulations')
+                    sim['adv_exit'] = config.getint(s, 'adv_exit')
+                    sim['adv_guard'] = config.getint(s, 'adv_guard')
+                    sim['adv_guard_bandwidth'] = config.getint(s, 'adv_guard_bandwidth')
+                    sim['adv_exit_bandwidth'] = config.getint(s, 'adv_exit_bandwidth')
+                    sim['path_selection'] = 'random'
+                    all_sims.append(sim)
+        except KeyError:
+            print('Key Error: ')
+            sys.exit(1)
+        except ValueError:
+            print()
+            sys.exit(1)
+    else:
+        ...
+
+    try:
+        for n in config.sections():
+            node = {}
+            if 'node' in n:
+                node['type'] = config[n]['type']
+                if config[n]['name'].isalpha():
+                    node['name'] = config[n]['name']
+                else:
+                    node['name'] = ''
+                node['ip'] = config[n]['ip']
+                node['port'] = config[n]['port']
+                node['bandwidth'] = "{} {} {}".format(config[n]['bandwidth'], config[n]['bandwidth'],
+                                                      config[n]['bandwidth'])
+                all_nodes.append(node)
+    except KeyError:
+        print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
+        sys.exit(1)
+
+    conf.append(dic)
+    conf.append(all_nodes)
+    conf.append(all_sims)
+    # pprint.pprint(conf)
+    return conf
+
+
+def parse_config_file_old():
     config = configparser.ConfigParser(allow_no_value=True)
     try:
         config.read('config.ini')
     except configparser.DuplicateSectionError:
         print('Node already exists')  # todo
         sys.exit(1)
-    
+
     conf = []
     all_nodes = []
 
@@ -128,8 +257,7 @@ def parse_config_file():
                   'Number of guards have to be > 1\n'
                   'Number of exits have to be > 1')
             sys.exit(1)
-
-    if conf[0]['simulation_type'] == 'attack':  # todo max 255 overflow
+    elif conf[0]['simulation_type'] == 'attack':  # todo max 255 overflow
         try:
             conf[0]['number_of_simulations'] = int(config['attack_simulation']['number_of_simulations'])
             conf[0]['adv_guard_bandwidth'] = int(config['attack_simulation']['adv_guard_bandwidth'])
@@ -145,8 +273,8 @@ def parse_config_file():
                 sys.exit(1)
         except ValueError:
             print('Value of nodes, bandwidth, simulations have to be number')
-
-    if conf[0]['simulation_type'] == 'hidden_service':
+            sys.exit(1)
+    elif conf[0]['simulation_type'] == 'hidden_service':
         conf[0]['adv_exit'] = 0
         conf[0]['adv_guard'] = 0
         conf[0]['adv_guard_bandwidth'] = 0
@@ -184,22 +312,43 @@ def parse_config_file():
     return conf
 
 
-def run_simulation():
-    config = parse_config_file()
-    routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
-                                            config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
-                                            config[1], config[0]['simulation_type'], config[0]['bandwidth_value']))
-    run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
-                           config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
-                           config[0]['number_of_simulations'])
-    circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, config[0]['adv_guard_bandwidth'],
-                                   config[0]['adv_exit_bandwidth'], config[0]['simulation_type'])
+def run_simulation(file='config.ini'):
+    loop_count = 0
+    config = parse_config_file(file)
+
+    if config[0]['simulation_type'] == 'multiple_sim':
+        output_from_all_sims = []
+        for sim in config[2]:
+            routers = make_descriptors(
+                check_params(sim['path_selection'], sim['guard'], sim['middle'], sim['exit'], sim['guard_exit'],
+                             config[0]['same_bandwidth'], config[1], config[0]['simulation_type'],
+                             config[0]['bandwidth_value']))
+            run_tor_path_simulator(config[0]['path'], sim['adv_guard'], sim['adv_exit'], sim['adv_guard_bandwidth'],
+                                   sim['adv_exit_bandwidth'], sim['number_of_simulations'])
+            circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, sim['adv_guard_bandwidth'],
+                                           sim['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count,
+                                           sim['adv_guard'], sim['adv_exit'])
+            output_from_all_sims.append(circuits_output)
+            loop_count += 1
+        if config[0]['generate_graph']:
+            g = GraphGenerator(sim_type=config[0]['simulation_type'], output_from_all_sims=output_from_all_sims)
+            GraphGenerator.generate_graph(g)
+    else:
+        routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
+                                                config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
+                                                config[1], config[0]['simulation_type'], config[0]['bandwidth_value']))
+        run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
+                               config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
+                               config[0]['number_of_simulations'])
+        circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, config[0]['adv_guard_bandwidth'],
+                                       config[0]['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count)
+
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
-        g = GraphGenerator(routers=routers, paths=circuits_output[0])
+        g = GraphGenerator(routers=routers, paths=circuits_output[0], sim_type=config[0]['simulation_type'])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
     elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
-                           color=circuits_output[1])
+                           color=circuits_output[1], sim_type=config[0]['simulation_type'])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
@@ -253,7 +402,8 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth, sim_type):
+def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth, sim_type, loop_count, adv_guard=None,
+                 adv_exit=None):
     circuits = []
     attackers_guards = []
     attackers_exits = []
@@ -264,7 +414,12 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
                                      'bad_exit_used': 0,
                                      'bad_circuit': 0,
                                      'bad_node': 0,
-                                     'bad_gu_and_ex': 0})
+                                     'bad_gu_and_ex': 0,
+                                     'adv_guard': adv_guard,
+                                     'adv_exit': adv_exit,
+                                     'adv_guard_bandwidth': guard_bandwidth,
+                                     'adv_exit_bandwidth': exit_bandwidth
+                                     })
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
         lines = file.readlines()
@@ -279,7 +434,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
                 circuits.append(circuit)
 
             # attack nodes
-            if sim_type == 'attack':
+            if sim_type == 'attack' or sim_type == 'multiple_sim':
                 if circuit[0][:3] == '10.':
                     statistic.update(['bad_guard_used', 'bad_node'])
                     attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
@@ -297,6 +452,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/simulation')
     output_file = output_folder / 'usage'
+    statistic_file = output_folder / 'statistic'
 
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
@@ -307,7 +463,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
         except KeyError:
             ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
 
-    if sim_type == 'attack':
+    if sim_type == 'attack' or sim_type == 'multiple_sim':
         for node in attackers_guards:
             ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
 
@@ -320,6 +476,13 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
 
     with open(output_file, 'w') as file:
         json.dump(collections.OrderedDict(sorted(ip_bandwidth.items(), key=lambda kv: kv[1], reverse=True)), file)
+
+    if loop_count == 0:
+        with open(statistic_file, 'w') as file:
+            json.dump(statistic, file)
+    else:
+        with open(statistic_file, 'a') as file:
+            json.dump(statistic, file)
 
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
@@ -776,7 +939,7 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
 
 
 if __name__ == '__main__':
-    run_simulation()
+    run_simulation('config.ini')
 
     # get_circuits(False)
 
