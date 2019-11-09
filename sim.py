@@ -44,19 +44,21 @@ def parse_config_file(file):
     conf = []
     all_nodes = []
     all_sims = []
+    dic = {}
 
     try:
-        dic = {'remove_duplicate_paths': config.getboolean('general', 'remove_duplicate_paths'),
-               'generate_graph': config.getboolean('general', 'generate_graph'),
-               'create_html': config.getboolean('general', 'create_html'),
-               'path': config['general']['path'],
-               'same_bandwidth': config.getboolean('general', 'same_bandwidth'),
-               'bandwidth_value': None if config['general']['bandwidth_value'] == '' else config.getint('general', 'bandwidth_value'),
-               'simulation_type': config['general']['simulation_type'],
-               }
+        dic['remove_duplicate_paths'] = config.getboolean('general', 'remove_duplicate_paths')
+        dic['generate_graph'] = config.getboolean('general', 'generate_graph')
+        dic['create_html'] = config.getboolean('general', 'create_html')
+        dic['path'] = config['general']['path']
+        dic['same_bandwidth'] = config.getboolean('general', 'same_bandwidth')
+        dic['bandwidth_value'] = None if config['general']['bandwidth_value'] == '' else config.getint('general', 'bandwidth_value')
+        dic['simulation_type'] = config['general']['simulation_type']
     except KeyError:
         print('Key Error: config.ini')
         sys.exit(1)
+    except ValueError:
+        ...
 
     if config['general']['simulation_type'] == 'path':
         try:
@@ -778,7 +780,7 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     all_ip = []
     guard_node = []
     middle_node = []
-    exit_node = []
+    exit_node = []  # todo add nodes guard==0 -> my nodes can be added
     
     if exit_c == 0:
         guard_to_generate = round(guard_exit_c / 2)
