@@ -21,14 +21,23 @@
 <div class="wrap">
     <div class="content">
         <div class="form">
-            <form action="backend.php" class="form-horizontal" method="post" enctype="multipart/form-data">
+            <form action="upload.php" class="form-horizontal" method="post" enctype="multipart/form-data">
                 <fieldset id="file_upload">
                     <legend>Load from file</legend>
                     <div class="control-group">
                         <div class="control-label"><label for="file_to_upload">Select .ini file</label></div>
-                        <div class="controls"><input class="form-control-file" type="file" name="file_to_upload" id="file_to_upload"></div>
+                        <div class="controls">
+                            <input class="form-control-file" type="file" name="file_to_upload" id="file_to_upload">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
+                        </div>
                     </div>
                 </fieldset>
+            </form>
+            <form action="parse_form.php" class="form-horizontal" method="post">
                 <fieldset id="main_form">
                     <legend>Simulation</legend>
                     <div class="control-group required">
@@ -115,8 +124,13 @@
                     </div>
                     <div id="hidden_div_attack" style="display:none">
                         <div class="control-group required">
-                            <div class="control-label"><label for="nodes_attack">Nodes:</label></div>
-                            <div class="controls"><input class="second_row" id="nodes_attack" min="0" name="nodes_attack"
+                            <div class="control-label"><label for="guard_attack">Guard:</label></div>
+                            <div class="controls"><input class="second_row" id="guard_attack" min="0" name="guard_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="exit_attack">Exit:</label></div>
+                            <div class="controls"><input class="second_row" id="exit_attack" min="0" name="exit_attack"
                                                          type="number"></div>
                         </div>
                         <div class="control-group required">
@@ -168,7 +182,7 @@
                         </div>
                         <div class="part_2">
                             <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">
-                            <input type="text" name="bandwidth[]" placeholder="Bandwidth" class="form-control name_list">
+                            <input type="text" name="bandwidth[]" placeholder="Bandwidth MB/s" class="form-control name_list">
                             <button type="button" name="add" id="add" class="btn btn-success">Add</button>
                         </div>
                     </div>
