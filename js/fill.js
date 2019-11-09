@@ -58,22 +58,24 @@ $(function() {
 
     $("#attack_example_1").click(function () {
         $("#simulation_type").val('attack');
-        $("#nodes_attack").val(150);
+        $("#guard_attack").val(80);
+        $("#exit_attack").val(50);
         $("#number_of_simulations_attack").val(800);
         $("#adv_guard").val(50);
         $("#adv_exit").val(80);
-        $("#adv_guard_bandwidth").val(1662668109);
-        $("#adv_exit_bandwidth").val(1662668109);
+        $("#adv_guard_bandwidth").val(2300);
+        $("#adv_exit_bandwidth").val(1050);
     });
 
     $("#attack_example_2").click(function () {
         $("#simulation_type").val('attack');
-        $("#nodes_attack").val(300);
+        $("#guard_attack").val(150);
+        $("#exit_attack").val(150);
         $("#number_of_simulations_attack").val(1200);
         $("#adv_guard").val(60);
         $("#adv_exit").val(60);
-        $("#adv_guard_bandwidth").val(1662668109);
-        $("#adv_exit_bandwidth").val(1662668109);
+        $("#adv_guard_bandwidth").val(1500);
+        $("#adv_exit_bandwidth").val(10000);
     });
 });
 
