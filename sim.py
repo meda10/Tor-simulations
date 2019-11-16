@@ -76,6 +76,11 @@ def parse_config_file(file):
         except ValueError:
             print()
             sys.exit(1)
+
+        if dic['simulation_size'] == 'small':
+            if dic['path_selection'] != 'random':
+                print('Value of path_selection have to be: random')
+
     elif config['general']['simulation_type'] == 'hidden_service':
         try:
             dic['guard'] = 0
@@ -158,162 +163,12 @@ def parse_config_file(file):
         print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
         sys.exit(1)
 
+    if dic['guard'] < 0 or dic['middle'] < 0 or dic['exit'] < 0:
+        print('Number of nodes have to be > 0')
+        sys.exit(1)
     conf.append(dic)
     conf.append(all_nodes)
     conf.append(all_sims)
-    # pprint.pprint(conf)
-    return conf
-
-
-def parse_config_file_old():
-    config = configparser.ConfigParser(allow_no_value=True)
-    try:
-        config.read('config.ini')
-    except configparser.DuplicateSectionError:
-        print('Node already exists')  # todo
-        sys.exit(1)
-
-    conf = []
-    all_nodes = []
-
-    try:
-        dic = {'guard': config['path_simulation']['guard'],
-               'middle': config['path_simulation']['middle'],
-               'exit': config['path_simulation']['exit'],
-               'guard_exit': config['path_simulation']['guard_exit'],
-               'number_of_simulations': config['path_simulation']['number_of_simulations'],
-               'simulation_size': config['path_simulation']['simulation_size'],
-               'path_selection': config['path_simulation']['path_selection'],
-               'remove_duplicate_paths': config['general']['remove_duplicate_paths'].upper() in ['TRUE'],
-               'generate_graph': config['general']['generate_graph'].upper() in ['TRUE'],
-               'create_html': config['general']['create_html'].upper() in ['TRUE'],
-               'path': config['general']['path'],
-               'same_bandwidth': config['general']['same_bandwidth'].upper() in ['TRUE'],
-               'bandwidth_value': config['general']['bandwidth_value'],
-               'simulation_type': config['general']['simulation_type'],
-               'nodes': config['hiden_service_simulation']['nodes'],
-               'adv_guard_bandwidth': config['attack_simulation']['adv_guard_bandwidth'],
-               'adv_exit_bandwidth': config['attack_simulation']['adv_exit_bandwidth'],
-               'adv_guard': config['attack_simulation']['adv_guard'],
-               'adv_exit': config['attack_simulation']['adv_exit'],
-               }
-        conf.append(dic)
-    except KeyError:
-        print('Key Error: config.ini')
-        sys.exit(1)
-
-    try:
-        for n in config.sections():
-            node = {}
-            if 'node' in n:
-                node['type'] = config[n]['type']
-                if config[n]['name'].isalpha():
-                    node['name'] = config[n]['name']
-                else:
-                    node['name'] = ''
-                node['ip'] = config[n]['ip']
-                node['port'] = config[n]['port']
-                node['bandwidth'] = "{} {} {}".format(config[n]['bandwidth'], config[n]['bandwidth'],
-                                                      config[n]['bandwidth'])
-                all_nodes.append(node)
-        conf.append(all_nodes)
-    except KeyError:
-        print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
-        sys.exit(1)
-
-    try:
-        conf[0]['number_of_simulations'] = int(conf[0]['number_of_simulations'])
-    except ValueError:
-        print('Number of simulations have to be >= 1')
-        sys.exit(1)
-
-    try:
-        conf[0]['bandwidth_value'] = int(conf[0]['bandwidth_value'])
-    except ValueError:
-        conf[0]['bandwidth_value'] = None
-
-    if conf[0]['simulation_type'] == 'path':
-        try:
-            conf[0]['exit'] = int(conf[0]['exit'])
-            conf[0]['middle'] = int(conf[0]['middle'])
-            conf[0]['guard'] = int(conf[0]['guard'])
-            conf[0]['guard'] = int(conf[0]['guard'])
-            conf[0]['guard_exit'] = int(conf[0]['guard_exit'])
-            if conf[0]['guard'] < 0:
-                print('Number of guards have to be > 0')
-                sys.exit(1)
-            if conf[0]['exit'] < 0:
-                print('Number of exits have to be > 0')
-                sys.exit(1)
-            if conf[0]['guard_exit'] < 0:
-                print('Number of guard_exit have to be >= 0')
-                sys.exit(1)
-            if conf[0]['guard_exit'] + conf[0]['guard'] == 0:
-                print('Number of guards have to be > 0')
-                sys.exit(1)
-            if conf[0]['guard_exit'] + conf[0]['exit'] == 0:
-                print('Number of exits have to be > 0')
-                sys.exit(1)
-            if conf[0]['exit'] + conf[0]['guard'] + conf[0]['middle'] + conf[0]['guard_exit'] < 3:
-                print('Number of nodes have to be > 3')
-                sys.exit(1)
-        except ValueError:
-            print('Number of nodes have to be > 3\n'
-                  'Number of guards have to be > 1\n'
-                  'Number of exits have to be > 1')
-            sys.exit(1)
-    elif conf[0]['simulation_type'] == 'attack':  # todo max 255 overflow
-        try:
-            conf[0]['number_of_simulations'] = int(config['attack_simulation']['number_of_simulations'])
-            conf[0]['adv_guard_bandwidth'] = int(config['attack_simulation']['adv_guard_bandwidth'])
-            conf[0]['adv_exit_bandwidth'] = int(config['attack_simulation']['adv_exit_bandwidth'])
-            conf[0]['adv_guard'] = int(conf[0]['adv_guard'])
-            conf[0]['adv_exit'] = int(conf[0]['adv_exit'])
-            conf[0]['guard_exit'] = int(config['attack_simulation']['nodes'])
-            conf[0]['guard'] = 0
-            conf[0]['middle'] = 0
-            conf[0]['exit'] = 0
-            if conf[0]['adv_guard'] + conf[0]['adv_exit'] + conf[0]['guard_exit'] < 3:
-                print('Number of nodes + adv. guard + adv. exit have to be > 3\n')
-                sys.exit(1)
-        except ValueError:
-            print('Value of nodes, bandwidth, simulations have to be number')
-            sys.exit(1)
-    elif conf[0]['simulation_type'] == 'hidden_service':
-        conf[0]['adv_exit'] = 0
-        conf[0]['adv_guard'] = 0
-        conf[0]['adv_guard_bandwidth'] = 0
-        conf[0]['adv_exit_bandwidth'] = 0
-        conf[0]['number_of_simulations'] = 8
-        try:
-            conf[0]['guard_exit'] = int(conf[0]['nodes'])
-            conf[0]['guard'] = 0
-            conf[0]['middle'] = 0
-            conf[0]['exit'] = 0
-            if conf[0]['guard_exit'] < 3:
-                print('Number of nodes have to be > 3\n')
-                sys.exit(1)
-        except ValueError:
-            print('Value of nodes and bandwidth have to be number')
-
-    if conf[0]['simulation_type'] == 'path':
-        conf[0]['adv_exit'] = 0
-        conf[0]['adv_guard'] = 0
-        conf[0]['adv_guard_bandwidth'] = 0
-        conf[0]['adv_exit_bandwidth'] = 0
-        if conf[0]['simulation_size'] == 'small':
-            if conf[0]['path_selection'] != 'random':
-                print('Value of path_selection have to be: random')
-        
-        if conf[0]['path_selection'] == '3_guards':
-            if conf[0]['guard'] + conf[0]['guard_exit'] < 3:
-                print('Number of guards have to be > 3')
-                sys.exit(1)
-        if conf[0]['path_selection'] == '1_guard':
-            if conf[0]['guard'] + conf[0]['guard_exit'] < 1:
-                print('Number of guards have to be > 1')
-                sys.exit(1)
-
     return conf
 
 
@@ -780,51 +635,58 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     all_ip = []
     guard_node = []
     middle_node = []
-    exit_node = []  # todo add nodes guard==0 -> my nodes can be added
-    
-    if exit_c == 0:
-        guard_to_generate = round(guard_exit_c / 2)
-        exit_to_generate = guard_exit_c - round(guard_exit_c / 2)
-    else:
-        guard_to_generate = guard_exit_c - round(guard_exit_c / 2)
-        exit_to_generate = round(guard_exit_c / 2)
-    
-    if path_selection == '3_guards':
-        if guard_c + guard_exit_c == 3:
-            guard_to_generate = guard_exit_c
-        if guard_c == 1 and guard_exit_c == 3:
-            guard_to_generate = round(guard_exit_c / 2)
-            exit_to_generate = guard_exit_c - round(guard_exit_c / 2)
-    
+    exit_node = []
+
     if node_entries is not None:
         for node in node_entries:
             validate_node_entries(node, all_names, all_ip, same_bandwidth, bandwidth_value)
-            guard_node.append(node) if node['type'] == 'guard' and len(guard_node) < guard_c else None
-            middle_node.append(node) if node['type'] == 'middle' and len(middle_node) < middle_c else None
-            exit_node.append(node) if node['type'] == 'exit' and len(exit_node) < exit_c else None
-    for i in range(0, guard_c - len(guard_node) + guard_to_generate):
+            guard_node.append(node) if node['type'] == 'guard' else None
+            middle_node.append(node) if node['type'] == 'middle' else None
+            exit_node.append(node) if node['type'] == 'exit' else None
+
+    if guard_exit_c > 0:
+        guard_c += guard_exit_c - round(guard_exit_c / 2)
+        exit_c += round(guard_exit_c / 2)
+
+    for i in range(0, guard_c):
         guard_node.append(create_node_entries('guard', same_bandwidth, bandwidth_value))
-    for i in range(0, middle_c - len(middle_node)):
+    for i in range(0, middle_c):
         middle_node.append(create_node_entries('middle', same_bandwidth, bandwidth_value))
-    for i in range(0, exit_c - len(exit_node) + exit_to_generate):
+    for i in range(0, exit_c):
         exit_node.append(create_node_entries('exit', same_bandwidth, bandwidth_value))
-    
+
+    if len(guard_node) + len(middle_node) + len(exit_node) < 3:
+        print('Number of nodes have to be > 3\n')
+        sys.exit(1)
+    if len(guard_node) < 1:
+        print('Number of guards have to be > 1')
+        sys.exit(1)
+    if len(exit_node) < 1:
+        print('Number of exits have to be > 1')
+        sys.exit(1)
+
     if path_selection == '1_guard' and sim_type == 'path':
-        for node in guard_node[1:guard_c + guard_to_generate]:
+        if len(guard_node) < 1:
+            print('Number of guards have to be > 1')
+            sys.exit(1)
+        for node in guard_node[1:]:
             node['type'] = 'middle'
-        middle_node = guard_node[1:guard_c + guard_to_generate] + middle_node[:middle_c]
-        descriptor_entries = [guard_node[:1], middle_node, exit_node[:exit_c + exit_to_generate]]
+        middle_node = guard_node[1:] + middle_node
+        descriptor_entries = [guard_node[:1], middle_node, exit_node]
         return descriptor_entries
     elif path_selection == '3_guards' and sim_type == 'path':
-        for node in guard_node[3:guard_c + guard_to_generate]:
+        if len(guard_node) < 3:
+            print('Number of guards have to be > 3')
+            sys.exit(1)
+        for node in guard_node[3:]:
             node['type'] = 'middle'
-        middle_node = guard_node[3:guard_c + guard_to_generate] + middle_node[:middle_c]
-        descriptor_entries = [guard_node[:3], middle_node, exit_node[:exit_c + exit_to_generate]]
+        middle_node = guard_node[3:] + middle_node
+        descriptor_entries = [guard_node[:3], middle_node, exit_node]
         return descriptor_entries
     else:
-        descriptor_entries = [guard_node[:guard_c + guard_to_generate], middle_node[:middle_c],
-                              exit_node[:exit_c + exit_to_generate]]
-        # pprint.pprint(descriptor_entries)
+        print('random')
+        pprint.pprint(guard_node)
+        descriptor_entries = [guard_node, middle_node, exit_node]
         return descriptor_entries
 
 
