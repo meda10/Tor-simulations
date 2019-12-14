@@ -32,7 +32,7 @@ class GraphGenerator:
                 self.generate_large_graph()
             elif self.sim_size == 'small':
                 self.generate_simple_graph()
-        elif self.sim_type == 'attack':
+        elif self.sim_type == 'attack' or self.sim_type == 'exit_attack':
             self.generate_attack_graph()
         elif self.sim_type == 'hidden_service':
             self.generate_hidden_service_graph()
@@ -2142,7 +2142,7 @@ class GraphGenerator:
         self.fix_svg_links()
         self.generate_graph_legend('hidden_service')
 
-    def generate_attack_graph(self):  # todo alpha by node usage, colr by True/Flase
+    def generate_attack_graph(self):  # todo alpha by node usage, color by True/Flase
         graph = Digraph('Attack', format='svg')
 
         graph.attr(layout='neato')
@@ -2155,15 +2155,18 @@ class GraphGenerator:
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
 
-        for index, r in enumerate(self.routers, start=0):  # todo guard or exit
+        for index, r in enumerate(self.routers, start=0):  # todo guard or exit color??
             try:
+                color = str(self.color[str(r.address)])
+                if len(color) == 1:
+                    color = '0{}'.format(color)
                 if 'Guard' in r.flags:
                     graph.node(str(r.address), label="", style='filled',
-                               fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='box', height='0.3',
+                               fillcolor="#0000FF{}".format(color), shape='box', height='0.3',
                                width='0.3')
                 elif 'Exit' in r.flags:
                     graph.node(str(r.address), label="", style='filled',
-                               fillcolor="#0000FF{}".format(self.color[str(r.address)]), shape='circle', height='0.3',
+                               fillcolor="#0000FF{}".format(color), shape='circle', height='0.3',
                                width='0.3')
             except KeyError:
                 if 'Guard' in r.flags:
@@ -2223,3 +2226,4 @@ class GraphGenerator:
         plt.legend()
 
         plt.show()
+        plt.savefig('graph/foo.png', bbox_inches='tight')

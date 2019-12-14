@@ -108,6 +108,23 @@ def parse_config_file(file):
             dic['adv_guard_bandwidth'] = config.getint('attack_simulation', 'adv_guard_bandwidth')
             dic['adv_exit_bandwidth'] = config.getint('attack_simulation', 'adv_exit_bandwidth')
             dic['path_selection'] = 'random'
+            dic['encryption'] = config.getint('attack_simulation', 'encryption')
+        except ValueError:
+            print()
+            sys.exit(1)
+    elif config['general']['simulation_type'] == 'exit_attack':
+        try:
+            dic['guard'] = config.getint('exit_attack', 'guard')
+            dic['middle'] = 0
+            dic['exit'] = config.getint('exit_attack', 'exit')
+            dic['guard_exit'] = 0
+            dic['number_of_simulations'] = config.getint('exit_attack', 'number_of_simulations')
+            dic['adv_exit'] = config.getint('exit_attack', 'adv_exit')
+            dic['adv_guard'] = 0
+            dic['adv_guard_bandwidth'] = config.getint('exit_attack', 'adv_guard_bandwidth')
+            dic['adv_exit_bandwidth'] = config.getint('exit_attack', 'adv_exit_bandwidth')
+            dic['path_selection'] = 'random'
+            dic['encryption'] = config.getint('exit_attack', 'encryption')
         except ValueError:
             print()
             sys.exit(1)
@@ -125,6 +142,7 @@ def parse_config_file(file):
             for s in config.sections():
                 sim = {}
                 if 'sim_' in s:
+                    sim['encryption'] = config.getint(s, 'encryption')
                     sim['guard'] = config.getint(s, 'guard')
                     sim['middle'] = 0
                     sim['exit'] = config.getint(s, 'exit')
@@ -163,9 +181,11 @@ def parse_config_file(file):
         print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
         sys.exit(1)
 
-    if dic['guard'] < 0 or dic['middle'] < 0 or dic['exit'] < 0:
-        print('Number of nodes have to be > 0')
-        sys.exit(1)
+    if config['general']['simulation_type'] != 'multiple_sim':
+        if dic['guard'] < 0 or dic['middle'] < 0 or dic['exit'] < 0:
+            print('Number of nodes have to be > 0')
+            sys.exit(1)
+
     conf.append(dic)
     conf.append(all_nodes)
     conf.append(all_sims)
@@ -182,12 +202,12 @@ def run_simulation(file):
             routers = make_descriptors(
                 check_params(sim['path_selection'], sim['guard'], sim['middle'], sim['exit'], sim['guard_exit'],
                              config[0]['same_bandwidth'], config[1], config[0]['simulation_type'],
-                             config[0]['bandwidth_value']))
+                             config[0]['bandwidth_value'], sim['adv_guard'], sim['adv_exit']))
             run_tor_path_simulator(config[0]['path'], sim['adv_guard'], sim['adv_exit'], sim['adv_guard_bandwidth'],
                                    sim['adv_exit_bandwidth'], sim['number_of_simulations'])
             circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, sim['adv_guard_bandwidth'],
                                            sim['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count,
-                                           sim['adv_guard'], sim['adv_exit'])
+                                           sim[0]['encryption'], sim['adv_guard'], sim['adv_exit'])
             output_from_all_sims.append(circuits_output)
             loop_count += 1
         if config[0]['generate_graph']:
@@ -196,17 +216,19 @@ def run_simulation(file):
     else:
         routers = make_descriptors(check_params(config[0]['path_selection'], config[0]['guard'], config[0]['middle'],
                                                 config[0]['exit'], config[0]['guard_exit'], config[0]['same_bandwidth'],
-                                                config[1], config[0]['simulation_type'], config[0]['bandwidth_value']))
+                                                config[1], config[0]['simulation_type'], config[0]['bandwidth_value'],
+                                                config[0]['adv_guard'], config[0]['adv_exit']))
         run_tor_path_simulator(config[0]['path'], config[0]['adv_guard'], config[0]['adv_exit'],
                                config[0]['adv_guard_bandwidth'], config[0]['adv_exit_bandwidth'],
                                config[0]['number_of_simulations'])
         circuits_output = get_circuits(config[0]['remove_duplicate_paths'], routers, config[0]['adv_guard_bandwidth'],
-                                       config[0]['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count)
+                                       config[0]['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count,
+                                       config[0]['encryption'], config[0]['adv_guard'], config[0]['adv_exit'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0], sim_type=config[0]['simulation_type'])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
-    elif config[0]['simulation_type'] == 'attack' and config[0]['generate_graph']:
+    elif (config[0]['simulation_type'] == 'attack' or config[0]['simulation_type'] == 'exit_attack') and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
                            color=circuits_output[1], sim_type=config[0]['simulation_type'])
         GraphGenerator.generate_graph(g)
@@ -262,7 +284,7 @@ def write_descriptor(desc, filename):
             file.write(str(desc))
 
 
-def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth, sim_type, loop_count, adv_guard=None,
+def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidth, sim_type, loop_count, probability, adv_guard=None,
                  adv_exit=None):
     circuits = []
     attackers_guards = []
@@ -270,11 +292,16 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     attackers_middle = []
     ip_bandwidth = {}
     node_usage = collections.Counter()
+    encrypted_node_usage = collections.Counter()
+    encrypted_attacker_guard = collections.Counter()
+    encrypted_attacker_exit = collections.Counter()
+    encrypted_attacker_middle = collections.Counter()
     statistic = collections.Counter({'bad_guard_used': 0,
                                      'bad_exit_used': 0,
                                      'bad_circuit': 0,
                                      'bad_node': 0,
                                      'bad_gu_and_ex': 0,
+                                     'encrypted': 0,
                                      'adv_guard': adv_guard,
                                      'adv_exit': adv_exit,
                                      'adv_guard_bandwidth': guard_bandwidth,
@@ -294,15 +321,25 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
                 circuits.append(circuit)
 
             # attack nodes
-            if sim_type == 'attack' or sim_type == 'multiple_sim':
+            if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
+                encrypted = get_encrypted(probability)
+                if encrypted:
+                    statistic.update(['encrypted'])
+                    encrypted_node_usage.update(circuit)
                 if circuit[0][:3] == '10.':
                     statistic.update(['bad_guard_used', 'bad_node'])
+                    if encrypted:
+                        encrypted_attacker_guard.update(['{}'.format(circuit[0])])
                     attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
                 if circuit[1][:3] == '10.':
                     statistic.update(['bad_node'])
+                    if encrypted:
+                        encrypted_attacker_middle.update(['{}'.format(circuit[1])])
                     attackers_middle.append(circuit[1]) if circuit[1] not in attackers_middle else None
                 if circuit[2][:3] == '10.':
                     statistic.update(['bad_exit_used', 'bad_node'])
+                    if encrypted:
+                        encrypted_attacker_exit.update(['{}'.format(circuit[2])])
                     attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
                 if circuit[0][:3] == '10.' and circuit[1][:3] == '10.' and circuit[2][:3] == '10.':
                     statistic.update(['bad_circuit'])
@@ -317,13 +354,14 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
 
+    #  {IP: (USAGE, BANDWIDTH MB/s)}
     for r in routers:
         try:
             ip_bandwidth['{}'.format(r.address)] = (node_usage['{}'.format(r.address)], round(r.bandwidth / math.pow(10, 6), 3))
         except KeyError:
             ip_bandwidth['{}'.format(r.address)] = (0, round(r.bandwidth / math.pow(10, 6), 3))
 
-    if sim_type == 'attack' or sim_type == 'multiple_sim':
+    if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
         for node in attackers_guards:
             ip_bandwidth['{}'.format(node)] = (node_usage['{}'.format(node)], round(guard_bandwidth / math.pow(10, 6), 3))
 
@@ -344,11 +382,31 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
         with open(statistic_file, 'a') as file:
             json.dump(statistic, file)
 
+    node_usage.subtract(encrypted_attacker_guard)
+    node_usage.subtract(encrypted_attacker_middle)
+    node_usage.subtract(encrypted_attacker_exit)
+
+    """
+    node_usage.update(encrypted_attacker_guard)
+    node_usage.update(encrypted_attacker_middle)
+    node_usage.update(encrypted_attacker_exit)
+    print(node_usage)
+    print('awdawdawd')
+    print(encrypted_node_usage)
+    """
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
         node_usage[k] = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
     data = [circuits, node_usage, statistic]
     return data
+
+
+def get_encrypted(encryption):
+    probability = random.randint(0, 100)
+    if probability <= encryption:
+        return True
+    else:
+        return False
 
 
 def get_multipurpose_nodes(routers, paths, fake_guards):
@@ -444,7 +502,7 @@ def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
         bandwidth = "{} {} {}".format(bandwidth_value, bandwidth_value, bandwidth_value)
         return bandwidth
     elif same_bandwidth:
-        bandwidth = "229311978 259222236 199401720"
+        bandwidth = "350000000 350000000 350000000"
         return bandwidth
     observed = random.randint(20 * 2 ** 10, 2 * 2 ** 30)
     percentage = float(variance) / 100.
@@ -617,7 +675,7 @@ def create_node_entries(node_type, same_bandwidth, bandwidth_value):
 
 
 def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0, same_bandwidth=False,
-                 node_entries=None, sim_type=None, bandwidth_value=None):
+                 node_entries=None, sim_type=None, bandwidth_value=None, adv_guard_c=0, adv_exit_c=0):
     """
     Creates node entries or checks if node entries are valid
     :param path_selection: type of path selection for Path simulations
@@ -629,6 +687,8 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     :param node_entries: node entries from config file
     :param sim_type: type of simulation
     :param bandwidth_value: value od bandwidth
+    :param adv_guard_c: adversary guard count
+    :param adv_exit_c: adversary exit count
     :return: list of nodes to generate, every node is represented as dictionary
     """
     all_names = []
@@ -655,15 +715,15 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
     for i in range(0, exit_c):
         exit_node.append(create_node_entries('exit', same_bandwidth, bandwidth_value))
 
-    if len(guard_node) + len(middle_node) + len(exit_node) < 3:
+    if len(guard_node) + len(middle_node) + len(exit_node) + adv_exit_c + adv_guard_c< 3:
         print('Number of nodes have to be > 3\n')
         sys.exit(1)
-    if len(guard_node) < 1:
+    if len(guard_node) + adv_guard_c < 1:
         print('Number of guards have to be > 1')
         sys.exit(1)
-    if len(exit_node) < 1:
+    if len(exit_node) + adv_exit_c < 1:
         print('Number of exits have to be > 1')
-        sys.exit(1)
+        # sys.exit(1)
 
     if path_selection == '1_guard' and sim_type == 'path':
         if len(guard_node) < 1:
@@ -684,8 +744,6 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
         descriptor_entries = [guard_node[:3], middle_node, exit_node]
         return descriptor_entries
     else:
-        print('random')
-        pprint.pprint(guard_node)
         descriptor_entries = [guard_node, middle_node, exit_node]
         return descriptor_entries
 
