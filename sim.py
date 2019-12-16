@@ -380,7 +380,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
 
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/simulation')
-    output_file = output_folder / 'usage'
+    output_file = output_folder / 'usage.json'
     statistic_file = output_folder / 'statistic'
 
     if not output_folder.exists():
