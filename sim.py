@@ -394,9 +394,9 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
         try:
             usage = node_usage['{}'.format(r.address)]
             encrypted_usage = (100 * (encrypted_node_usage['{}'.format(r.address)]))/usage
-            node_statistics['{}'.format(r.address)] = (usage, bandwidth, encrypted_usage)
+            node_statistics['{}'.format(r.address)] = (usage, bandwidth, round(encrypted_usage))
         except KeyError:
-            node_statistics['{}'.format(r.address)] = (0, bandwidth, encrypted_usage)   # todo maybe key error for encrypted
+            node_statistics['{}'.format(r.address)] = (0, bandwidth, round(encrypted_usage))   # todo maybe key error for encrypted
         except ZeroDivisionError:
             node_statistics['{}'.format(r.address)] = (0, bandwidth, 100)
 
@@ -406,27 +406,27 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
             try:
                 usage = node_usage['{}'.format(node)]
                 encrypted_usage = (100*(encrypted_node_usage['{}'.format(node)]))/usage
-                node_statistics['{}'.format(node)] = (usage, bandwidth, encrypted_usage)
+                node_statistics['{}'.format(node)] = (usage, bandwidth, round(encrypted_usage))
             except ZeroDivisionError:
-                node_statistics['{}'.format(node)] = (usage, bandwidth, 100)
+                node_statistics['{}'.format(node)] = (usage, bandwidth, 0)
 
         for node in attackers_exits:
             bandwidth = round(exit_bandwidth / math.pow(10, 6), 3)
             try:
                 usage = node_usage['{}'.format(node)]
                 encrypted_usage = (100 * (encrypted_node_usage['{}'.format(node)])) / usage
-                node_statistics['{}'.format(node)] = (usage, bandwidth, encrypted_usage)
+                node_statistics['{}'.format(node)] = (usage, bandwidth, round(encrypted_usage))
             except ZeroDivisionError:
-                node_statistics['{}'.format(node)] = (usage, bandwidth, 100)
+                node_statistics['{}'.format(node)] = (usage, bandwidth, 0)
 
         for node in attackers_middle:
             if node not in node_statistics.keys():
                 try:
                     usage = node_usage['{}'.format(node)]
                     encrypted_usage = (100 * (encrypted_node_usage['{}'.format(node)])) / usage
-                    node_statistics['{}'.format(node)] = (usage, '-', encrypted_usage)
+                    node_statistics['{}'.format(node)] = (usage, '-', round(encrypted_usage))
                 except ZeroDivisionError:
-                    node_statistics['{}'.format(node)] = (usage, '-', 100)
+                    node_statistics['{}'.format(node)] = (usage, '-', 0)
 
     with open(output_file, 'w') as file:
         json.dump(collections.OrderedDict(sorted(node_statistics.items(), key=lambda kv: kv[1], reverse=True)),
