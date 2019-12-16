@@ -60,8 +60,8 @@ body {
 .header h1 {
     text-align: center;
     margin-top: 10px;
-    padding-bottom: 50px;
-    padding-top: 50px;
+    padding-bottom: 20px;
+    padding-top: 20px;
 }
 
 .required label {
@@ -288,4 +288,34 @@ text-transform: uppercase;
 
 .part_2 {
     margin-top: 10px;
+}
+
+.bootstrap-table .fixed-table-container{
+    position: unset;
+    clear: unset;
+    border: 0;
+    border-radius: unset;
+    -webkit-border-radius: unset;
+    -moz-border-radius: unset;
+}
+
+.bootstrap-table .fixed-table-container tbody td{
+    border: 0;
+}
+
+.bootstrap-table .fixed-table-container tbody tr{
+    border-right: 0;
+    border-left: 0;
+    border-top: 0;
+    border-bottom: 1px solid #ddd;
+}
+.bootstrap-table .fixed-table-container thead th {
+    border-left: 0;
+}
+
+.red {
+    background-color: #ff7569
+}
+#usage_table_sorted .red {
+    background-color: #ff7569
 }

@@ -97,7 +97,8 @@ function parse_arguments($arr, $number_of_user_nodes){
 
     } else if ($arr['simulation_type']  == 'hidden_service'){
         $config['hiden_service_simulation']['nodes'] = $arr['nodes_hs'];
-    }else{
+    } else if ($arr['simulation_type']  == 'attack'){
+        $config['attack_simulation']['encryption'] = $arr['encryption_attack'];
         $config['attack_simulation']['guard'] = $arr['guard_attack'];
         $config['attack_simulation']['exit'] = $arr['exit_attack'];
         $config['attack_simulation']['number_of_simulations'] = $arr['number_of_simulations_attack'];
@@ -105,6 +106,13 @@ function parse_arguments($arr, $number_of_user_nodes){
         $config['attack_simulation']['adv_exit'] = $arr['adv_exit'];
         $config['attack_simulation']['adv_guard_bandwidth'] = $arr['adv_guard_bandwidth'];
         $config['attack_simulation']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth'];
+    } else if ($arr['simulation_type']  == 'exit_attack'){
+        $config['exit_attack']['encryption'] = $arr['encryption_exit_attack'];
+        $config['exit_attack']['guard'] = $arr['guard_exit_attack'];
+        $config['exit_attack']['exit'] = $arr['exit_exit_attack'];
+        $config['exit_attack']['number_of_simulations'] = $arr['number_of_simulations_exit_attack'];
+        $config['exit_attack']['adv_exit'] = $arr['adv_exit_exit_attack'];
+        $config['exit_attack']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth_exit_attack'];
     }
 
     $return_code = write_ini_file('conf/config.ini', $config);
@@ -164,21 +172,23 @@ function create_table(){
 function create_usage_table(){
     $table = "";
     $cwd = getcwd();
-    $output = file_get_contents($cwd . "/torps/out/simulation/usage");
+    $output = file_get_contents($cwd . "/torps/out/simulation/usage.json");
 
     $arr = json_decode($output, true);
     foreach ($arr as $key => $value){
         if(preg_match('/10.\d{1,3}.0.0/', $key)){
-            $html = "<tr style='background-color: #ff7569'>
-                     <td style='background-color: #ff7569'>" . $key . "</td>
-                     <td style='background-color: #ff7569'>" . $value[0] . "</td>
-                     <td style='background-color: #ff7569'>" . $value[1] . "</td>
+            $html = "<tr class='red' style='background-color: #ff7569'>
+                     <td class='red' style='background-color: #ff7569'>" . $key . "</td>
+                     <td class='red' style='background-color: #ff7569'>" . $value[0] . "</td>
+                     <td class='red' style='background-color: #ff7569'>" . $value[1] . "</td>
+                     <td class='red' style='background-color: #ff7569'>" . $value[2] . "</td>
                      </tr>";
         }else{
             $html = "<tr>
                      <td>" . $key . "</td>
                      <td>" . $value[0] . "</td>
                      <td>" . $value[1] . "</td>
+                     <td>" . $value[2] . "</td>
                      </tr>";
         }
         $table = $table . $html;
@@ -198,6 +208,31 @@ function create_graph_page(){
     $html_table = create_table();
     $usage_table = create_usage_table();
 
+    /*
+                    <link rel=\"stylesheet\" href=\"resources//animation.css\">
+                    <script defer=\"\" src=\"resources//animation.js\"></script>
+                    <link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>
+                    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>
+                    <script src=\"js/show.js\"></script>
+     */
+/*
+
+                    <link href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <link href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <link href=\"https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css\" rel=\"stylesheet\">
+
+                    <link href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\" rel=\"stylesheet\">
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.2/moment.min.js\"></script>
+
+
+                    <link href=\"https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css\" rel=\"stylesheet\" type=\"text/css\">
+                    <link href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css\" rel=\"stylesheet\" type=\"text/css\">
+
+                    <link href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css\" rel=\"stylesheet\" type=\"text/css\">
+
+ */
     $html_start = "<!DOCTYPE html>
                 <html lang=\"en\">
                 <head>
@@ -207,8 +242,20 @@ function create_graph_page(){
                     <script defer=\"\" src=\"resources//animation.js\"></script>
                     <link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">
                     <link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">
-                    <script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js\"></script>
-                    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js\"></script>
+                    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css\">
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js\"></script>
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js\"></script>
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js\"></script>
+                    <!-- Boodstrap 4
+                    <link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\">
+                    <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.6.3/css/all.css\" integrity=\"sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/\" crossorigin=\"anonymous\">
+                    <link rel=\"stylesheet\" href=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css\">
+                    
+                    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\" crossorigin=\"anonymous\"></script>
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script>
+                    <script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>
+                    <script src=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js\"></script>
+                    -->
                     <script src=\"js/show.js\"></script>
                     <title>Simulator</title>
                 </head>
@@ -275,12 +322,13 @@ function create_graph_page(){
                         </table>
                     </div>
                     <div class=\"tab-pane fade\" id=\"usage\" role=\"tabpanel\" aria-labelledby=\"usage_tab\">
-                        <table class=\"table table-striped\">
+                        <table id=\"usage_table_sorted\" class=\"table table-striped\" data-toggle=\"table\" data-toolbar=\".toolbar\" data-sortable=\"true\">
                             <thead>
                             <tr>
-                                <th scope=\"col\">IP</th>
-                                <th scope=\"col\">Usage</th>
-                                <th scope=\"col\">MB/s</th>
+                                <th data-field=\"0\" data-sortable=\"true\" scope=\"col\">IP</th>
+                                <th data-field=\"1\" data-sortable=\"true\" scope=\"col\">Usage</th>
+                                <th data-field=\"2\" data-sortable=\"true\" scope=\"col\">MB/s</th>
+                                <th data-field=\"3\" data-sortable=\"true\" scope=\"col\">Encryp. %</th>
                             </tr>
                             </thead>
                             <tbody>
