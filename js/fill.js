@@ -58,6 +58,7 @@ $(function() {
 
     $("#attack_example_1").click(function () {
         $("#simulation_type").val('attack');
+        $("#encryption_attack").val(20);
         $("#guard_attack").val(80);
         $("#exit_attack").val(50);
         $("#number_of_simulations_attack").val(800);
@@ -69,6 +70,7 @@ $(function() {
 
     $("#attack_example_2").click(function () {
         $("#simulation_type").val('attack');
+        $("#encryption_attack").val(50);
         $("#guard_attack").val(150);
         $("#exit_attack").val(150);
         $("#number_of_simulations_attack").val(1200);

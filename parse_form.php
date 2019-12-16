@@ -125,7 +125,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         } else{
             $arr['nodes_hs'] = "0";
         }
-    }else {
+    }else if ($simulation_type == 'attack'){
+        if (!empty($_POST['encryption_attack'])) {
+            $encryption_attack = $_POST['encryption_attack'];
+            $arr['encryption_attack'] = $encryption_attack;
+        } else{
+            $arr['encryption_attack'] = "0";
+        }
+
         if (!empty($_POST['guard_attack'])) {
             $guard_attack = $_POST['guard_attack'];
             $arr['guard_attack'] = $guard_attack;
@@ -173,6 +180,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             $arr['adv_exit_bandwidth'] = $adv_exit_bandwidth * pow(10,6);
         } else{
             $arr['adv_exit_bandwidth'] = "0";
+        }
+    }else if ($simulation_type == 'exit_attack'){
+        if (!empty($_POST['encryption_exit_attack'])) {
+            $encryption_exit_attack = $_POST['encryption_exit_attack'];
+            $arr['encryption_exit_attack'] = $encryption_exit_attack;
+        } else{
+            $arr['encryption_exit_attack'] = "0";
+        }
+
+        if (!empty($_POST['guard_exit_attack'])) {
+            $guard_exit_attack = $_POST['guard_exit_attack'];
+            $arr['guard_exit_attack'] = $guard_exit_attack;
+        } else{
+            $arr['guard_exit_attack'] = "0";
+        }
+
+        if (!empty($_POST['exit_exit_attack'])) {
+            $exit_exit_attack = $_POST['exit_exit_attack'];
+            $arr['exit_exit_attack'] = $exit_exit_attack;
+        } else{
+            $arr['exit_exit_attack'] = "0";
+        }
+
+        if (!empty($_POST['number_of_simulations_exit_attack'])) {
+            $number_of_simulations_exit_attack = $_POST['number_of_simulations_exit_attack'];
+            $arr['number_of_simulations_exit_attack'] = $number_of_simulations_exit_attack;
+        } else{
+            $arr['number_of_simulations_exit_attack'] = "0";
+        }
+
+        if (!empty($_POST['adv_exit_exit_attack'])) {
+            $adv_exit_exit_attack = $_POST['adv_exit_exit_attack'];
+            $arr['adv_exit_exit_attack'] = $adv_exit_exit_attack;
+        } else{
+            $arr['adv_exit_exit_attack'] = "0";
+        }
+
+        if (!empty($_POST['adv_exit_bandwidth_exit_attack'])) {
+            $adv_exit_bandwidth_exit_attack = $_POST['adv_exit_bandwidth_exit_attack'];
+            $arr['adv_exit_bandwidth_exit_attack'] = $adv_exit_bandwidth_exit_attack * pow(10,6);
+        } else{
+            $arr['adv_exit_bandwidth_exit_attack'] = "0";
         }
     }
 

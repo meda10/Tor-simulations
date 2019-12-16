@@ -5,8 +5,20 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+    <!-- Bootstrap 4 + tables
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+    -->
     <script src="js/show.js"></script>
     <script src="js/fill.js"></script>
     <script src="js/add_nodes.js"></script>
@@ -47,7 +59,9 @@
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path">Path</option>
                                 <option value="hidden_service">Hidden service</option>
-                                <option value="attack">Attack</option>
+                                <option value="attack">Correlation attack</option>
+                                <option value="exit_attack">Exit attack</option>
+                                <option value="multiple_sim">Multiple simulations</option>
                             </select>
                         </div>
                     </div>
@@ -124,6 +138,11 @@
                     </div>
                     <div id="hidden_div_attack" style="display:none">
                         <div class="control-group required">
+                            <div class="control-label"><label for="encryption_attack">Encryption(%):</label></div>
+                            <div class="controls"><input class="second_row" id="encryption_attack" min="0" name="encryption_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
                             <div class="control-label"><label for="guard_attack">Guard:</label></div>
                             <div class="controls"><input class="second_row" id="guard_attack" min="0" name="guard_attack"
                                                          type="number"></div>
@@ -160,6 +179,40 @@
                             </div>
                             <div class="controls"><input class="second_row" id="adv_exit_bandwidth" min="0"
                                                          name="adv_exit_bandwidth" type="number"></div>
+                        </div>
+                    </div>
+                    <div id="hidden_div_exit_attack" style="display:none">
+                        <div class="control-group required">
+                            <div class="control-label"><label for="encryption_exit_attack">Encryption(%):</label></div>
+                            <div class="controls"><input class="second_row" id="encryption_exit_attack" min="0" name="encryption_exit_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="guard_exit_attack">Guard:</label></div>
+                            <div class="controls"><input class="second_row" id="guard_exit_attack" min="0" name="guard_exit_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="exit_exit_attack">Exit:</label></div>
+                            <div class="controls"><input class="second_row" id="exit_exit_attack" min="0" name="exit_exit_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="number_of_simulations_exit_attack">Number of
+                                simulations:</label></div>
+                            <div class="controls"><input class="second_row" id="number_of_simulations_exit_attack" min="1"
+                                                         name="number_of_simulations_exit_attack" type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="adv_exit_exit_attack">Adversary exit:</label></div>
+                            <div class="controls"><input class="second_row" id="adv_exit_exit_attack" min="0" name="adv_exit_exit_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="adv_exit_bandwidth_exit_attack">Adversary exit bandwidth:</label>
+                            </div>
+                            <div class="controls"><input class="second_row" id="adv_exit_bandwidth_exit_attack" min="0"
+                                                         name="adv_exit_bandwidth_exit_attack" type="number"></div>
                         </div>
                     </div>
                     <div class="control-group" id="not_path_submit" style="display: none">
@@ -230,6 +283,14 @@
                                 <p>INFO attack 6</p>
                             </div>
                         </div>
+                        <div id="info_exit_attack" style="display: none;">
+                            <div class="example">
+                                <p>INFO exit attack 1</p>
+                            </div>
+                            <div class="example">
+                                <p>INFO exit attack 2</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
                         <div id="example_path">
@@ -276,6 +337,18 @@
                                 <h5>Example 2</h5>
                                 <p>Attack 300 60 60</p>
                                 <button class="btn btn-secondary" id="attack_example_2" type="button">Run</button>
+                            </div>
+                        </div>
+                        <div id="example_exit_attack" style="display: none;">
+                            <div class="example">
+                                <h5>Example 1</h5>
+                                <p>New example not working</p>
+                                <button class="btn btn-secondary" id="exit_attack_example_1" type="button">Run</button>
+                            </div>
+                            <div class="example">
+                                <h5>Example 2</h5>
+                                <p>New example</p>
+                                <button class="btn btn-secondary" id="exit_attack_example_2" type="button">Run</button>
                             </div>
                         </div>
                     </div>
