@@ -2,7 +2,6 @@
 
 include 'backend.php';
 
-
 if ( isset( $_GET['submit'] ) ) {
     $firstname = $_GET['name']; $lastname = $_GET['address'];
     echo '<h3>Form GET Method</h3>';
@@ -234,14 +233,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 
     $command = escapeshellcmd('./sim.py');
     //$output = shell_exec($command);
-    exec($command, $op, $ret);
+    exec($command.' 2> error.log', $op, $ret);
     if($ret != 0) {
         # echo "Error: xx\n";
+        echo "<h3>Error</h3>";
+        echo "<p>There was an error, you can find more information in  error.log</p>";
         foreach ($op as $item) {
             echo $item;
             echo "<br>";
         }
         # echo $ret;
+        return 0;
     }else{
         create_graph_page();
         header('Location:graph.html');
