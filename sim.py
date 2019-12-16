@@ -57,8 +57,9 @@ def parse_config_file(file):
     except KeyError as e:
         print('Key Error: {}'.format(e))
         sys.exit(1)
-    except ValueError:
-        ...
+    except ValueError as e:
+        print("Value Error: {}".format(e))
+        sys.exit(1)
     except configparser.NoOptionError as e:
         print("Key Error: {}".format(e))
         sys.exit(1)
@@ -76,8 +77,8 @@ def parse_config_file(file):
             dic['adv_exit_bandwidth'] = 0
             dic['path_selection'] = config['path_simulation']['path_selection']
             dic['simulation_size'] = config['path_simulation']['simulation_size']
-        except ValueError:
-            print()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
             sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
@@ -99,9 +100,9 @@ def parse_config_file(file):
             dic['adv_guard_bandwidth'] = 0
             dic['adv_exit_bandwidth'] = 0
             dic['path_selection'] = 'random'
-        except ValueError:
-            print()
-            sys.exit()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
+            sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
             sys.exit(1)
@@ -118,8 +119,8 @@ def parse_config_file(file):
             dic['adv_exit_bandwidth'] = config.getint('attack_simulation', 'adv_exit_bandwidth')
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('attack_simulation', 'encryption')
-        except ValueError:
-            print()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
             sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
@@ -137,8 +138,8 @@ def parse_config_file(file):
             dic['adv_exit_bandwidth'] = config.getint('exit_attack', 'adv_exit_bandwidth')
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('exit_attack', 'encryption')
-        except ValueError:
-            print()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
             sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
@@ -147,11 +148,12 @@ def parse_config_file(file):
         try:
             dic['number_of_simulations'] = config.getint('attack_simulation', 'number_of_simulations')
             dic['path_selection'] = 'random'
-        except ValueError:
-            print()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
             sys.exit(1)
-        except KeyError:
-            ...
+        except KeyError as e:
+            print("Key Error: {}".format(e))
+            sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
             sys.exit(1)
@@ -172,11 +174,11 @@ def parse_config_file(file):
                     sim['adv_exit_bandwidth'] = config.getint(s, 'adv_exit_bandwidth')
                     sim['path_selection'] = 'random'
                     all_sims.append(sim)
-        except KeyError:
-            print('Key Error: ')
+        except KeyError as e:
+            print('Key Error: {}'.format(e))
             sys.exit(1)
-        except ValueError:
-            print()
+        except ValueError as e:
+            print("Value Error: {}".format(e))
             sys.exit(1)
         except configparser.NoOptionError as e:
             print("Key Error: {}".format(e))
