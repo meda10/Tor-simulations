@@ -816,9 +816,9 @@ def create_html(sim_type):
     
     output_file = Path(cwd + '/picture.html')
     svg_file = Path(cwd + '/graph/simulation.dot.svg')
-    exit_bandwidth = Path(cwd + '/graph/exit_bandwidth.png')
-    guard_bandwidth = Path(cwd + '/graph/guard_bandwidth.png')
-    encryption = Path(cwd + '/graph/encryption.png')
+    exit_bandwidth_file_path = Path(cwd + '/graph/exit_bandwidth.png')
+    guard_bandwidth_file_path = Path(cwd + '/graph/guard_bandwidth.png')
+    encryption_file_path = Path(cwd + '/graph/encryption.png')
     svg_file_legend = Path(cwd + '/graph/legend.dot.svg')
     if sim_type != 'multiple_sim':
         try:
@@ -837,10 +837,6 @@ def create_html(sim_type):
             print(e)
             sys.exit(1)
     else:
-        cwd = os.getcwd()
-        exit_bandwidth_file_path = Path(cwd + '/' + exit_bandwidth)
-        guard_bandwidth_file_path = Path(cwd + '/' + guard_bandwidth)
-        encryption_file_path = Path(cwd + '/' + encryption)
         if not exit_bandwidth_file_path.exists():
             print("File Error: Can not read file {}".format(exit_bandwidth_file_path))
             sys.exit(1)
