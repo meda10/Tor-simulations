@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $cwd = getcwd();
             chdir($cwd);
             //$arg = escapeshellarg('-i conf/'.$file_name);
-            $command = escapeshellcmd('./sim.py -i /conf/'.$file_name);
+            $command = escapeshellcmd('./sim.py -i "/conf/'.$file_name.'"');
             exec($command.' 2> error.log', $op, $ret);
             if ($ret != 0) {
                 # echo "Error: xx\n";
