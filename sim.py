@@ -828,14 +828,6 @@ def create_html(sim_type):
         except (OSError, IOError) as e:
             print("File Error: Can not read file {}".format(svg_file))
             sys.exit(1)
-        try:
-            with open(svg_file_legend, 'r') as svg:
-                legend = svg.read()
-                svg.close()
-        except (OSError, IOError) as e:
-            print("File Error: Can not read file {}".format(svg_file_legend))
-            print(e)
-            sys.exit(1)
     else:
         if not exit_bandwidth_file_path.exists():
             print("File Error: Can not read file {}".format(exit_bandwidth_file_path))
@@ -851,6 +843,14 @@ def create_html(sim_type):
             "<img src=\"graph/guard_bandwidth.png\" alt=\"Guard bandwidth\">"\
             "<img src=\"graph/encryption.png\" alt=\"Encryption\">"\
             "</div>"
+    try:
+        with open(svg_file_legend, 'r') as svg:
+            legend = svg.read()
+            svg.close()
+    except (OSError, IOError) as e:
+        print("File Error: Can not read file {}".format(svg_file_legend))
+        print(e)
+        sys.exit(1)
 
     try:
         with open(output_file, 'w') as html_file:
