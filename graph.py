@@ -2189,7 +2189,7 @@ class GraphGenerator:
                             fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='box',
                             height='0.3', width='0.3')
             else:
-                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='box',
+                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="FF000000", shape='box',
                            height='0.3', width='0.3')  # guard was not used
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
         for i in range(self.adv_guard_c + 1, self.adv_guard_c + 1 + self.adv_exit_c):
@@ -2204,7 +2204,7 @@ class GraphGenerator:
                            fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='circle',
                            height='0.3', width='0.3')
             else:
-                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='circle',
+                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="FF000000", shape='circle',
                            height='0.3', width='0.3')  # exit was not used
 
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
