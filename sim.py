@@ -439,9 +439,9 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
         with open(statistic_file, 'a') as file:
             json.dump(statistic, file, indent=4, sort_keys=True)
 
-    node_usage.subtract(encrypted_attacker_guard)
-    node_usage.subtract(encrypted_attacker_middle)
-    node_usage.subtract(encrypted_attacker_exit)
+    # node_usage.subtract(encrypted_attacker_guard)
+    # node_usage.subtract(encrypted_attacker_middle)
+    # node_usage.subtract(encrypted_attacker_exit)
 
 
     """
@@ -454,8 +454,11 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
     """
     dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
     for k in node_usage.keys():
-        color[k] = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
-    data = [circuits, color, statistic]
+        encrypted_usage = (100 * (encrypted_node_usage['{}'.format(k)])) / node_usage[k]
+        blue = hex(round((255 * encrypted_usage / 100)))[2:]
+        alpha = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
+        color[k] = (alpha, blue)
+    data = [circuits, color, statistic, node_usage]
     return data
 
 

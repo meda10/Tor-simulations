@@ -2157,7 +2157,7 @@ class GraphGenerator:
 
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit color??
             try:
-                color = str(self.color[str(r.address)])
+                color = str(self.color[str(r.address)][0])
                 if len(color) == 1:
                     color = '0{}'.format(color)
                 if 'Guard' in r.flags:
@@ -2179,17 +2179,29 @@ class GraphGenerator:
 
         for i in range(1, self.adv_guard_c + 1):
             if '10.{}.0.0'.format(i) in self.color.keys():
+                alpha = self.color['10.{}.0.0'.format(i)][0]
+                encryption_color = self.color['10.{}.0.0'.format(i)][1]
+                if len(alpha) == 1:
+                    alpha = '0{}'.format(alpha)
+                if len(encryption_color) == 1:
+                    encryption_color = '0{}'.format(encryption_color)
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
-                           fillcolor="#FF0000{}".format(self.color['10.{}.0.0'.format(i)]), shape='box',
-                           height='0.3', width='0.3')
+                            fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='box',
+                            height='0.3', width='0.3')
             else:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='box',
                            height='0.3', width='0.3')  # guard was not used
             graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
         for i in range(self.adv_guard_c + 1, self.adv_guard_c + 1 + self.adv_exit_c):
             if '10.{}.0.0'.format(i) in self.color.keys():
+                alpha = self.color['10.{}.0.0'.format(i)][0]
+                encryption_color = self.color['10.{}.0.0'.format(i)][1]
+                if len(alpha) == 1:
+                    alpha = '0{}'.format(alpha)
+                if len(encryption_color) == 1:
+                    encryption_color = '0{}'.format(encryption_color)
                 graph.node('10.{}.0.0'.format(i), label="", style='filled',
-                           fillcolor="#FF0000{}".format(self.color['10.{}.0.0'.format(i)]), shape='circle',
+                           fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='circle',
                            height='0.3', width='0.3')
             else:
                 graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="green", shape='circle',
