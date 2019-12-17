@@ -245,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         # echo $ret;
         return 0;
     }else{
-        create_graph_page();
+        create_graph_page($arr['simulation_type']);
         header('Location:graph.html');
     }
 }

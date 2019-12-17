@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if ($file_size > 2097152) {
-            $errors[] = 'File size must be excately 2 MB';
+            $errors[] = 'File size must be max 2 MB';
         }
 
         if (file_exists("conf/" . $file_name)) {
@@ -34,18 +34,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $cwd = getcwd();
             chdir($cwd);
-
-            $command = escapeshellcmd('./sim.py -i conf/' . $file_name);
-            exec($command, $op, $ret);
+            //$arg = escapeshellarg('-i conf/'.$file_name);
+            $command = escapeshellcmd('./sim.py -i /conf/'.$file_name);
+            exec($command.' 2> error.log', $op, $ret);
             if ($ret != 0) {
                 # echo "Error: xx\n";
+                echo "<h3>Error</h3>";
+                echo "<p>There was an error, you can find more information in  error.log</p>";
                 foreach ($op as $item) {
                     echo $item;
                     echo "<br>";
                 }
                 # echo $ret;
+                return 0;
             } else {
-                create_graph_page();
+                $config = parse_ini_file($cwd.'/conf/'.$file_name, true, INI_SCANNER_RAW);
+                create_graph_page($config['general']['simulation_type']);
                 header('Location:graph.html');
             }
 

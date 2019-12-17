@@ -62,7 +62,7 @@ function write_ini_file($file, $array = []) {
 
 
 function parse_arguments($arr, $number_of_user_nodes){
-    $config = parse_ini_file('config.ini', true, INI_SCANNER_RAW);
+    $config = parse_ini_file('/conf/config.ini', true, INI_SCANNER_RAW);
 
     $i = 0;
     while ($config['node'.$i] != NULL){
@@ -197,11 +197,20 @@ function create_usage_table(){
     return $table;
 }
 
-function create_graph_page(){
+function create_graph_page($sim_type){
     $cwd = getcwd();
     //$graph_file = fopen($cwd."/graph/simulation.dot.svg", "r") or die("Unable to open simulaton file!");
     //$legend_file = fopen($cwd."/graph/legend.dot.svg", "r") or die("Unable to open legend file!");
-    $graph = file_get_contents($cwd."/graph/simulation.dot.svg");
+    if($sim_type == 'multiple_sim'){
+        $graph = "<div style='display: flex; flex-flow: wrap;'>
+                  <img src=\"graph/exit_bandwidth.png\" alt=\"Exit bandwidth\">
+                  <img src=\"graph/guard_bandwidth.png\" alt=\"Guard bandwidth\">
+                  <img src=\"graph/encryption.png\" alt=\"Encryption\">
+                  </div>
+                 ";
+    }else{
+        $graph = file_get_contents($cwd."/graph/simulation.dot.svg");
+    }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
     //fclose($graph_file);
     //fclose($legend_file);
