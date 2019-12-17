@@ -75,6 +75,7 @@ def parse_config_file(file):
             dic['adv_guard'] = 0
             dic['adv_guard_bandwidth'] = 0
             dic['adv_exit_bandwidth'] = 0
+            dic['encryption'] = 0
             dic['path_selection'] = config['path_simulation']['path_selection']
             dic['simulation_size'] = config['path_simulation']['simulation_size']
         except ValueError as e:
@@ -99,6 +100,7 @@ def parse_config_file(file):
             dic['adv_guard'] = 0
             dic['adv_guard_bandwidth'] = 0
             dic['adv_exit_bandwidth'] = 0
+            dic['encryption'] = 0
             dic['path_selection'] = 'random'
         except ValueError as e:
             print("Value Error: {}".format(e))
@@ -943,7 +945,7 @@ if __name__ == '__main__':
             elif Path(arg).exists():
                 input_file = arg
             else:
-                print('Invalid file')
+                print('Invalid file {}'.format(arg))
                 sys.exit(1)
 
     run_simulation(input_file)
