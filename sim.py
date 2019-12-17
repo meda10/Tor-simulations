@@ -264,7 +264,7 @@ def run_simulation(file):
                            sim_type=config[0]['simulation_type'])
         GraphGenerator.generate_graph(g)
     if config[0]['create_html'] and config[0]['generate_graph']:
-        create_html()
+        create_html(config[0]['simulation_type'])
 
 
 def write_descriptors(descs, filename):
@@ -400,7 +400,7 @@ def get_circuits(remove_duplicate_paths, routers, guard_bandwidth, exit_bandwidt
         except KeyError:
             node_statistics['{}'.format(r.address)] = (0, bandwidth, round(encrypted_usage))   # todo maybe key error for encrypted
         except ZeroDivisionError:
-            node_statistics['{}'.format(r.address)] = (0, bandwidth, 100)
+            node_statistics['{}'.format(r.address)] = (0, bandwidth, 0)
 
     if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
         for node in attackers_guards:
@@ -811,27 +811,51 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
         return descriptor_entries
 
 
-def create_html():
+def create_html(sim_type):
     cwd = os.getcwd()
     
     output_file = Path(cwd + '/picture.html')
     svg_file = Path(cwd + '/graph/simulation.dot.svg')
+    exit_bandwidth = Path(cwd + '/graph/exit_bandwidth.png')
+    guard_bandwidth = Path(cwd + '/graph/guard_bandwidth.png')
+    encryption = Path(cwd + '/graph/encryption.png')
     svg_file_legend = Path(cwd + '/graph/legend.dot.svg')
-    try:
-        with open(svg_file, 'r') as svg:
-            s = svg.read()
-            svg.close()
-    except (OSError, IOError) as e:
-        print("File Error: Can not read file {}".format(svg_file))
-        sys.exit(1)
-    try:
-        with open(svg_file_legend, 'r') as svg:
-            legend = svg.read()
-            svg.close()
-    except (OSError, IOError) as e:
-        print("File Error: Can not read file {}".format(svg_file_legend))
-        print(e)
-        sys.exit(1)
+    if sim_type != 'multiple_sim':
+        try:
+            with open(svg_file, 'r') as svg:
+                s = svg.read()
+                svg.close()
+        except (OSError, IOError) as e:
+            print("File Error: Can not read file {}".format(svg_file))
+            sys.exit(1)
+        try:
+            with open(svg_file_legend, 'r') as svg:
+                legend = svg.read()
+                svg.close()
+        except (OSError, IOError) as e:
+            print("File Error: Can not read file {}".format(svg_file_legend))
+            print(e)
+            sys.exit(1)
+    else:
+        cwd = os.getcwd()
+        exit_bandwidth_file_path = Path(cwd + '/' + exit_bandwidth)
+        guard_bandwidth_file_path = Path(cwd + '/' + guard_bandwidth)
+        encryption_file_path = Path(cwd + '/' + encryption)
+        if not exit_bandwidth_file_path.exists():
+            print("File Error: Can not read file {}".format(exit_bandwidth_file_path))
+            sys.exit(1)
+        if not guard_bandwidth_file_path.exists():
+            print("File Error: Can not read file {}".format(guard_bandwidth_file_path))
+            sys.exit(1)
+        if not encryption_file_path.exists():
+            print("File Error: Can not read file {}".format(encryption_file_path))
+            sys.exit(1)
+        s = "<div style='display: flex; flex-flow: wrap;'>"\
+            "<img src=\"graph/exit_bandwidth.png\" alt=\"Exit bandwidth\">"\
+            "<img src=\"graph/guard_bandwidth.png\" alt=\"Guard bandwidth\">"\
+            "<img src=\"graph/encryption.png\" alt=\"Encryption\">"\
+            "</div>"
+
     try:
         with open(output_file, 'w') as html_file:
             html_file.write(
