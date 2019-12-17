@@ -2284,3 +2284,4 @@ class GraphGenerator:
         plt.savefig('graph/encryption.png', bbox_inches='tight')
         plt.clf()
 
+        self.generate_graph_legend('attack')
