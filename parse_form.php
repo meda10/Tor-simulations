@@ -50,11 +50,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         $arr['same_bandwidth'] = $same_bandwidth;
     }
 
-    if (!empty($_POST['bandwidth_value'])) {
-        $bandwidth_value = $_POST['bandwidth_value'];
-        $arr['bandwidth_value'] = $bandwidth_value * pow(10,6);
+    if (!empty($_POST['guard_bandwidth_value'])) {
+        $guard_bandwidth_value = $_POST['guard_bandwidth_value'];
+        $arr['guard_bandwidth_value'] = $guard_bandwidth_value * pow(10,6);
     } else{
-        $arr['bandwidth_value'] = '';
+        $arr['guard_bandwidth_value'] = '';
+    }
+
+    if (!empty($_POST['middle_bandwidth_value'])) {
+        $middle_bandwidth_value = $_POST['middle_bandwidth_value'];
+        $arr['middle_bandwidth_value'] = $middle_bandwidth_value * pow(10,6);
+    } else{
+        $arr['middle_bandwidth_value'] = '';
+    }
+
+    if (!empty($_POST['exit_bandwidth_value'])) {
+        $exit_bandwidth_value = $_POST['bandwidth_value'];
+        $arr['exit_bandwidth_value'] = $exit_bandwidth_value * pow(10,6);
+    } else{
+        $arr['exit_bandwidth_value'] = '';
     }
 
     if($simulation_type == 'path'){

@@ -77,9 +77,18 @@
                                    onchange="java_script_:show_bandwidth()">
                         </div>
                     </div>
-                    <div id="bandwidth_value_div" class="control-group" style="display: none">
-                        <div class="control-label"><label for="bandwidth_value">Bandwidth (optional) B/s:</label></div>
-                        <div class="controls"><input class="second_row" id="bandwidth_value" min="1" name="bandwidth_value" type="number">
+                    <div id="bandwidth_value_div" style="display: none">
+                        <div class="control-group">
+                            <div class="control-label"><label for="guard_bandwidth_value">Bandwidth guard (optional) B/s:</label></div>
+                            <div class="controls"><input class="second_row" id="guard_bandwidth_value" min="1" name="guard_bandwidth_value" type="number"></div>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label"><label for="middle_bandwidth_value">Bandwidth middle (optional) B/s:</label></div>
+                            <div class="controls"><input class="second_row" id="middle_bandwidth_value" min="1" name="middle_bandwidth_value" type="number"></div>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label"><label for="exit_bandwidth_value">Bandwidth exit (optional) B/s:</label></div>
+                            <div class="controls"><input class="second_row" id="exit_bandwidth_value" min="1" name="exit_bandwidth_value" type="number"></div>
                         </div>
                     </div>
                     <div id="hidden_div_path" style="display:grid">

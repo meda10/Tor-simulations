@@ -73,7 +73,9 @@ function parse_arguments($arr, $number_of_user_nodes){
     $config['general']['simulation_type'] = $arr['simulation_type'];
     $config['general']['remove_duplicate_paths'] = $arr['remove_duplicate_paths'];
     $config['general']['same_bandwidth'] = $arr['same_bandwidth'];
-    $config['general']['bandwidth_value'] = $arr['bandwidth_value'];
+    $config['general']['guard_bandwidth_value'] = $arr['guard_bandwidth_value'];
+    $config['general']['middle_bandwidth_value'] = $arr['middle_bandwidth_value'];
+    $config['general']['exit_bandwidth_value'] = $arr['exit_bandwidth_value'];
     $config['general']['generate_graph'] = 'True';
     $config['general']['create_html'] = 'True';
     $config['general']['path'] = '/home/petr/torps';
@@ -181,14 +183,14 @@ function create_usage_table(){
                      <td class='red' style='background-color: #ff7569'>" . $key . "</td>
                      <td class='red' style='background-color: #ff7569'>" . $value[0] . "</td>
                      <td class='red' style='background-color: #ff7569'>" . $value[1] . "</td>
-                     <td class='red' style='background-color: #ff7569'>" . $value[2] . "</td>
+                     <td class='red' style='background-color: #ff7569'>" . $value[2] . "%</td>
                      </tr>";
         }else{
             $html = "<tr>
                      <td>" . $key . "</td>
                      <td>" . $value[0] . "</td>
                      <td>" . $value[1] . "</td>
-                     <td>" . $value[2] . "</td>
+                     <td>" . $value[2] . "%</td>
                      </tr>";
         }
         $table = $table . $html;
@@ -215,7 +217,6 @@ function create_graph_page($sim_type){
     //fclose($graph_file);
     //fclose($legend_file);
     $html_table = create_table();
-    $usage_table = create_usage_table();
 
     /*
                     <link rel=\"stylesheet\" href=\"resources//animation.css\">
@@ -266,6 +267,7 @@ function create_graph_page($sim_type){
                     <script src=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js\"></script>
                     -->
                     <script src=\"js/show.js\"></script>
+                    <script src=\"js/table_filter.js\"></script>
                     <title>Simulator</title>
                 </head>
                 <body>
@@ -316,7 +318,7 @@ function create_graph_page($sim_type){
                         </div>
                     </div>
                     <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
-                        <table class=\"table table-striped\">
+                        <table class=\"table\">
                             <thead>
                             <tr>
                                 <th scope=\"col\">#</th>
@@ -331,23 +333,40 @@ function create_graph_page($sim_type){
                         </table>
                     </div>
                     <div class=\"tab-pane fade\" id=\"usage\" role=\"tabpanel\" aria-labelledby=\"usage_tab\">
-                        <table id=\"usage_table_sorted\" class=\"table table-striped\" data-toggle=\"table\" data-toolbar=\".toolbar\" data-sortable=\"true\">
+                        <label><input id=\"filter_checkbox\" type=\"checkbox\">Show only enemy nodes</label>    
+                        <table id=\"usage_table_sorted\" 
+                                class=\"table\" 
+                                data-toggle=\"table\" 
+                                data-toolbar=\".toolbar\" 
+                                data-sortable=\"true\"
+                                data-search=\"true\"
+                                data-search-align=\"left\"
+                                data-row-style=\"rowStyle\"
+                                data-url=\"torps/out/simulation/usage.json\">
                             <thead>
                             <tr>
-                                <th data-field=\"0\" data-sortable=\"true\" scope=\"col\">IP</th>
-                                <th data-field=\"1\" data-sortable=\"true\" scope=\"col\">Usage</th>
-                                <th data-field=\"2\" data-sortable=\"true\" scope=\"col\">MB/s</th>
-                                <th data-field=\"3\" data-sortable=\"true\" scope=\"col\">Encryp. %</th>
+                                <th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
+                                <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
+                                <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
+                                <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>
                             </tr>
                             </thead>
-                            <tbody>
-                                " .$usage_table. "
-                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
+        <script>
+            function rowStyle(row) {
+                if (row.affiliation === true) {
+                    return {
+                        classes: 'red'
+                    }
+                }
+                return {}
+            }
+            $( \"usage_table_sorted\" ).removeClass( \"table-hover\" );
+        </script>
     </div>";
 
     $html_file = fopen("graph.html", "w") or die("Unable to open html file!");
