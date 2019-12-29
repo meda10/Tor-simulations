@@ -6,6 +6,7 @@ import sys
 import math
 import collections
 import getopt
+import re
 import pprint
 
 
@@ -443,7 +444,13 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     node_statistics['{}'.format(node)] = (usage, '-', 0)
 
     with open(output_file, 'w') as file:
-        json.dump(node_statistics, file, indent=4, sort_keys=True)
+        new_list = []
+        for node in node_statistics.keys():
+            json_dmp = {'ip': node, 'usage': node_statistics[node][0], 'bandwidth': node_statistics[node][1],
+                        'encryption': node_statistics[node][2],
+                        'affiliation': True if re.match(r"10\.[0-9]{1,3}\.0\.0", node) else False}
+            new_list.append(json_dmp)
+        json.dump(new_list, file, indent=4, sort_keys=True)
         # json.dump(collections.OrderedDict(sorted(node_statistics.items(), key=lambda kv: kv[1], reverse=True)),
         # file, indent=4, sort_keys=True)
 
