@@ -373,7 +373,10 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
-            circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2]}
+            if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
+                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
+            else:
+                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False}
             circuit_list.append(circuit_entry)
             node_usage.update(circuit)
             if circuit not in circuits and remove_duplicate_paths:

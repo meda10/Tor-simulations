@@ -59,7 +59,7 @@
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path">Path</option>
                                 <option value="hidden_service">Hidden service</option>
-                                <option value="attack">Correlation attack</option>
+                                <option value="attack">Attack</option>
                                 <option value="exit_attack">Exit attack</option>
                                 <option value="multiple_sim">Multiple simulations</option>
                             </select>
@@ -149,6 +149,11 @@
                         <div class="control-group required">
                             <div class="control-label"><label for="encryption_attack">Encryption(%):</label></div>
                             <div class="controls"><input class="second_row" id="encryption_attack" min="0" name="encryption_attack"
+                                                         type="number"></div>
+                        </div>
+                        <div class="control-group required">
+                            <div class="control-label"><label for="identification_occurrence_attack">ID occurrence(%):</label></div>
+                            <div class="controls"><input class="second_row" id="identification_occurrence_attack" min="0" name="identification_occurrence_attack"
                                                          type="number"></div>
                         </div>
                         <div class="control-group required">

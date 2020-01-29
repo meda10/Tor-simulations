@@ -101,6 +101,7 @@ function parse_arguments($arr, $number_of_user_nodes){
         $config['hiden_service_simulation']['nodes'] = $arr['nodes_hs'];
     } else if ($arr['simulation_type']  == 'attack'){
         $config['attack_simulation']['encryption'] = $arr['encryption_attack'];
+        $config['attack_simulation']['identification_occurrence'] = $arr['identification_occurrence_attack'];
         $config['attack_simulation']['guard'] = $arr['guard_attack'];
         $config['attack_simulation']['exit'] = $arr['exit_attack'];
         $config['attack_simulation']['number_of_simulations'] = $arr['number_of_simulations_attack'];
@@ -137,68 +138,6 @@ function create_zip(){
     }
 }
 
-function create_table(){
-    $table = "";
-    $cwd = getcwd();
-    $output = file_get_contents($cwd . "/torps//out/simulation/output");
-    $i = 0;
-    foreach (preg_split("/((\r?\n)|(\r\n?))/", $output) as $line) {
-        if (!empty($line)) {
-            if ($i >= 1) {
-                $parts = preg_split('/\s+/', $line);
-                $x = $i - 1;
-
-                if(preg_match('/10.\d{1,3}.0.0/', $parts[2]) && preg_match('/10.\d{1,3}.0.0/', $parts[4])){
-                    $html = "<tr style='background-color: #ff7569'>
-                        <th style='background-color: #ff7569'>" . $x . "</th>
-                        <td style='background-color: #ff7569'>" . $parts[2] . "</td>
-                        <td style='background-color: #ff7569'>" . $parts[3] . "</td>
-                        <td style='background-color: #ff7569'>" . $parts[4] . "</td>
-                     </tr>";
-                }else{
-                    $html = "<tr>
-                        <th>" . $x . "</th>
-                        <td>" . $parts[2] . "</td>
-                        <td>" . $parts[3] . "</td>
-                        <td>" . $parts[4] . "</td>
-                     </tr>";
-                }
-                $table = $table . $html;
-            }
-        }
-        $i++;
-    }
-    return $table;
-}
-
-function create_usage_table(){
-    $table = "";
-    $cwd = getcwd();
-    $output = file_get_contents($cwd . "/torps/out/simulation/usage.json");
-
-    $arr = json_decode($output, true);
-    foreach ($arr as $key => $value){
-        if(preg_match('/10.\d{1,3}.0.0/', $key)){
-            $html = "<tr class='red' style='background-color: #ff7569'>
-                     <td class='red' style='background-color: #ff7569'>" . $key . "</td>
-                     <td class='red' style='background-color: #ff7569'>" . $value[0] . "</td>
-                     <td class='red' style='background-color: #ff7569'>" . $value[1] . "</td>
-                     <td class='red' style='background-color: #ff7569'>" . $value[2] . "%</td>
-                     </tr>";
-        }else{
-            $html = "<tr>
-                     <td>" . $key . "</td>
-                     <td>" . $value[0] . "</td>
-                     <td>" . $value[1] . "</td>
-                     <td>" . $value[2] . "%</td>
-                     </tr>";
-        }
-        $table = $table . $html;
-    }
-
-    return $table;
-}
-
 function create_graph_page($sim_type){
     $cwd = getcwd();
     //$graph_file = fopen($cwd."/graph/simulation.dot.svg", "r") or die("Unable to open simulaton file!");
@@ -213,11 +152,23 @@ function create_graph_page($sim_type){
     }else{
         $graph = file_get_contents($cwd."/graph/simulation.dot.svg");
     }
-    $legend = file_get_contents($cwd."/graph/legend.dot.svg");
-    //fclose($graph_file);
-    //fclose($legend_file);
-    $html_table = create_table();
 
+    $output_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                     <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                     <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
+    
+    if($sim_type == 'attack'){
+        $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
+                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
+                        <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
+                        <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
+    }else{
+        $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
+                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
+                        <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
+                        <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
+    }
+    $legend = file_get_contents($cwd."/graph/legend.dot.svg");
     /*
                     <link rel=\"stylesheet\" href=\"resources//animation.css\">
                     <script defer=\"\" src=\"resources//animation.js\"></script>
@@ -318,18 +269,21 @@ function create_graph_page($sim_type){
                         </div>
                     </div>
                     <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
-                        <table class=\"table\">
+                        <label><input id=\"filter_checkbox\" type=\"checkbox\">Show only enemy nodes</label>    
+                        <table id=\"output_table_sorted\" 
+                                class=\"table\" 
+                                data-toggle=\"table\" 
+                                data-toolbar=\".toolbar\" 
+                                data-sortable=\"true\"
+                                data-search=\"true\"
+                                data-search-align=\"left\"
+                                data-row-style=\"rowStyle\"
+                                data-url=\"torps/out/simulation/output.json\">
                             <thead>
                             <tr>
-                                <th scope=\"col\">#</th>
-                                <th scope=\"col\">Guard</th>
-                                <th scope=\"col\">Middle</th>
-                                <th scope=\"col\">Exit</th>
+                                ".$output_table."
                             </tr>
                             </thead>
-                            <tbody>
-                                " . $html_table . "
-                            </tbody>
                         </table>
                     </div>
                     <div class=\"tab-pane fade\" id=\"usage\" role=\"tabpanel\" aria-labelledby=\"usage_tab\">
@@ -345,10 +299,7 @@ function create_graph_page($sim_type){
                                 data-url=\"torps/out/simulation/usage.json\">
                             <thead>
                             <tr>
-                                <th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
-                                <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
-                                <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
-                                <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>
+                                ".$usage_table."
                             </tr>
                             </thead>
                         </table>
@@ -366,6 +317,7 @@ function create_graph_page($sim_type){
                 return {}
             }
             $( \"usage_table_sorted\" ).removeClass( \"table-hover\" );
+            $( \"output_table_sorted\" ).removeClass( \"table-hover\" );
         </script>
     </div>";
 

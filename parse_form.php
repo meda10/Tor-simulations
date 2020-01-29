@@ -146,6 +146,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             $arr['encryption_attack'] = "0";
         }
 
+        if (!empty($_POST['identification_occurrence_attack'])) {
+            $encryption_attack = $_POST['identification_occurrence_attack'];
+            $arr['identification_occurrence_attack'] = $encryption_attack;
+        } else{
+            $arr['identification_occurrence_attack'] = "0";
+        }
+
         if (!empty($_POST['guard_attack'])) {
             $guard_attack = $_POST['guard_attack'];
             $arr['guard_attack'] = $guard_attack;

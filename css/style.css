@@ -316,6 +316,7 @@ text-transform: uppercase;
 .red {
     background-color: #ff7569
 }
+
 #usage_table_sorted .red {
     background-color: #ff7569
 }
@@ -325,6 +326,19 @@ text-transform: uppercase;
 }
 
 #usage .fixed-table-body {
+    overflow-x: unset;
+    overflow-y: unset;
+}
+
+#output_table_sorted .red {
+    background-color: #ff7569
+}
+
+#output_table_sorted tr:hover > td, tbody tr:hover > th {
+    background-color: unset;
+}
+
+#path .fixed-table-body {
     overflow-x: unset;
     overflow-y: unset;
 }
