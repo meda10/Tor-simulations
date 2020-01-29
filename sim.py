@@ -335,6 +335,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     attackers_guards = []
     attackers_exits = []
     attackers_middle = []
+    circuit_list = []
     color = {}
     node_usage = collections.Counter()
     id_node_usage = collections.Counter()
@@ -372,6 +373,8 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
+            circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2]}
+            circuit_list.append(circuit_entry)
             node_usage.update(circuit)
             if circuit not in circuits and remove_duplicate_paths:
                 circuits.append(circuit)
@@ -421,6 +424,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     if encrypted:
                         statistic.update(['bad_gu_and_ex_encrypt'])
 
+    create_output_json(circuit_list)
     create_statistic(loop_count, statistic)
     create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandwidth, node_usage, encrypted_node_usage,
                           attackers_guards, attackers_exits, attackers_middle, id_node_usage, id_stolen_node_usage)
@@ -440,7 +444,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
         # add nodes that were not in enemy circuts
         for node in id_node_usage:
             if node not in id_stolen_node_usage.keys():
-                id_stolen_node_usage['{}'.format(node)] = 0  #  id_node_usage[node]
+                id_stolen_node_usage['{}'.format(node)] = 0  # id_node_usage[node]
 
         # statistic: enemy nodes - stolen count | friendly nodes - not stolen count
         for node in id_stolen_node_usage.keys():
@@ -460,10 +464,18 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     return data
 
 
+def create_output_json(circuit_list):
+    cwd = os.getcwd()
+    output_file_path_json = Path(cwd + '/torps/out/simulation/output.json')
+
+    with open(output_file_path_json, 'w') as file:
+        json.dump(circuit_list, file, indent=4, sort_keys=True)
+
+
 def create_statistic(loop_count, statistic):
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/simulation')
-    statistic_file = Path(cwd + '/torps/out/simulation/statistic')
+    statistic_file = Path(cwd + '/torps/out/simulation/statistic.json')
 
     if not output_folder.exists():
         output_folder.mkdir(parents=True)
