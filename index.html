@@ -59,7 +59,7 @@
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path">Path</option>
                                 <option value="hidden_service">Hidden service</option>
-                                <option value="attack">Attack</option>
+                                <option value="attack" selected>Attack</option>
                                 <option value="exit_attack">Exit attack</option>
                                 <option value="multiple_sim">Multiple simulations</option>
                             </select>
@@ -229,6 +229,13 @@
                                                          name="adv_exit_bandwidth_exit_attack" type="number"></div>
                         </div>
                     </div>
+                    <div id="hidden_div_multiple_sim" style="display: none">
+                        <div class="control-group required">
+                            <div class="control-label"><label for="number_of_simulations_multiple_sim">Number of simulations:</label>
+                            </div>
+                            <div class="controls"><input class="second_row" id="number_of_simulations_multiple_sim" min="1" name="number_of_simulations_multiple_sim" type="number"></div>
+                        </div>
+                    </div>
                     <div class="control-group" id="not_path_submit" style="display: none">
                         <div class="control-label"></div>
                         <div class="controls">
@@ -254,6 +261,29 @@
                         </div>
                     </div>
                     <div class="sumbit_btn">
+                        <div class="">
+                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset id="multiple_sim_add" style="display: none">
+                    <legend>Multiple sim</legend>
+                    <div class="multiple_sim_item" id="dynamic_field_multiple_sim">
+                        <div class="border_bottom">
+                            <input type="text" name="m_s_guard[]" placeholder="F - Guard" class="form-control name_list">
+                            <input type="text" name="m_s_exit[]" placeholder="F - Exit" class="form-control name_list">
+                            <input type="text" name="m_s_adv_guard[]" placeholder="ADV - Guard" class="form-control name_list">
+                            <input type="text" name="m_s_adv_exit[]" placeholder="ADV - Exit" class="form-control name_list">
+                            <input type="text" name="m_s_encryption[]" placeholder="Encription %" class="form-control name_list">
+                            <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth MB/s" class="form-control name_list">
+                            <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth MB/s" class="form-control name_list">
+                            <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth MB/s" class="form-control name_list">
+                            <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth MB/s" class="form-control name_list">
+                            <input type="text" name="m_s_identification_occurrence[]" placeholder="ID occurence %" class="form-control name_list">
+                            <button type="button" name="add" id="add_multiple_sim" class="btn btn-success">Add</button>
+                        </div>
+                    </div>
+                    <div class="sumbit_btn_multiple_sim">
                         <div class="">
                             <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
                         </div>

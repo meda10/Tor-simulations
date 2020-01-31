@@ -37,3 +37,38 @@ $(document).ready(function(){
         });
     });
 });
+
+$(document).ready(function(){
+    var i=1;
+    $('#add_multiple_sim').click(function(){
+        i++;
+        $('#dynamic_field_multiple_sim').append('<div class="dynamic_field_multiple_sim border_bottom" id="m_s_row'+i+'">\
+            <input type="text" name="m_s_guard[]" placeholder="F - Guard" class="form-control name_list">\
+            <input type="text" name="m_s_exit[]" placeholder="F - Exit" class="form-control name_list">\
+            <input type="text" name="m_s_adv_guard[]" placeholder="ADV - Guard" class="form-control name_list">\
+            <input type="text" name="m_s_adv_exit[]" placeholder="ADV - Exit" class="form-control name_list">\
+            <input type="text" name="m_s_encryption[]" placeholder="Encription %" class="form-control name_list">\
+            <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth MB/s" class="form-control name_list">\
+            <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth MB/s" class="form-control name_list">\
+            <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth MB/s" class="form-control name_list">\
+            <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth MB/s" class="form-control name_list">\
+            <input type="text" name="m_s_identification_occurrence[]" placeholder="ID occurence %" class="form-control name_list">\
+            <button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></div>');
+    });
+    $(document).on('click', '.btn_remove', function(){
+        var button_id = $(this).attr("id");
+        $('#m_s_row'+button_id+'').remove();
+    });
+    $('#submit').click(function(){
+        $.ajax({
+            url:"name.php",
+            method:"POST",
+            data:$('#add_name').serialize(),
+            success:function(data)
+            {
+                alert(data);
+                $('#add_name')[0].reset();
+            }
+        });
+    });
+});

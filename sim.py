@@ -155,7 +155,7 @@ def parse_config_file(file):
             sys.exit(1)
     elif config['general']['simulation_type'] == 'multiple_sim':
         try:
-            dic['number_of_simulations'] = config.getint('attack_simulation', 'number_of_simulations')
+            dic['number_of_simulations'] = config.getint('multiple_sim', 'number_of_simulations')
             dic['same_bandwidth'] = True
             dic['path_selection'] = 'random'
         except ValueError as e:
@@ -374,7 +374,12 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
         if not lines[i].split()[2].__eq__('Guard'):
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
             if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
-                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
+                if sim_type == 'exit_attack' and circuit[2][:3] == '10.':
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
+                elif sim_type == 'exit_attack' and not circuit[2][:3] == '10.':
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False}
+                else:
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
             else:
                 circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False}
             circuit_list.append(circuit_entry)

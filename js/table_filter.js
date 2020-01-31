@@ -30,7 +30,7 @@ $(document).ready(function () {
     var $table_2 = $('#output_table_sorted');
 
     $(function() {
-        $('#filter_checkbox').on('change', function(){
+        $('#filter_checkbox_output').on('change', function(){
             if(this.checked){
                 $table_2.bootstrapTable('refreshOptions', {
                     filterOptions: {

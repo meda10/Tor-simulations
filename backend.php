@@ -61,7 +61,7 @@ function write_ini_file($file, $array = []) {
 }
 
 
-function parse_arguments($arr, $number_of_user_nodes){
+function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulations){
     $config = parse_ini_file('/conf/config.ini', true, INI_SCANNER_RAW);
 
     $i = 0;
@@ -88,15 +88,6 @@ function parse_arguments($arr, $number_of_user_nodes){
         $config['path_simulation']['number_of_simulations'] = $arr['number_of_simulations'];
         $config['path_simulation']['simulation_size'] = $arr['simulation_size'];
         $config['path_simulation']['path_selection'] = $arr['path_selection'];
-
-        for($i = 0; $i < $number_of_user_nodes; $i++){
-            $config['node'.$i]['type'] = $arr['node'.$i]['type'];
-            $config['node'.$i]['name'] = $arr['node'.$i]['name'];
-            $config['node'.$i]['ip'] = $arr['node'.$i]['ip'];
-            $config['node'.$i]['port'] = 413;
-            $config['node'.$i]['bandwidth'] = $arr['node'.$i]['bandwidth'];;
-        }
-
     } else if ($arr['simulation_type']  == 'hidden_service'){
         $config['hiden_service_simulation']['nodes'] = $arr['nodes_hs'];
     } else if ($arr['simulation_type']  == 'attack'){
@@ -116,6 +107,34 @@ function parse_arguments($arr, $number_of_user_nodes){
         $config['exit_attack']['number_of_simulations'] = $arr['number_of_simulations_exit_attack'];
         $config['exit_attack']['adv_exit'] = $arr['adv_exit_exit_attack'];
         $config['exit_attack']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth_exit_attack'];
+    } else if($arr['simulation_type']  == 'multiple_sim'){
+
+        $config['multiple_sim']['number_of_simulations'] = $arr['number_of_simulations_multiple_sim'];
+
+        for($i = 0; $i < $number_of_user_simulations; $i++){
+            $config['sim_'.$i]['encryption'] = $arr['sim_'.$i]['encryption'];
+            $config['sim_'.$i]['identification_occurrence'] = $arr['sim_'.$i]['identification_occurrence'];
+            $config['sim_'.$i]['guard'] = $arr['sim_'.$i]['guard'];
+            $config['sim_'.$i]['exit'] = $arr['sim_'.$i]['exit'];
+            $config['sim_'.$i]['adv_guard'] = $arr['sim_'.$i]['adv_guard'];
+            $config['sim_'.$i]['adv_exit'] = $arr['sim_'.$i]['adv_exit'];
+            $config['sim_'.$i]['friendly_guard_bandwidth'] = $arr['sim_'.$i]['friendly_guard_bandwidth'];
+            $config['sim_'.$i]['friendly_exit_bandwidth'] = $arr['sim_'.$i]['friendly_exit_bandwidth'];
+            $config['sim_'.$i]['adv_guard_bandwidth'] = $arr['sim_'.$i]['adv_guard_bandwidth'];
+            $config['sim_'.$i]['adv_exit_bandwidth'] = $arr['sim_'.$i]['adv_exit_bandwidth'];
+        }
+
+    }
+
+    if($arr['simulation_type']  == 'exit_attack' || $arr['simulation_type']  == 'attack' || $arr['simulation_type'] == 'path'){
+
+        for($i = 0; $i < $number_of_user_nodes; $i++){
+            $config['node'.$i]['type'] = $arr['node'.$i]['type'];
+            $config['node'.$i]['name'] = $arr['node'.$i]['name'];
+            $config['node'.$i]['ip'] = $arr['node'.$i]['ip'];
+            $config['node'.$i]['port'] = 413;
+            $config['node'.$i]['bandwidth'] = $arr['node'.$i]['bandwidth'];;
+        }
     }
 
     $return_code = write_ini_file('conf/config.ini', $config);
@@ -269,7 +288,7 @@ function create_graph_page($sim_type){
                         </div>
                     </div>
                     <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
-                        <label><input id=\"filter_checkbox\" type=\"checkbox\">Show only enemy nodes</label>    
+                        <label><input id=\"filter_checkbox_output\" type=\"checkbox\">Show only enemy nodes</label>    
                         <table id=\"output_table_sorted\" 
                                 class=\"table\" 
                                 data-toggle=\"table\" 

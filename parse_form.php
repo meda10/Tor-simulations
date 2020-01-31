@@ -28,6 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 } elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
     $arr = array();
     $number_of_user_nodes = 0;
+    $number_of_user_simulations = 0;
 
     if (!empty($_POST['simulation_type'])) {
         $simulation_type = $_POST['simulation_type'];
@@ -201,6 +202,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         } else{
             $arr['adv_exit_bandwidth'] = "0";
         }
+
+        $number = count($_POST['name']);
+        $number_of_user_nodes = $number;
+        if($number > 0) {
+            for($i = 0; $i < $number; $i++) {
+                if(trim($_POST['name'][$i] != '')) {
+                    $arr['node'.$i]['type'] = $_POST['type'][$i];
+                    $arr['node'.$i]['name'] = $_POST['name'][$i];
+                    $arr['node'.$i]['ip'] = $_POST['ip'][$i];
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                }
+            }
+        }
+
     }else if ($simulation_type == 'exit_attack'){
         if (!empty($_POST['encryption_exit_attack'])) {
             $encryption_exit_attack = $_POST['encryption_exit_attack'];
@@ -243,9 +258,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         } else{
             $arr['adv_exit_bandwidth_exit_attack'] = "0";
         }
+
+        $number = count($_POST['name']);
+        $number_of_user_nodes = $number;
+        if($number > 0) {
+            for($i = 0; $i < $number; $i++) {
+                if(trim($_POST['name'][$i] != '')) {
+                    $arr['node'.$i]['type'] = $_POST['type'][$i];
+                    $arr['node'.$i]['name'] = $_POST['name'][$i];
+                    $arr['node'.$i]['ip'] = $_POST['ip'][$i];
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                }
+            }
+        }
+    } else if ($simulation_type == 'multiple_sim'){
+
+        if (!empty($_POST['number_of_simulations_multiple_sim'])) {
+            $number_of_simulations_multiple_sim = $_POST['number_of_simulations_multiple_sim'];
+            $arr['number_of_simulations_multiple_sim'] = $number_of_simulations_multiple_sim;
+        } else{
+            $arr['number_of_simulations_multiple_sim'] = '42';
+        }
+
+        echo $number_of_simulations_multiple_sim;
+
+        $n = count($_POST['m_s_guard']);
+        $number_of_user_simulations = $n;
+        echo $n;
+        if($n > 0) {
+            for($i = 0; $i < $n; $i++) {
+                if(trim($_POST['m_s_guard'][$i] != '')) {
+                    $arr['sim_'.$i]['encryption'] = $_POST['m_s_encryption'][$i];
+                    $arr['sim_'.$i]['identification_occurrence'] = $_POST['m_s_identification_occurrence'][$i];
+                    $arr['sim_'.$i]['guard'] = $_POST['m_s_guard'][$i];
+                    $arr['sim_'.$i]['exit'] = $_POST['m_s_exit'][$i];
+                    $arr['sim_'.$i]['adv_guard'] = $_POST['m_s_adv_guard'][$i];
+                    $arr['sim_'.$i]['adv_exit'] = $_POST['m_s_adv_exit'][$i];
+                    $arr['sim_'.$i]['friendly_guard_bandwidth'] = $_POST['m_s_friendly_guard_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['friendly_exit_bandwidth'] = $_POST['m_s_friendly_exit_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['adv_guard_bandwidth'] = $_POST['m_s_adv_guard_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['adv_exit_bandwidth'] = $_POST['m_s_adv_exit_bandwidth'][$i] * pow(10,6);
+                }
+            }
+        }
+
     }
 
-    parse_arguments($arr, $number_of_user_nodes);
+    parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulations);
     $cwd = getcwd();
     chdir($cwd);
     //echo getcwd();

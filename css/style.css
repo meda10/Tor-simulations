@@ -342,3 +342,35 @@ text-transform: uppercase;
     overflow-x: unset;
     overflow-y: unset;
 }
+
+/*------------------------------------------*/
+
+#multiple_sim_add {
+    width: 200%;
+    display: block;
+}
+
+#dynamic_field_multiple_sim {
+    display: flex;
+    flex-flow: wrap;
+}
+
+#dynamic_field_multiple_sim input {
+    margin: 10px;
+    width: unset;
+}
+
+#add_multiple_sim {
+    margin: auto;
+    margin-left: inherit;
+}
+
+.sumbit_btn_multiple_sim {
+    margin: 10px;
+}
+
+.border_bottom {
+    border-bottom: 1px solid #e5e5e5;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
