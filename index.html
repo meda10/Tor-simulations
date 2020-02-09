@@ -3,25 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
-    <!-- Bootstrap 4 + tables
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
-
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
-    -->
-    <script src="js/show.js"></script>
-    <script src="js/fill.js"></script>
-    <script src="js/add_nodes.js"></script>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="resources/animation.css">
     <title>Simulator</title>
 </head>
 <body>
@@ -33,29 +19,22 @@
 <div class="wrap">
     <div class="content">
         <div class="form">
-            <form action="upload.php" class="form-horizontal" method="post" enctype="multipart/form-data">
-                <fieldset id="file_upload">
-                    <legend>Load from file</legend>
-                    <div class="control-group">
-                        <div class="control-label"><label for="file_to_upload">Select .ini file</label></div>
-                        <div class="controls">
-                            <input class="form-control-file" type="file" name="file_to_upload" id="file_to_upload">
-                        </div>
-                    </div>
-                    <div class="control-group">
-                        <div class="controls">
-                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
-                        </div>
-                    </div>
-                </fieldset>
+            <form action="upload.php" class="form-inline" method="post" enctype="multipart/form-data">
+                <legend class="border_bottom">Load from file</legend>
+                <div class="custom-file col-sm-8">
+                    <input type="file" class="custom-file-input" name="file_to_upload" id="file_to_upload" required>
+                    <label class="custom-file-label align-items-md-start justify-content-md-start" for="file_to_upload">Choose file...</label>
+                    <div class="invalid-feedback">Please chose file</div>
+                </div>
+                <button name="_submit" type="submit" value="Submit" class=" btn btn-primary">Submit</button>
             </form>
-            <form action="parse_form.php" class="form-horizontal" method="post">
+            <form action="parse_form.php" method="post">
                 <fieldset id="main_form">
-                    <legend>Simulation</legend>
-                    <div class="control-group required">
-                        <div class="control-label"><label for="simulation_type">Simulation type:</label></div>
-                        <div class="controls">
-                            <select class="second_row" id="simulation_type" name="simulation_type"
+                    <legend class="border_bottom">Simulation</legend>
+                    <div class="form-group row required">
+                        <label class="col-sm-5 col-form-label col-form-label-sm" for="simulation_type">Simulation type:</label>
+                        <div class="col-sm-7">
+                            <select class="form-control form-control-sm second_row" id="simulation_type" name="simulation_type"
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path">Path</option>
                                 <option value="hidden_service">Hidden service</option>
@@ -65,72 +44,82 @@
                             </select>
                         </div>
                     </div>
-                    <div class="control-group required">
-                        <div class="control-label"><label for="remove_duplicate_paths">Remove duplicate paths:</label></div>
-                        <div class="controls"><input class="second_row" id="remove_duplicate_paths"
-                                                     name="remove_duplicate_paths" type="checkbox"></div>
+                    <div class="form-group row">
+                        <label class="col-sm-5 col-form-label col-form-label-sm" for="remove_duplicate_paths">Remove duplicate paths:</label>
+                        <div class="col-sm-7">
+                            <input class="second_row" id="remove_duplicate_paths" name="remove_duplicate_paths" type="checkbox">
+                        </div>
                     </div>
-                    <div class="control-group required">
-                        <div class="control-label"><label for="same_bandwidth">Same bandwidth:</label></div>
-                        <div class="controls">
-                            <input class="second_row" id="same_bandwidth" name="same_bandwidth" type="checkbox"
-                                   onchange="java_script_:show_bandwidth()">
+                    <div class="form-group row">
+                        <label class="col-sm-5 col-form-label col-form-label-sm" for="same_bandwidth">Same bandwidth:</label>
+                        <div class="col-sm-7">
+                            <input class="second_row" id="same_bandwidth" name="same_bandwidth" type="checkbox" onchange="java_script_:show_bandwidth()">
                         </div>
                     </div>
                     <div id="bandwidth_value_div" style="display: none">
-                        <div class="control-group">
-                            <div class="control-label"><label for="guard_bandwidth_value">Bandwidth guard (optional) B/s:</label></div>
-                            <div class="controls"><input class="second_row" id="guard_bandwidth_value" min="1" name="guard_bandwidth_value" type="number"></div>
+                        <div class="form-group row">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_bandwidth_value">Bandwidth guard (optional) B/s:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="guard_bandwidth_value" min="1" name="guard_bandwidth_value" type="number">
+                            </div>
                         </div>
-                        <div class="control-group">
-                            <div class="control-label"><label for="middle_bandwidth_value">Bandwidth middle (optional) B/s:</label></div>
-                            <div class="controls"><input class="second_row" id="middle_bandwidth_value" min="1" name="middle_bandwidth_value" type="number"></div>
+                        <div class="form-group row">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="middle_bandwidth_value">Bandwidth middle (optional) B/s:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="middle_bandwidth_value" min="1" name="middle_bandwidth_value" type="number">
+                            </div>
                         </div>
-                        <div class="control-group">
-                            <div class="control-label"><label for="exit_bandwidth_value">Bandwidth exit (optional) B/s:</label></div>
-                            <div class="controls"><input class="second_row" id="exit_bandwidth_value" min="1" name="exit_bandwidth_value" type="number"></div>
+                        <div class="form-group row">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit_bandwidth_value">Bandwidth exit (optional) B/s:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="exit_bandwidth_value" min="1" name="exit_bandwidth_value" type="number">
+                            </div>
                         </div>
                     </div>
-                    <div id="hidden_div_path" style="display:grid">
-                        <div class="control-group required">
-                            <div class="control-label"><label for="guard">Guard:</label></div>
-                            <div class="controls"><input class="second_row" id="guard" min="0" name="guard" type="number">
+                    <div id="hidden_div_path" style="display:grid; width: 100%;">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard">Guard:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="guard" min="0" name="guard" type="number">
                             </div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="middle">Middle:</label></div>
-                            <div class="controls"><input class="second_row" id="middle" min="0" name="middle" type="number">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="middle">Middle:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="middle" min="0" name="middle" type="number">
                             </div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="exit">Exit:</label></div>
-                            <div class="controls"><input class="second_row" id="exit" min="0" name="exit" type="number">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit">Exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="exit" min="0" name="exit" type="number">
                             </div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="guard_exit">Guard exit:</label></div>
-                            <div class="controls"><input class="second_row" id="guard_exit" min="0" name="guard_exit"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="number_of_simulations">Number of simulations:</label>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_exit">Guard exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="guard_exit" min="0" name="guard_exit" type="number">
                             </div>
-                            <div class="controls"><input class="second_row" id="number_of_simulations" min="1"
-                                                         name="number_of_simulations" type="number"></div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="simulation_size">Simulation size:</label></div>
-                            <div class="controls">
-                                <select class="second_row" id="simulation_size" name="simulation_size">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="number_of_simulations">Number of simulations:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="number_of_simulations" min="1" name="number_of_simulations" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="simulation_size">Simulation size:</label>
+                            <div class="col-sm-7">
+                                <select class="form-control form-control-sm second_row" id="simulation_size" name="simulation_size">
                                     <option value="small">Small</option>
                                     <option value="large">Large</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="path_selection">Path selection:</label></div>
-                            <div class="controls">
-                                <select class="second_row" id="path_selection" name="path_selection">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="path_selection">Path selection:</label>
+                            <div class="col-sm-7">
+                                <select class="form-control form-control-sm second_row" id="path_selection" name="path_selection">
                                     <option value="random">Random</option>
                                     <option value="3_guards">3 guards</option>
                                     <option value="1_guard">1 guard</option>
@@ -138,156 +127,191 @@
                             </div>
                         </div>
                     </div>
-                    <div id="hidden_div_hs" style="display:none">
-                        <div class="control-group required">
-                            <div class="control-label"><label for="nodes_hs">Nodes:</label></div>
-                            <div class="controls"><input class="second_row" id="nodes_hs" min="3" name="nodes_hs"
-                                                         type="number"></div>
+                    <div id="hidden_div_hs" style="display:none; width: 100%;">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="nodes_hs">Nodes:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="nodes_hs" min="3" name="nodes_hs" type="number">
+                            </div>
                         </div>
                     </div>
-                    <div id="hidden_div_attack" style="display:none">
-                        <div class="control-group required">
-                            <div class="control-label"><label for="encryption_attack">Encryption(%):</label></div>
-                            <div class="controls"><input class="second_row" id="encryption_attack" min="0" name="encryption_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="identification_occurrence_attack">ID occurrence(%):</label></div>
-                            <div class="controls"><input class="second_row" id="identification_occurrence_attack" min="0" name="identification_occurrence_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="guard_attack">Guard:</label></div>
-                            <div class="controls"><input class="second_row" id="guard_attack" min="0" name="guard_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="exit_attack">Exit:</label></div>
-                            <div class="controls"><input class="second_row" id="exit_attack" min="0" name="exit_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="number_of_simulations_attack">Number of
-                                simulations:</label></div>
-                            <div class="controls"><input class="second_row" id="number_of_simulations_attack" min="1"
-                                                         name="number_of_simulations_attack" type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_guard">Adversary guard:</label></div>
-                            <div class="controls"><input class="second_row" id="adv_guard" min="0" name="adv_guard"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_exit">Adversary exit:</label></div>
-                            <div class="controls"><input class="second_row" id="adv_exit" min="0" name="adv_exit"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_guard_bandwidth">Adversary guard bandwidth:</label>
+                    <div id="hidden_div_attack" style="display:none; width: 100%;">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="encryption_attack">Encryption(%):</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="encryption_attack" min="0" name="encryption_attack" type="number">
                             </div>
-                            <div class="controls"><input class="second_row" id="adv_guard_bandwidth" min="0"
-                                                         name="adv_guard_bandwidth" type="number"></div>
                         </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_exit_bandwidth">Adversary exit bandwidth:</label>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="identification_occurrence_attack">ID occurrence(%):</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="identification_occurrence_attack" min="0" name="identification_occurrence_attack" type="number">
                             </div>
-                            <div class="controls"><input class="second_row" id="adv_exit_bandwidth" min="0"
-                                                         name="adv_exit_bandwidth" type="number"></div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_attack">Guard:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="guard_attack" min="0" name="guard_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit_attack">Exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="exit_attack" min="0" name="exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="number_of_simulations_attack">Number of simulations:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="number_of_simulations_attack" min="1" name="number_of_simulations_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_guard">Adversary guard:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_guard" min="0" name="adv_guard" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_exit">Adversary exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_exit" min="0" name="adv_exit" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_guard_bandwidth">Adversary guard bandwidth:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_guard_bandwidth" min="0" name="adv_guard_bandwidth" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_exit_bandwidth">Adversary exit bandwidth:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_exit_bandwidth" min="0" name="adv_exit_bandwidth" type="number">
+                            </div>
                         </div>
                     </div>
-                    <div id="hidden_div_exit_attack" style="display:none">
-                        <div class="control-group required">
-                            <div class="control-label"><label for="encryption_exit_attack">Encryption(%):</label></div>
-                            <div class="controls"><input class="second_row" id="encryption_exit_attack" min="0" name="encryption_exit_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="guard_exit_attack">Guard:</label></div>
-                            <div class="controls"><input class="second_row" id="guard_exit_attack" min="0" name="guard_exit_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="exit_exit_attack">Exit:</label></div>
-                            <div class="controls"><input class="second_row" id="exit_exit_attack" min="0" name="exit_exit_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="number_of_simulations_exit_attack">Number of
-                                simulations:</label></div>
-                            <div class="controls"><input class="second_row" id="number_of_simulations_exit_attack" min="1"
-                                                         name="number_of_simulations_exit_attack" type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_exit_exit_attack">Adversary exit:</label></div>
-                            <div class="controls"><input class="second_row" id="adv_exit_exit_attack" min="0" name="adv_exit_exit_attack"
-                                                         type="number"></div>
-                        </div>
-                        <div class="control-group required">
-                            <div class="control-label"><label for="adv_exit_bandwidth_exit_attack">Adversary exit bandwidth:</label>
+                    <div id="hidden_div_exit_attack" style="display:none; width: 100%;">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="encryption_exit_attack">Encryption(%):</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="encryption_exit_attack" min="0" name="encryption_exit_attack" type="number">
                             </div>
-                            <div class="controls"><input class="second_row" id="adv_exit_bandwidth_exit_attack" min="0"
-                                                         name="adv_exit_bandwidth_exit_attack" type="number"></div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_exit_attack">Guard:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="guard_exit_attack" min="0" name="guard_exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit_exit_attack">Exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="exit_exit_attack" min="0" name="exit_exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="number_of_simulations_exit_attack">Number of simulations:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="number_of_simulations_exit_attack" min="1" name="number_of_simulations_exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_exit_exit_attack">Adversary exit:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_exit_exit_attack" min="0" name="adv_exit_exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="adv_exit_bandwidth_exit_attack">Adversary exit bandwidth:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="adv_exit_bandwidth_exit_attack" min="0" name="adv_exit_bandwidth_exit_attack" type="number">
+                            </div>
                         </div>
                     </div>
-                    <div id="hidden_div_multiple_sim" style="display: none">
-                        <div class="control-group required">
-                            <div class="control-label"><label for="number_of_simulations_multiple_sim">Number of simulations:</label>
+                    <div id="hidden_div_multiple_sim" style="display: none; width: 100%;">
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="number_of_simulations_multiple_sim">Number of simulations:</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="number_of_simulations_multiple_sim" min="1" name="number_of_simulations_multiple_sim" type="number">
                             </div>
-                            <div class="controls"><input class="second_row" id="number_of_simulations_multiple_sim" min="1" name="number_of_simulations_multiple_sim" type="number"></div>
                         </div>
                     </div>
-                    <div class="control-group" id="not_path_submit" style="display: none">
-                        <div class="control-label"></div>
-                        <div class="controls">
-                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
-                        </div>
+                    <div class="form-group row" id="not_path_submit" style="display: none">
+                        <button name="_submit" type="submit" value="Submit" class="btn btn-primary">Submit</button>
                     </div>
                 </fieldset>
                 <fieldset id="add_nodes_path">
-                    <legend>Nodes</legend>
+                    <legend class="border_bottom">Nodes</legend>
                     <div class="path_node_item" id="dynamic_field">
-                        <div class="part_1">
-                            <select class="second_row" name="type[]">
-                                <option value="guard">Guard</option>
-                                <option value="middle">Middle</option>
-                                <option value="exit">Exit</option>
-                            </select>
-                            <input type="text" name="name[]" placeholder="Name" class="form-control name_list">
-                        </div>
-                        <div class="part_2">
-                            <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">
-                            <input type="text" name="bandwidth[]" placeholder="Bandwidth MB/s" class="form-control name_list">
-                            <button type="button" name="add" id="add" class="btn btn-success">Add</button>
+                        <div class="form-row">
+                            <div class="col-md-2 mb-3">
+                                <select class="form-control second_row" name="type[]">
+                                    <option value="guard">Guard</option>
+                                    <option value="middle">Middle</option>
+                                    <option value="exit">Exit</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="text" name="name[]" placeholder="Name" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <input type="text" name="bandwidth[]" placeholder="Bandwidth MB/s" class="form-control name_list">
+                            </div>
+                            <div class="col-md-0 mb-3">
+                                <button type="button" name="add" id="add" class="btn btn-success">+</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="sumbit_btn">
-                        <div class="">
-                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
-                        </div>
-                    </div>
+                    <button name="_submit" type="submit" value="Submit" class="btn btn-primary">Submit</button>
                 </fieldset>
                 <fieldset id="multiple_sim_add" style="display: none">
-                    <legend>Multiple sim</legend>
+                    <legend class="border_bottom">Multiple sim</legend>
                     <div class="multiple_sim_item" id="dynamic_field_multiple_sim">
                         <div class="border_bottom">
-                            <input type="text" name="m_s_guard[]" placeholder="F - Guard" class="form-control name_list">
-                            <input type="text" name="m_s_exit[]" placeholder="F - Exit" class="form-control name_list">
-                            <input type="text" name="m_s_adv_guard[]" placeholder="ADV - Guard" class="form-control name_list">
-                            <input type="text" name="m_s_adv_exit[]" placeholder="ADV - Exit" class="form-control name_list">
-                            <input type="text" name="m_s_encryption[]" placeholder="Encription %" class="form-control name_list">
-                            <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth MB/s" class="form-control name_list">
-                            <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth MB/s" class="form-control name_list">
-                            <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth MB/s" class="form-control name_list">
-                            <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth MB/s" class="form-control name_list">
-                            <input type="text" name="m_s_identification_occurrence[]" placeholder="ID occurence %" class="form-control name_list">
-                            <button type="button" name="add" id="add_multiple_sim" class="btn btn-success">Add</button>
+                            <div class="form-row">
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_guard[]" placeholder="F - Guard" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_exit[]" placeholder="F - Exit" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_adv_guard[]" placeholder="ADV - Guard" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_adv_exit[]" placeholder="ADV - Exit" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_encryption[]" placeholder="Encription %" class="form-control form-control-sm name_list">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-2 mb-2 mt-2">
+                                    <input type="text" name="m_s_identification_occurrence[]" placeholder="ID occurence %" class="form-control form-control-sm name_list">
+                                </div>
+                                <div class="col-md-0 mb-2 mt-2">
+                                    <button type="button" name="add" id="add_multiple_sim" class="btn-sm btn-success">+</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="sumbit_btn_multiple_sim">
-                        <div class="">
-                            <input class="btn btn-primary button" name="_submit" type="submit" value="Submit">
-                        </div>
-                    </div>
+                    <button name="_submit" type="submit" value="Submit" class="mt-2 btn btn-primary">Submit</button>
                 </fieldset>
             </form>
         </div>
@@ -401,5 +425,14 @@
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="js/show.js"></script>
+<script src="js/table_filter.js"></script>
+<script src="js/add_nodes.js"></script>
+<script src="js/fill.js"></script>
+<script defer="" src="resources/animation.js"></script>
 </body>
 </html>

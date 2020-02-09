@@ -1,6 +1,5 @@
 body {
     font-family: Arial, sans-serif;
-    font-size: 19px;
     margin: 0;
     color: #262626;
 }
@@ -17,21 +16,21 @@ body {
 .node_row_item{
     margin: 5px;
 }
-
+/*
 .form {
     margin-left: 20px;
     margin-right: 20px;
     width: 420px;
     min-width: 420px;
 }
-
+*/
 .wrap {
     margin-left: auto;
     margin-right: auto;
 
     max-width: 1200px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
     border: 1px solid black;
     padding-top: 20px;
     padding-bottom: 20px;
@@ -69,8 +68,8 @@ body {
 }
 
 .example {
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border-bottom: 1px solid #e5e5e5;
 }
 
@@ -99,10 +98,13 @@ body {
     display: flex;
     flex-flow: nowrap;
     justify-content: space-between;
+    margin: 3px;
 }
 
 .left_header legend {
     width: 78%;
+    margin: 0;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .left_header ul {
@@ -110,9 +112,10 @@ body {
 }
 
 #link-container {
-    margin-bottom: 20px;
+
     font-size: 21px;
     line-height: 40px;
+    margin: 0;
 }
 
 #link-container h3{
@@ -151,16 +154,8 @@ body {
     max-height: 88vw;
 }
 
-#path {
-    max-height: 82vh;
-}
-
 #path table {
     font-size: 11.6px;
-}
-
-#usage {
-    max-height: 82vh;
 }
 
 #usage table {
@@ -222,6 +217,9 @@ text-transform: uppercase;
     .form #add_nodes_path {
         width: 100%
     }
+    .form #multiple_sim_add {
+        width: 100%;
+    }
 }
 
 /*-------------------------------------*/
@@ -229,7 +227,7 @@ text-transform: uppercase;
 #tabs_div {
     margin: 14px;
 }
-
+/*
 .path_node_item{
     display: flex;
     flex-flow: wrap;
@@ -250,7 +248,7 @@ text-transform: uppercase;
     margin-left: 10px;
     margin-right: 10px;
 }
-
+*/
 
 #add_nodes_path{
     width: 200%;
@@ -263,25 +261,21 @@ text-transform: uppercase;
     max-height: 650px;
     margin: 0;
 }
-
+/*
 #main_form{
     margin: 10px;
 }
-
-#file_upload{
-    margin: 10px;
-}
-
+*/
 
 .form {
     width: 50%;
     margin: 0;
 }
-
+/*
 .sumbit_btn {
     margin: 10px;
 }
-
+*/
 .part_1 {
     margin-top: 10px;
 }
@@ -299,7 +293,7 @@ text-transform: uppercase;
     -moz-border-radius: unset;
 }
 
-.bootstrap-table .fixed-table-container tbody td{
+.right .table-bordered td, .right .table-bordered th {
     border: 0;
 }
 
@@ -325,11 +319,6 @@ text-transform: uppercase;
     background-color: unset;
 }
 
-#usage .fixed-table-body {
-    overflow-x: unset;
-    overflow-y: unset;
-}
-
 #output_table_sorted .red {
     background-color: #ff7569
 }
@@ -338,39 +327,75 @@ text-transform: uppercase;
     background-color: unset;
 }
 
-#path .fixed-table-body {
-    overflow-x: unset;
-    overflow-y: unset;
-}
-
 /*------------------------------------------*/
 
 #multiple_sim_add {
     width: 200%;
     display: block;
 }
-
+/*
 #dynamic_field_multiple_sim {
     display: flex;
     flex-flow: wrap;
 }
-
+*/
+/*
 #dynamic_field_multiple_sim input {
     margin: 10px;
     width: unset;
 }
-
+*/
 #add_multiple_sim {
     margin: auto;
     margin-left: inherit;
 }
-
+/*
 .sumbit_btn_multiple_sim {
     margin: 10px;
 }
-
+*/
 .border_bottom {
     border-bottom: 1px solid #e5e5e5;
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+
+/** Bootstrap 4 **/
+
+body *,
+body *::before,
+body *::after {
+    /*box-sizing: unset;*/
+}
+
+.right .form-control {
+    height: unset;
+}
+
+#output_table_sorted, #usage_table_sorted{
+    border: unset;
+}
+
+.right .bootstrap-table .fixed-table-container.fixed-height:not(.has-footer) {
+    border-bottom: unset;
+}
+
+.fixed-table-border {
+    display: none;
+}
+.fixed-table-body {
+    max-height: 66vh;
+}
+
+#my_tab {
+    margin-top: 1px;
+}
+
+#add_nodes_path .form-row {
+    margin-top: 10px;
+}
+
+.custom-file{
+    margin-right: 10px;
 }

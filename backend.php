@@ -168,8 +168,19 @@ function create_graph_page($sim_type){
                   <img src=\"graph/encryption.png\" alt=\"Encryption\">
                   </div>
                  ";
+        $nav = "<li class=\"nav-item\">
+                    <a class=\"nav-link\" id=\"statistic_tab\" data-toggle=\"tab\" href=\"#statistic\" role=\"tab\" aria-controls=\"statistic\" aria-selected=\"false\">Statistic</a>
+                </li>";
+
+        $statistic_table = "";
     }else{
         $graph = file_get_contents($cwd."/graph/simulation.dot.svg");
+        $nav = "<li class=\"nav-item\">
+                    <a class=\"nav-link\" id=\"path_tab\" data-toggle=\"tab\" href=\"#path\" role=\"tab\" aria-controls=\"path\" aria-selected=\"false\">Paths</a>
+                </li>
+                <li class=\"nav-item\">
+                    <a class=\"nav-link\" id=\"usage_tab\" data-toggle=\"tab\" href=\"#usage\" role=\"tab\" aria-controls=\"usage\" aria-selected=\"false\">Usage</a>
+                </li>";
     }
 
     $output_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
@@ -212,20 +223,26 @@ function create_graph_page($sim_type){
 
                     <link href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css\" rel=\"stylesheet\" type=\"text/css\">
 
+
+
+
+
+<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
  */
     $html_start = "<!DOCTYPE html>
                 <html lang=\"en\">
                 <head>
                     <meta charset=\"utf-8\">
                     <meta content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\" name=\"viewport\">
-                    <link rel=\"stylesheet\" href=\"resources//animation.css\">
-                    <script defer=\"\" src=\"resources//animation.js\"></script>
+                    <link rel=\"stylesheet\" href=\"resources/animation.css\">
                     <link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\">
-                    <link href=\"css/bootstrap.min.css\" rel=\"stylesheet\" type=\"text/css\">
+                    
+                    <!-- 
                     <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css\">
                     <script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js\"></script>
                     <script src=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js\"></script>
-                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js\"></script>
+                    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js\"></script>  
+                    -->
                     <!-- Boodstrap 4
                     <link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\">
                     <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.6.3/css/all.css\" integrity=\"sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/\" crossorigin=\"anonymous\">
@@ -236,8 +253,14 @@ function create_graph_page($sim_type){
                     <script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>
                     <script src=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js\"></script>
                     -->
-                    <script src=\"js/show.js\"></script>
-                    <script src=\"js/table_filter.js\"></script>
+
+                    <link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\">
+                    <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.6.3/css/all.css\" integrity=\"sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/\" crossorigin=\"anonymous\">
+                    <link rel=\"stylesheet\" href=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css\">
+                    <!-- 
+                    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css\">
+                    -->
+                   
                     <title>Simulator</title>
                 </head>
                 <body>
@@ -269,17 +292,13 @@ function create_graph_page($sim_type){
                     <li class=\"nav-item active\">
                         <a class=\"nav-link active\" id=\"info_tab\" data-toggle=\"tab\" href=\"#info\" role=\"tab\" aria-controls=\"info\" aria-selected=\"true\" aria-expanded=\"true\">Info</a>
                     </li>
-                    <li class=\"nav-item\">
-                        <a class=\"nav-link\" id=\"path_tab\" data-toggle=\"tab\" href=\"#path\" role=\"tab\" aria-controls=\"path\" aria-selected=\"false\">Paths</a>
-                    </li>
-                    <li class=\"nav-item\">
-                        <a class=\"nav-link\" id=\"usage_tab\" data-toggle=\"tab\" href=\"#usage\" role=\"tab\" aria-controls=\"usage\" aria-selected=\"false\">Usage</a>
-                    </li>
+                    ".$nav."
                 </ul>
                 <div class=\"tab-content\" id=\"my_tab_content\">
                     <div class=\"tab-pane fade show active in\" id=\"info\" role=\"tabpanel\" aria-labelledby=\"info-info_tab\">
-                        <div class=\"legend\">";
-    $html_end = "                        </div>
+                        <div class=\"legend\">
+                        ".$legend."
+                        </div>
                         <div class=\"download\">
                             <h1>Download Zip</h1>
                             <form method='post' action='backend.php'>
@@ -288,25 +307,34 @@ function create_graph_page($sim_type){
                         </div>
                     </div>
                     <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
-                        <label><input id=\"filter_checkbox_output\" type=\"checkbox\">Show only enemy nodes</label>    
-                        <table id=\"output_table_sorted\" 
-                                class=\"table\" 
-                                data-toggle=\"table\" 
-                                data-toolbar=\".toolbar\" 
-                                data-sortable=\"true\"
-                                data-search=\"true\"
-                                data-search-align=\"left\"
-                                data-row-style=\"rowStyle\"
-                                data-url=\"torps/out/simulation/output.json\">
+                        <div style='margin-top: 10px'>
+                            <label for=\"filter_checkbox_output\">Show only enemy nodes</label>
+                            <input id=\"filter_checkbox_output\" type=\"checkbox\">    
+                        </div>
+                        <table id=\"output_table_sorted\"                        
+                               class=\"table\"
+                               data-toggle=\"table\"
+                               data-toolbar=\".toolbar\"
+                               
+                               data-sortable=\"true\"
+                               data-search=\"true\"
+                               data-search-align=\"left\"
+                               data-row-style=\"rowStyle\"
+                               data-url=\"torps/out/simulation/output.json\">
                             <thead>
                             <tr>
-                                ".$output_table."
+                                <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                                <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                                <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>
                             </tr>
                             </thead>
                         </table>
                     </div>
                     <div class=\"tab-pane fade\" id=\"usage\" role=\"tabpanel\" aria-labelledby=\"usage_tab\">
-                        <label><input id=\"filter_checkbox\" type=\"checkbox\">Show only enemy nodes</label>    
+                        <div style='margin-top: 10px'>
+                            <label for=\"filter_checkbox\">Show only enemy nodes</label>
+                            <input id=\"filter_checkbox\" type=\"checkbox\">                        
+                        </div>
                         <table id=\"usage_table_sorted\" 
                                 class=\"table\" 
                                 data-toggle=\"table\" 
@@ -323,6 +351,29 @@ function create_graph_page($sim_type){
                             </thead>
                         </table>
                     </div>
+                    <div class=\"tab-pane fade\" id=\"statistic\" role=\"tabpanel\" aria-labelledby=\"statistic_tab\">    
+
+                        <nav aria-label=\"Page navigation example\">
+                          <ul class=\"pagination\">
+                            <li class=\"page-item\">
+                              <a class=\"page-link\" href=\"#\" aria-label=\"Previous\">
+                                <span aria-hidden=\"true\">&laquo;</span>
+                              </a>
+                            </li>
+                            <li class=\"page-item\"><a class=\"page-link\" href=\"#\">1</a></li>
+                            <li class=\"page-item\"><a class=\"page-link\" href=\"#\">2</a></li>
+                            <li class=\"page-item\"><a class=\"page-link\" href=\"#\">3</a></li>
+                            <li class=\"page-item\">
+                              <a class=\"page-link\" href=\"#\" aria-label=\"Next\">
+                                <span aria-hidden=\"true\">&raquo;</span>
+                              </a>
+                            </li>
+                          </ul>
+                        </nav>
+
+
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -335,17 +386,36 @@ function create_graph_page($sim_type){
                 }
                 return {}
             }
-            $( \"usage_table_sorted\" ).removeClass( \"table-hover\" );
-            $( \"output_table_sorted\" ).removeClass( \"table-hover\" );
         </script>
-    </div>";
+    </div>
+    <script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" integrity=\"sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=\" crossorigin=\"anonymous\"></script>
+    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script>
+    <script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>
+    <script src=\"https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js\"></script>
+    <script src=\"js/show.js\"></script>
+    <script src=\"js/table_filter.js\"></script>
+    <script defer=\"\" src=\"resources/animation.js\"></script>
+    <script>
+        $( document ).ready(function() {   
+            $('#output_table_sorted').removeClass('table-hover');
+            $('#output_table_sorted').removeClass('table-bordered');
+            $('table').removeClass('table-bordered');
+            $('#usage_table_sorted').removeClass('table-hover');
+            $('#usage_table_sorted').removeClass('table-bordered');
+        });
+    </script>
+    
+    <!--
+    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js\"></script>  
+    -->
+    ";
 
     $html_file = fopen("graph.html", "w") or die("Unable to open html file!");
     fwrite($html_file, $html_start);
     fwrite($html_file, $graph);
     fwrite($html_file, $html_middle);
-    fwrite($html_file, $legend);
-    fwrite($html_file, $html_end);
+    # fwrite($html_file, $legend);
+    # fwrite($html_file, $html_end);
     fwrite($html_file, "</div></body></html>");
     fclose($html_file);
 }
