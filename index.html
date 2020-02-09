@@ -365,58 +365,92 @@
                             <div class="example">
                                 <h5>Example 1</h5>
                                 <p>Small simulation + random</p>
-                                <button class="btn btn-secondary" id="path_example_1" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="path_example_1" class="btn-sm btn-secondary">Run</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 2</h5>
                                 <p>Large simulation + random</p>
-                                <button class="btn btn-secondary" id="path_example_2" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="path_example_2" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 3</h5>
                                 <p>Large simulation + 3 Guards</p>
-                                <button class="btn btn-secondary" id="path_example_3" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="path_example_3" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 4</h5>
                                 <p>Large simulation no middle</p>
-                                <button class="btn btn-secondary" id="path_example_4" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="path_example_4" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                         </div>
                         <div id="example_hidden_service" style="display: none;">
                             <div class="example">
                                 <h5>Example 1</h5>
                                 <p>Hidden service 180</p>
-                                <button class="btn btn-secondary" id="hs_example_1" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="hidden_service_example_1" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 2</h5>
                                 <p>Hidden service 250</p>
-                                <button class="btn btn-secondary" id="hs_example_2" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="hidden_service_example_2" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                         </div>
                         <div id="example_attack" style="display: none;">
                             <div class="example">
                                 <h5>Example 1</h5>
                                 <p>Attack 150 50 80</p>
-                                <button class="btn btn-secondary" id="attack_example_1" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="attack_example_1" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 2</h5>
                                 <p>Attack 300 60 60</p>
-                                <button class="btn btn-secondary" id="attack_example_2" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="attack_example_2" class="btn-sm btn-secondary">RUN</button>
+                                </form>
+                            </div>
+                            <div class="example">
+                                <h5>Example 3</h5>
+                                <p>Attack 300 60 60</p>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="attack_example_3" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                         </div>
                         <div id="example_exit_attack" style="display: none;">
                             <div class="example">
                                 <h5>Example 1</h5>
                                 <p>New example not working</p>
-                                <button class="btn btn-secondary" id="exit_attack_example_1" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="exit_attack_example_1" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                             <div class="example">
                                 <h5>Example 2</h5>
                                 <p>New example</p>
-                                <button class="btn btn-secondary" id="exit_attack_example_2" type="button">Run</button>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="exit_attack_example_2" class="btn-sm btn-secondary">RUN</button>
+                                </form>
+                            </div>
+                            <div class="example">
+                                <h5>Example 3</h5>
+                                <p>New example</p>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="exit_attack_example_3" class="btn-sm btn-secondary">RUN</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -432,7 +466,6 @@
 <script src="js/show.js"></script>
 <script src="js/table_filter.js"></script>
 <script src="js/add_nodes.js"></script>
-<script src="js/fill.js"></script>
 <script defer="" src="resources/animation.js"></script>
 </body>
 </html>

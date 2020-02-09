@@ -1,3 +1,4 @@
+/*
 $(function() {
     $("#path_example_1").click(function() {
         $("#simulation_type").val('path');
@@ -80,5 +81,5 @@ $(function() {
         $("#adv_exit_bandwidth").val(10000);
     });
 });
-
+*/
 

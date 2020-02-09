@@ -414,8 +414,6 @@ function create_graph_page($sim_type){
     fwrite($html_file, $html_start);
     fwrite($html_file, $graph);
     fwrite($html_file, $html_middle);
-    # fwrite($html_file, $legend);
-    # fwrite($html_file, $html_end);
     fwrite($html_file, "</div></body></html>");
     fclose($html_file);
 }
