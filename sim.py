@@ -345,6 +345,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     encrypted_attacker_exit = collections.Counter()
     encrypted_attacker_middle = collections.Counter()
     statistic = collections.Counter({'bad_guard_used': 0,
+                                     'bad_middle_used': 0,
                                      'bad_exit_used': 0,
                                      'bad_circuit': 0,
                                      'bad_node': 0,
@@ -409,7 +410,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                         encrypted_attacker_guard.update(['{}'.format(circuit[0])])
                     attackers_guards.append(circuit[0]) if circuit[0] not in attackers_guards else None
                 if circuit[1][:3] == '10.':  # middle
-                    statistic.update(['bad_node'])
+                    statistic.update(['bad_middle_used', 'bad_node'])
                     if encrypted:
                         statistic.update(['bad_middle_encrypt'])
                         encrypted_attacker_middle.update(['{}'.format(circuit[1])])

@@ -305,7 +305,8 @@ text-transform: uppercase;
 .fixed-table-border {
     display: none;
 }
-.fixed-table-body {
+
+#usage_table_sorted, #output_table_sorted {
     max-height: 66vh;
 }
 
@@ -322,7 +323,7 @@ text-transform: uppercase;
 }
 
 /* UNUSED */
-
+/*
 .node_row_item{
     margin: 5px;
 }
@@ -333,4 +334,41 @@ text-transform: uppercase;
 
 .part_2 {
     margin-top: 10px;
+}
+*/
+
+/* Statistic table */
+
+#statistic_table {
+    margin-top: 10px;
+    display: flex;
+    flex-flow: nowrap;
+}
+
+#statistic_table thead tr,#statistic_table tbody tr{
+    display: inline-grid;
+}
+
+#statistic_table th, #statistic_table td{
+    border: 1px solid #dee2e6;
+}
+/*
+#statistic_table thead,#statistic_table tbody{
+    display:inline-block;
+}
+*/
+#statistic_table tbody tr {
+    border-bottom: 0px;
+}
+
+.pagination-detail {
+    display: none;
+}
+
+#statistic_table .table-bordered td, .right .table-bordered th {
+    border: inherit;
+}
+
+#statistic_table .th-inner, #statistic_table td{
+    padding: 0.30rem;
 }
