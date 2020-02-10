@@ -472,12 +472,15 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     return data
 
 
+def write_json(data, path):
+    with open(path, 'w') as file:
+        json.dump(data, file, indent=4, sort_keys=True)
+
+
 def create_output_json(circuit_list):
     cwd = os.getcwd()
     output_file_path_json = Path(cwd + '/torps/out/simulation/output.json')
-
-    with open(output_file_path_json, 'w') as file:
-        json.dump(circuit_list, file, indent=4, sort_keys=True)
+    write_json(circuit_list, output_file_path_json)
 
 
 def create_statistic(loop_count, statistic):
@@ -489,11 +492,13 @@ def create_statistic(loop_count, statistic):
         output_folder.mkdir(parents=True)
 
     if loop_count == 0:
-        with open(statistic_file, 'w') as file:
-            json.dump(statistic, file, indent=4, sort_keys=True)
+        statistic = [statistic]
+        write_json(statistic, statistic_file)
     else:
-        with open(statistic_file, 'a') as file:
-            json.dump(statistic, file, indent=4, sort_keys=True)
+        with open(statistic_file) as json_file:
+            data = json.load(json_file)
+            data.append(statistic)
+        write_json(data, statistic_file)
 
 
 def parse_statistics(bandwidth, ip, node_usage, id_node_usage, encrypted_node_usage, id_stolen_node_usage, node_statistics):
