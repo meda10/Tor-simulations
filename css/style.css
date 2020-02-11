@@ -306,8 +306,12 @@ text-transform: uppercase;
     display: none;
 }
 
-#usage_table_sorted, #output_table_sorted {
+.fixed-table-body {
     max-height: 66vh;
+}
+
+.fixed-table-body #statistic_table {
+    max-height: unset;
 }
 
 #my_tab {

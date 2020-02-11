@@ -40,6 +40,12 @@ if (isset($_POST['btn'])) {
         case 'exit_attack_example_3':
             run_sim("exit_attack_example_3.ini");
             break;
+        case 'multiple_sim_example_1':
+            run_sim("multiple_sim_example_1.ini");
+            break;
+        case 'multiple_sim_example_2':
+            run_sim("multiple_sim_example_2.ini");
+            break;
     }
 }
 

@@ -36,9 +36,9 @@
                         <div class="col-sm-7">
                             <select class="form-control form-control-sm second_row" id="simulation_type" name="simulation_type"
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
-                                <option value="path">Path</option>
+                                <option value="path" selected>Path</option>
                                 <option value="hidden_service">Hidden service</option>
-                                <option value="attack" selected>Attack</option>
+                                <option value="attack">Attack</option>
                                 <option value="exit_attack">Exit attack</option>
                                 <option value="multiple_sim">Multiple simulations</option>
                             </select>
@@ -359,6 +359,14 @@
                                 <p>INFO exit attack 2</p>
                             </div>
                         </div>
+                        <div id="info_multiple_sim" style="display: none;">
+                            <div class="example">
+                                <p>INFO exit attack 1</p>
+                            </div>
+                            <div class="example">
+                                <p>INFO exit attack 2</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
                         <div id="example_path">
@@ -450,6 +458,22 @@
                                 <p>New example</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_3" class="btn-sm btn-secondary">RUN</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="example_multiple_sim" style="display: none;">
+                            <div class="example">
+                                <h5>Example 1</h5>
+                                <p>New example not working</p>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="multiple_sim_example_1" class="btn-sm btn-secondary">RUN</button>
+                                </form>
+                            </div>
+                            <div class="example">
+                                <h5>Example 2</h5>
+                                <p>New example</p>
+                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
+                                    <button name="btn" type="submit" value="multiple_sim_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                         </div>
