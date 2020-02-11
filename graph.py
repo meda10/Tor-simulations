@@ -2312,7 +2312,7 @@ class GraphGenerator:
         plt.scatter(x, y3, marker='^', c='green', label='ADV Exit Encrypted')
         plt.scatter(x, y, marker='o', c='blue', label='ADV Guard')
         plt.scatter(x1, y1, marker='^', c='red', label='ADV Exit')
-        plt.xlabel('number of nodes')
+        plt.xlabel('number of ADV nodes')
         plt.ylabel('node usage')
 
         plt.legend()

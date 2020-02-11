@@ -280,11 +280,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             $arr['number_of_simulations_multiple_sim'] = '42';
         }
 
-        echo $number_of_simulations_multiple_sim;
+        # echo "Number of simulations: ".$number_of_simulations_multiple_sim;
 
         $n = count($_POST['m_s_guard']);
         $number_of_user_simulations = $n;
-        echo $n;
+        # echo "n ".$n;
         if($n > 0) {
             for($i = 0; $i < $n; $i++) {
                 if(trim($_POST['m_s_guard'][$i] != '')) {

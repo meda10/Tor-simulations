@@ -165,7 +165,15 @@ function create_graph_page($sim_type){
         $graph = "<div style='display: flex; flex-flow: wrap;'>
                   <img src=\"graph/exit_bandwidth.png\" alt=\"Exit bandwidth\">
                   <img src=\"graph/guard_bandwidth.png\" alt=\"Guard bandwidth\">
+                  <img src=\"graph/nodes_gu_ex_usage.png\" alt=\"\">
+                  <img src=\"graph/correlation_attack_exit.png\" alt=\"\">
+                  <img src=\"graph/correlation_attack_guard.png\" alt=\"\">
                   <img src=\"graph/encryption.png\" alt=\"Encryption\">
+                  <img src=\"graph/id_encryption.png\" alt=\"\">
+                  <img src=\"graph/id_exit_bandwidth.png\" alt=\"\">
+                  <img src=\"graph/id_guard_bandwidth.png\" alt=\"\">
+                  <img src=\"graph/id_number_of_exits.png\" alt=\"\">
+                  <img src=\"graph/id_number_of_guards.png\" alt=\"\">
                   </div>
                  ";
         $nav = "<li class=\"nav-item\">
