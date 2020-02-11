@@ -310,7 +310,7 @@ text-transform: uppercase;
     max-height: 66vh;
 }
 
-.fixed-table-body #statistic_table {
+#statistic .fixed-table-body  {
     max-height: unset;
 }
 
@@ -375,4 +375,5 @@ text-transform: uppercase;
 
 #statistic_table .th-inner, #statistic_table td{
     padding: 0.30rem;
+    font-size: 14px;
 }

@@ -351,7 +351,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'bad_node': 0,
                                      'bad_gu_and_ex': 0,
                                      'encrypted': 0,
-                                     'id': 0,
+                                     'total_id': 0,
                                      'not_encrypted_id': 0,
                                      'not_encrypted_id_stolen': 0,
                                      'bad_guard_encrypt': 0,
@@ -362,10 +362,10 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'adv_exit': adv_exit,
                                      'encryption': encryption_percentage,
                                      'identification_occurrence': identification_occurrence,
-                                     'adv_guard_bandwidth': adv_guard_bandwidth,
-                                     'adv_exit_bandwidth': adv_exit_bandwidth,
-                                     'guard_bandwidth': guard_bandwidth,
-                                     'exit_bandwidth': exit_bandwidth
+                                     'adv_guard_bandwidth': round(adv_guard_bandwidth / math.pow(10, 6), 3),
+                                     'adv_exit_bandwidth': round(adv_exit_bandwidth / math.pow(10, 6), 3),
+                                     'guard_bandwidth': round(guard_bandwidth / math.pow(10, 6), 3),
+                                     'exit_bandwidth': round(exit_bandwidth / math.pow(10, 6), 3)
                                      })
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
@@ -397,8 +397,8 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                 if encrypted:
                     statistic.update(['encrypted'])
                     encrypted_node_usage.update(circuit)
-                if id_included and sim_type == 'attack':
-                    statistic.update(['id'])
+                if id_included and sim_type == 'attack' or id_included and sim_type == 'multiple_sim':
+                    statistic.update(['total_id'])
                     id_node_usage.update(circuit)
                 if id_included and not encrypted:
                     statistic.update(['not_encrypted_id'])
@@ -423,7 +423,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
 
                 if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
-                    if id_included and not encrypted and sim_type == 'attack':
+                    if id_included and not encrypted and sim_type == 'attack' or (id_included and not encrypted and sim_type == 'multiple_sim'):
                         statistic.update(['not_encrypted_id_stolen'])
                         id_stolen_node_usage.update(circuit)
                 if circuit[0][:3] == '10.' and circuit[1][:3] == '10.' and circuit[2][:3] == '10.':
@@ -535,7 +535,7 @@ def create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandw
     if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
         for node in attackers_guards:
             node_statistics = parse_statistics(adv_guard_bandwidth, node, node_usage, id_node_usage,
-                                               encrypted_node_usage,id_stolen_node_usage, node_statistics)
+                                               encrypted_node_usage, id_stolen_node_usage, node_statistics)
         for node in attackers_exits:
             node_statistics = parse_statistics(adv_exit_bandwidth, node, node_usage, id_node_usage,
                                                encrypted_node_usage, id_stolen_node_usage, node_statistics)

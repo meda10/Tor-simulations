@@ -2220,18 +2220,20 @@ class GraphGenerator:
         self.generate_graph_legend('attack')
 
     def generate_x_y_graph(self):
-        # exit + correlation / bandwidth
+        # exit + correlation / bandwidth -----------------------------------
         x = []
         y = []
         x1 = []
         y1 = []
+        y2 = []
+        y3 = []
 
         for sim in self.output_from_all_sims:
             y.append(sim[2]['bad_exit_used'])
             y1.append(sim[2]['bad_gu_and_ex'])
-            x.append(sim[2]['adv_exit_bandwidth'] / pow(10, 6))
+            x.append(sim[2]['adv_exit_bandwidth'])
 
-        plt.scatter(x, y, marker='o', c='blue', label='adversary exit')
+        plt.scatter(x, y, marker='o', c='blue', label='ADV Exit')
         plt.scatter(x, y1, marker='^', c='red', label='Correlation attack')
 
         plt.xlabel('adversary exit bandwidth MB/s')
@@ -2242,18 +2244,20 @@ class GraphGenerator:
         plt.savefig('graph/exit_bandwidth.png', bbox_inches='tight')
         plt.clf()
 
-        # guard + correlation / bandwidth
+        # guard + correlation / bandwidth -----------------------------------
         x.clear()
         y.clear()
         y1.clear()
         x1.clear()
+        y2.clear()
+        y3.clear()
 
         for sim in self.output_from_all_sims:
             y.append(sim[2]['bad_guard_used'])
             y1.append(sim[2]['bad_gu_and_ex'])
-            x.append(sim[2]['adv_guard_bandwidth'] / pow(10, 6))
+            x.append(sim[2]['adv_guard_bandwidth'])
 
-        plt.scatter(x, y, marker='o', c='blue', label='adversary guard')
+        plt.scatter(x, y, marker='o', c='blue', label='ADV Guard')
         plt.scatter(x, y1, marker='^', c='red', label='Correlation attack')
         plt.xlabel('adversary guard bandwidth MB/s')
         plt.ylabel('node usage')
@@ -2262,11 +2266,13 @@ class GraphGenerator:
         plt.savefig('graph/guard_bandwidth.png', bbox_inches='tight')
         plt.clf()
 
-        # guard + exit + correlation / encryption %
+        # guard + exit + correlation / encryption % -----------------------------------
         x.clear()
         y.clear()
         y1.clear()
         x1.clear()
+        y2.clear()
+        y3.clear()
 
         for sim in self.output_from_all_sims:
             y.append(sim[2]['bad_exit_used'] - sim[2]['bad_exit_encrypt'])
@@ -2274,14 +2280,203 @@ class GraphGenerator:
             x1.append(sim[2]['bad_gu_and_ex'] - sim[2]['bad_gu_and_ex_encrypt'])
             x.append(sim[2]['encryption'])
 
-        plt.scatter(x, y, marker='o', c='blue', label='adv exit')
-        plt.scatter(x, y1, marker='o', c='red', label='adv guard')
-        plt.scatter(x, x1, marker='^', c='green', label='Corelation attack')
+        plt.scatter(x, x1, marker='^', c='green', label='ADV Corelation attack')
+        plt.scatter(x, y1, marker='o', c='red', label='ADV Guard')
+        plt.scatter(x, y, marker='o', c='blue', label='ADV Exit')
         plt.xlabel('Encryption %')
-        plt.ylabel('node usage')
+        plt.ylabel('unencrypted node usage')
 
         plt.legend()
         plt.savefig('graph/encryption.png', bbox_inches='tight')
         plt.clf()
 
-        self.generate_graph_legend('attack')
+        # number of guard + exit + encrypted_gu + ex/ ADV usage -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_guard'])
+            y.append(sim[2]['bad_guard_used'])
+
+            x1.append(sim[2]['adv_exit'])
+            y1.append(sim[2]['bad_exit_used'])
+
+            y2.append(sim[2]['bad_guard_encrypt'])
+            y3.append(sim[2]['bad_exit_encrypt'])
+
+        plt.scatter(x, y2, marker='o', c='green', label='ADV Guard Encrypted')
+        plt.scatter(x, y3, marker='^', c='green', label='ADV Exit Encrypted')
+        plt.scatter(x, y, marker='o', c='blue', label='ADV Guard')
+        plt.scatter(x1, y1, marker='^', c='red', label='ADV Exit')
+        plt.xlabel('number of nodes')
+        plt.ylabel('node usage')
+
+        plt.legend()
+        plt.savefig('graph/nodes_gu_ex_usage.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of exit / correlation -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_exit'])
+            y.append(sim[2]['bad_gu_and_ex'])
+
+            y1.append(sim[2]['bad_gu_and_ex_encrypt'])
+
+        plt.scatter(x, y1, marker='^', c='red', label='Correlation attack encrypted')
+        plt.scatter(x, y, marker='o', c='blue', label='Correlation attack')
+
+        plt.xlabel('number of ADV exits')
+        plt.ylabel('correlation attack')
+
+        plt.legend()
+        plt.savefig('graph/correlation_attack_exit.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of guard / correlation -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_guard'])
+            y.append(sim[2]['bad_gu_and_ex'])
+
+            y1.append(sim[2]['bad_gu_and_ex_encrypt'])
+
+        plt.scatter(x, y1, marker='^', c='red', label='Correlation attack encrypted')
+        plt.scatter(x, y, marker='o', c='blue', label='Correlation attack')
+
+        plt.xlabel('number of ADV guards')
+        plt.ylabel('correlation attack')
+
+        plt.legend()
+        plt.savefig('graph/correlation_attack_guard.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of id / number of ADV guards -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_guard'])
+            y.append(sim[2]['not_encrypted_id'])
+
+            y1.append(sim[2]['not_encrypted_id_stolen'])
+
+        plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
+        plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
+
+        plt.xlabel('number of ADV guards')
+        plt.ylabel('number of ID\'s')
+
+        plt.legend()
+        plt.savefig('graph/id_number_of_guards.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of id / number of ADV exits -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_exit'])
+            y.append(sim[2]['not_encrypted_id'])
+
+            y1.append(sim[2]['not_encrypted_id_stolen'])
+
+        plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
+        plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
+
+        plt.xlabel('number of ADV exits')
+        plt.ylabel('number of ID\'s')
+
+        plt.legend()
+        plt.savefig('graph/id_number_of_exits.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of id  / encryption % -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['encryption'])
+            y.append(sim[2]['not_encrypted_id'])
+            y1.append(sim[2]['not_encrypted_id_stolen'])
+
+        plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
+        plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
+        plt.xlabel('Encryption %')
+        plt.ylabel('number of unencrypted ID\'s')
+
+        plt.legend()
+        plt.savefig('graph/id_encryption.png', bbox_inches='tight')
+        plt.clf()
+
+        # number of id  / exit bandwidth -----------------------------------
+        x = []
+        y = []
+        x1 = []
+        y1 = []
+        y2 = []
+        y3 = []
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_exit_bandwidth'])
+            y.append(sim[2]['not_encrypted_id'])
+            y1.append(sim[2]['not_encrypted_id_stolen'])
+
+        plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
+        plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
+        plt.xlabel('adversary exit bandwidth MB/s')
+        plt.ylabel('number of unencrypted ID\'s')
+
+        plt.legend()
+        plt.savefig('graph/id_exit_bandwidth.png', bbox_inches='tight')
+        plt.clf()
+
+        #  number of id / guard bandwidth -----------------------------------
+        x.clear()
+        y.clear()
+        y1.clear()
+        x1.clear()
+        y2.clear()
+        y3.clear()
+
+        for sim in self.output_from_all_sims:
+            x.append(sim[2]['adv_guard_bandwidth'])
+            y.append(sim[2]['not_encrypted_id'])
+            y1.append(sim[2]['not_encrypted_id_stolen'])
+
+        plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
+        plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
+        plt.xlabel('adversary guard bandwidth MB/s')
+        plt.ylabel('number of unencrypted ID\'s')
+
+        plt.legend()
+        plt.savefig('graph/id_guard_bandwidth.png', bbox_inches='tight')
+        plt.clf()
