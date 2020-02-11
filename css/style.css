@@ -148,6 +148,15 @@ body {
     font-size: 11.6px;
 }
 
+#tabs_div {
+    margin: 14px;
+}
+
+.form {
+    width: 50%;
+    margin: 0;
+    margin-right: 20px;
+}
 
 /*
 text-transform: uppercase;
@@ -199,16 +208,23 @@ text-transform: uppercase;
     .form #add_nodes_path {
         width: 100%
     }
+
     .form #multiple_sim_add {
         width: 100%;
+    }
+
+    #tabs_div {
+        margin: 0px;
+        margin-top: 20px;
+    }
+
+    .form{
+        margin: 0px;
     }
 }
 
 /*-------------------------------------*/
 
-#tabs_div {
-    margin: 14px;
-}
 
 #add_nodes_path{
     width: 200%;
@@ -219,11 +235,6 @@ text-transform: uppercase;
     min-width: 200px;
     width: 50%;
     max-height: 650px;
-    margin: 0;
-}
-
-.form {
-    width: 50%;
     margin: 0;
 }
 
@@ -356,11 +367,7 @@ text-transform: uppercase;
 #statistic_table th, #statistic_table td{
     border: 1px solid #dee2e6;
 }
-/*
-#statistic_table thead,#statistic_table tbody{
-    display:inline-block;
-}
-*/
+
 #statistic_table tbody tr {
     border-bottom: 0px;
 }
@@ -377,3 +384,8 @@ text-transform: uppercase;
     padding: 0.30rem;
     font-size: 14px;
 }
+
+.example p {
+    margin-bottom: 5px;
+}
+

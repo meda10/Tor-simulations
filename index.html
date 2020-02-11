@@ -329,71 +329,64 @@
                     <div class="tab-pane fade show active in" id="info" role="tabpanel" aria-labelledby="info-info_tab">
                         <div id="info_path">
                             <div class="example">
-                                <p>INFO Path 1</p>
-                            </div>
-                            <div class="example">
-                                <p>INFO Path 2</p>
+                                <h5 class="font-weight-bold">Path simulation</h5>
+                                <p>This simulation shows</p>
+                                <p>Simulation size</p>
+                                <p>Path selection</p>
                             </div>
                         </div>
                         <div id="info_hidden_service" style="display: none;">
                             <div class="example">
-                                <p>INFO HS 3</p>
-                            </div>
-                            <div class="example">
-                                <p>INFO HS 4</p>
+                                <h5 class="font-weight-bold">Hidden service simulation</h5>
+                                <p>This simulation shows how does connection to hidden service works step by step.</p>
                             </div>
                         </div>
                         <div id="info_attack" style="display: none;">
                             <div class="example">
-                                <p>INFO attack 5</p>
-                            </div>
-                            <div class="example">
-                                <p>INFO attack 6</p>
+                                <h5 class="font-weight-bold">Attack simulation</h5>
+                                <p>ID</p>
                             </div>
                         </div>
                         <div id="info_exit_attack" style="display: none;">
                             <div class="example">
-                                <p>INFO exit attack 1</p>
-                            </div>
-                            <div class="example">
-                                <p>INFO exit attack 2</p>
+                                <h5 class="font-weight-bold">Exit attack simulation</h5>
+                                <p>Encryption</p>
                             </div>
                         </div>
                         <div id="info_multiple_sim" style="display: none;">
                             <div class="example">
-                                <p>INFO exit attack 1</p>
-                            </div>
-                            <div class="example">
-                                <p>INFO exit attack 2</p>
+                                <h5 class="font-weight-bold">Multiple simulation</h5>
+                                <p>This allows run multiple simulations consecutively, you can change parameters and watch how it affects outputs.</p>
+                                <p>Statistics are generated for every simulation</p>
                             </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
                         <div id="example_path">
                             <div class="example">
-                                <h5>Example 1</h5>
-                                <p>Small simulation + random</p>
+                                <h5 class="font-weight-bold">Simple</h5>
+                                <p>Small simulation with random path selection</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_1" class="btn-sm btn-secondary">Run</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 2</h5>
-                                <p>Large simulation + random</p>
+                                <h5 class="font-weight-bold">Path selection: 1 Guard</h5>
+                                <p>Large simulation with 1 guard path selection</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 3</h5>
-                                <p>Large simulation + 3 Guards</p>
+                                <h5 class="font-weight-bold">Path selection: 3 Guard</h5>
+                                <p>Large simulation with 3 guard path selection</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 4</h5>
-                                <p>Large simulation no middle</p>
+                                <h5 class="font-weight-bold">Example 4</h5>
+                                <p>Large simulation with random path selection</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_4" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -401,38 +394,31 @@
                         </div>
                         <div id="example_hidden_service" style="display: none;">
                             <div class="example">
-                                <h5>Example 1</h5>
-                                <p>Hidden service 180</p>
+                                <h5 class="font-weight-bold">Hidden service example</h5>
+                                <p>Simulation with 250 nodes.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="hidden_service_example_1" class="btn-sm btn-secondary">RUN</button>
-                                </form>
-                            </div>
-                            <div class="example">
-                                <h5>Example 2</h5>
-                                <p>Hidden service 250</p>
-                                <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
-                                    <button name="btn" type="submit" value="hidden_service_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                         </div>
                         <div id="example_attack" style="display: none;">
                             <div class="example">
-                                <h5>Example 1</h5>
-                                <p>Attack 150 50 80</p>
+                                <h5 class="font-weight-bold">Identification occurrence 30%</h5>
+                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 2</h5>
-                                <p>Attack 300 60 60</p>
+                                <h5 class="font-weight-bold">Identification occurrence 50%</h5>
+                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 3</h5>
-                                <p>Attack 300 60 60</p>
+                                <h5 class="font-weight-bold">Identification occurrence 80%</h5>
+                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -440,22 +426,22 @@
                         </div>
                         <div id="example_exit_attack" style="display: none;">
                             <div class="example">
-                                <h5>Example 1</h5>
-                                <p>New example not working</p>
+                                <h5 class="font-weight-bold">Encryption 20%</h5>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 20% encryption</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 2</h5>
-                                <p>New example</p>
+                                <h5 class="font-weight-bold">Encryption 50%</h5>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 50% encryption</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 3</h5>
-                                <p>New example</p>
+                                <h5 class="font-weight-bold">Encryption 80%</h5>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 80% encryption</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -463,15 +449,15 @@
                         </div>
                         <div id="example_multiple_sim" style="display: none;">
                             <div class="example">
-                                <h5>Example 1</h5>
-                                <p>New example not working</p>
+                                <h5 class="font-weight-bold">Encryption</h5>
+                                <p>Runs 20 simulations every time increasing encryption by 5%</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="multiple_sim_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5>Example 2</h5>
-                                <p>New example</p>
+                                <h5 class="font-weight-bold">ADV Guard Bandwidth</h5>
+                                <p>Runs 10 simulations changing value of adversary guard bandwidth.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="multiple_sim_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
