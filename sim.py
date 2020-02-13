@@ -40,7 +40,7 @@ def parse_config_file(file):
         config.read(file)
     except configparser.DuplicateSectionError:
         print('Duplicate sections in .ini file')  # todo
-        sys.exit(1)
+        sys.exit(5)
 
     conf = []
     all_nodes = []
@@ -58,14 +58,17 @@ def parse_config_file(file):
         dic['middle_bandwidth_value'] = None if config['general']['middle_bandwidth_value'] == '' else config.getint('general', 'middle_bandwidth_value')
         dic['simulation_type'] = config['general']['simulation_type']
     except KeyError as e:
+        print('There was an error while parsing arguments')
         print('Key Error: {}'.format(e))
-        sys.exit(1)
+        sys.exit(5)
     except ValueError as e:
+        print('There was an error while parsing arguments')
         print("Value Error: {}".format(e))
-        sys.exit(1)
+        sys.exit(5)
     except configparser.NoOptionError as e:
+        print('There was an error while parsing arguments')
         print("Key Error: {}".format(e))
-        sys.exit(1)
+        sys.exit(5)
 
     if config['general']['simulation_type'] == 'path':
         try:
@@ -83,11 +86,13 @@ def parse_config_file(file):
             dic['path_selection'] = config['path_simulation']['path_selection']
             dic['simulation_size'] = config['path_simulation']['simulation_size']
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
 
         if dic['simulation_size'] == 'small':
             if dic['path_selection'] != 'random':
@@ -108,11 +113,13 @@ def parse_config_file(file):
             dic['identification_occurrence'] = 0
             dic['path_selection'] = 'random'
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
     elif config['general']['simulation_type'] == 'attack':
         try:
             dic['guard'] = config.getint('attack_simulation', 'guard')
@@ -128,11 +135,13 @@ def parse_config_file(file):
             dic['encryption'] = config.getint('attack_simulation', 'encryption')
             dic['identification_occurrence'] = config.getint('attack_simulation', 'identification_occurrence')
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
     elif config['general']['simulation_type'] == 'exit_attack':
         try:
             dic['guard'] = config.getint('exit_attack', 'guard')
@@ -148,25 +157,30 @@ def parse_config_file(file):
             dic['encryption'] = config.getint('exit_attack', 'encryption')
             dic['identification_occurrence'] = 0
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
     elif config['general']['simulation_type'] == 'multiple_sim':
         try:
             dic['number_of_simulations'] = config.getint('multiple_sim', 'number_of_simulations')
             dic['same_bandwidth'] = True
             dic['path_selection'] = 'random'
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except KeyError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
 
         try:
             for s in config.sections():
@@ -188,14 +202,17 @@ def parse_config_file(file):
                     sim['path_selection'] = 'random'
                     all_sims.append(sim)
         except KeyError as e:
+            print('There was an error while parsing arguments')
             print('Key Error: {}'.format(e))
-            sys.exit(1)
+            sys.exit(5)
         except ValueError as e:
+            print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
         except configparser.NoOptionError as e:
+            print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
-            sys.exit(1)
+            sys.exit(5)
     else:
         ...
 
@@ -214,13 +231,15 @@ def parse_config_file(file):
                                                       config[n]['bandwidth'])
                 all_nodes.append(node)
     except KeyError:
+        print('There was an error while parsing arguments')
         print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
-        sys.exit(1)
+        sys.exit(5)
 
     if config['general']['simulation_type'] != 'multiple_sim':
         if dic['guard'] < 0 or dic['middle'] < 0 or dic['exit'] < 0:
+            print('There was an error while parsing arguments')
             print('Number of nodes have to be > 0')
-            sys.exit(1)
+            sys.exit(5)
 
     conf.append(dic)
     conf.append(all_nodes)
