@@ -46,8 +46,8 @@ body {
 .header h1 {
     text-align: center;
     margin-top: 10px;
-    padding-bottom: 20px;
-    padding-top: 20px;
+    padding-bottom: 15px;
+    padding-top: 15px;
 }
 
 .required label {

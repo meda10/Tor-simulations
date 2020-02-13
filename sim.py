@@ -362,10 +362,10 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'adv_exit': adv_exit,
                                      'encryption': encryption_percentage,
                                      'identification_occurrence': identification_occurrence,
-                                     'adv_guard_bandwidth': round(adv_guard_bandwidth / math.pow(10, 6), 3),
-                                     'adv_exit_bandwidth': round(adv_exit_bandwidth / math.pow(10, 6), 3),
-                                     'guard_bandwidth': round(guard_bandwidth / math.pow(10, 6), 3),
-                                     'exit_bandwidth': round(exit_bandwidth / math.pow(10, 6), 3)
+                                     'adv_guard_bandwidth': round(adv_guard_bandwidth / math.pow(10, 6), 0),
+                                     'adv_exit_bandwidth': round(adv_exit_bandwidth / math.pow(10, 6), 0),
+                                     'guard_bandwidth': None if guard_bandwidth is None else round(guard_bandwidth / math.pow(10, 6), 0),
+                                     'exit_bandwidth': None if exit_bandwidth is None else round(exit_bandwidth / math.pow(10, 6), 0)
                                      })
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
@@ -504,7 +504,7 @@ def create_statistic(loop_count, statistic):
 
 def parse_statistics(bandwidth, ip, node_usage, id_node_usage, encrypted_node_usage, id_stolen_node_usage, node_statistics):
     # node_statistics = {IP: (USAGE, BANDWIDTH MB/s, encryption %, id_usage, id_stolen)}
-    bandwidth = round(bandwidth / math.pow(10, 6), 3)
+    bandwidth = round(bandwidth / math.pow(10, 6), 0)
     usage = node_usage['{}'.format(ip)]
     id_usage = id_node_usage['{}'.format(ip)]
 
@@ -909,7 +909,7 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
         sys.exit(1)
     if len(exit_node) + adv_exit_c < 1:
         print('Number of exits have to be > 1')
-        # sys.exit(1)
+        sys.exit(1)
 
     if path_selection == '1_guard' and sim_type == 'path':
         if len(guard_node) < 1:
