@@ -31,91 +31,76 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     $number_of_user_simulations = 0;
 
     if (!empty($_POST['simulation_type'])) {
-        $simulation_type = $_POST['simulation_type'];
-        $arr['simulation_type'] = $simulation_type;
+        $arr['simulation_type'] = $_POST['simulation_type'];
     }
 
     if (!empty($_POST['remove_duplicate_paths'])) {
-        $remove_duplicate_paths = "True";
-        $arr['remove_duplicate_paths'] = $remove_duplicate_paths;
+        $arr['remove_duplicate_paths'] = "True";
     } else{
-        $remove_duplicate_paths = "False";
-        $arr['remove_duplicate_paths'] = $remove_duplicate_paths;
+        $arr['remove_duplicate_paths'] = "False";
     }
 
     if (!empty($_POST['same_bandwidth'])) {
-        $same_bandwidth = "True";
-        $arr['same_bandwidth'] = $same_bandwidth;
+        $arr['same_bandwidth'] = "True";;
     } else{
-        $same_bandwidth = "False";
-        $arr['same_bandwidth'] = $same_bandwidth;
+        $arr['same_bandwidth'] = "False";
     }
 
     if (!empty($_POST['guard_bandwidth_value'])) {
-        $guard_bandwidth_value = $_POST['guard_bandwidth_value'];
-        $arr['guard_bandwidth_value'] = $guard_bandwidth_value * pow(10,6);
+        $arr['guard_bandwidth_value'] = $_POST['guard_bandwidth_value'] * pow(10,6);
     } else{
         $arr['guard_bandwidth_value'] = '';
     }
 
     if (!empty($_POST['middle_bandwidth_value'])) {
-        $middle_bandwidth_value = $_POST['middle_bandwidth_value'];
-        $arr['middle_bandwidth_value'] = $middle_bandwidth_value * pow(10,6);
+        $arr['middle_bandwidth_value'] = $_POST['middle_bandwidth_value'] * pow(10,6);
     } else{
         $arr['middle_bandwidth_value'] = '';
     }
 
     if (!empty($_POST['exit_bandwidth_value'])) {
-        $exit_bandwidth_value = $_POST['bandwidth_value'];
-        $arr['exit_bandwidth_value'] = $exit_bandwidth_value * pow(10,6);
+        $arr['exit_bandwidth_value'] = $_POST['bandwidth_value'] * pow(10,6);
     } else{
         $arr['exit_bandwidth_value'] = '';
     }
 
     if($simulation_type == 'path'){
-        if (!empty($_POST['guard']) || $_POST['guard'] == 0) {
-            $guard = $_POST['guard'];
-            $arr['guard'] = $guard;
+        if ($_POST['guard'] != "") {
+            $arr['guard'] = $_POST['guard'];
         } else{
             error('Required field was not field: Guard');
         }
 
-        if (!empty($_POST['middle']) || $_POST['middle'] == 0) {
-            $middle = $_POST['middle'];
-            $arr['middle'] = $middle;
+        if ($_POST['middle'] != "") {
+            $arr['middle'] = $_POST['middle'];
         } else{
             error('Required field was not field: Middle');
         }
 
-        if (!empty($_POST['exit']) || $_POST['exit'] == 0) {
-            $exit = $_POST['exit'];
-            $arr['exit'] = $exit;
+        if ($_POST['exit'] != "") {
+            $arr['exit'] = $_POST['exit'];
         } else{
             error('Required field was not field: Exit');
         }
 
-        if (!empty($_POST['guard_exit']) || $_POST['guard_exit'] == 0) {
-            $guard_exit = $_POST['guard_exit'];
-            $arr['guard_exit'] = $guard_exit;
+        if ($_POST['guard_exit'] != "") {
+            $arr['guard_exit'] = $_POST['guard_exit'];
         } else{
             $arr['guard_exit'] = "0";
         }
 
-        if (!empty($_POST['number_of_simulations']) || $_POST['number_of_simulations'] == 0) {
-            $number_of_simulations = $_POST['number_of_simulations'];
-            $arr['number_of_simulations'] = $number_of_simulations;
+        if ($_POST['number_of_simulations'] != "") {
+            $arr['number_of_simulations'] = $_POST['number_of_simulations'];
         } else{
             error('Required field was not field: Number of simulations');
         }
 
         if (!empty($_POST['simulation_size'])) {
-            $simulation_size = $_POST['simulation_size'];
-            $arr['simulation_size'] = $simulation_size;
+            $arr['simulation_size'] = $_POST['simulation_size'];
         }
 
         if (!empty($_POST['path_selection'])) {
-            $path_selection = $_POST['path_selection'];
-            $arr['path_selection'] = $path_selection;
+            $arr['path_selection'] = $_POST['path_selection'];
         }
 
         $number = count($_POST['name']);
@@ -132,72 +117,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         }
 
     }else if ($simulation_type == 'hidden_service'){
-        if (!empty($_POST['nodes_hs']) || $_POST['nodes_hs'] == 0) {
-            $nodes_hs = $_POST['nodes_hs'];
-            $arr['nodes_hs'] = $nodes_hs;
+        if ($_POST['nodes_hs'] != "") {
+            $arr['nodes_hs'] = $_POST['nodes_hs'];
         } else{
             error('Required field was not field: Nodes');
         }
     }else if ($simulation_type == 'attack'){
-        if (!empty($_POST['encryption_attack']) || $_POST['encryption_attack'] == 0) {
-            $encryption_attack = $_POST['encryption_attack'];
-            $arr['encryption_attack'] = $encryption_attack;
+        if ($_POST['encryption_attack'] != "") {
+            $arr['encryption_attack'] = $_POST['encryption_attack'];
         } else{
             error('Required field was not field: Encryption %');
         }
 
-        if (!empty($_POST['identification_occurrence_attack']) || $_POST['identification_occurrence_attack'] == 0) {
-            $encryption_attack = $_POST['identification_occurrence_attack'];
-            $arr['identification_occurrence_attack'] = $encryption_attack;
+        if ($_POST['identification_occurrence_attack'] != "") {
+            $arr['identification_occurrence_attack'] = $_POST['identification_occurrence_attack'];
         } else{
             error('Required field was not field: ID occurrence');
         }
 
-        if (!empty($_POST['guard_attack']) || $_POST['guard_attack'] == 0) {
-            $guard_attack = $_POST['guard_attack'];
-            $arr['guard_attack'] = $guard_attack;
+        if ($_POST['guard_attack'] != "") {
+            $arr['guard_attack'] = $_POST['guard_attack'];
         } else{
             error('Required field was not field: Guard');
         }
 
-        if (!empty($_POST['exit_attack']) || $_POST['exit_attack'] == 0) {
-            $exit_attack = $_POST['exit_attack'];
-            $arr['exit_attack'] = $exit_attack;
+        if ($_POST['exit_attack'] != "") {
+            $arr['exit_attack'] = $_POST['exit_attack'];
         } else{
             error('Required field was not field: Exit');
         }
 
-        if (!empty($_POST['number_of_simulations_attack']) || $_POST['number_of_simulations_attack'] == 0) {
-            $number_of_simulations_attack = $_POST['number_of_simulations_attack'];
-            $arr['number_of_simulations_attack'] = $number_of_simulations_attack;
+        if ($_POST['number_of_simulations_attack'] != "") {
+            $arr['number_of_simulations_attack'] = $_POST['number_of_simulations_attack'];
         } else{
             error('Required field was not field: number od simulations');
         }
 
-        if (!empty($_POST['adv_guard']) || $_POST['adv_guard'] == 0) {
-            $adv_guard = $_POST['adv_guard'];
-            $arr['adv_guard'] = $adv_guard;
+        if ($_POST['adv_guard'] != "") {
+            $arr['adv_guard'] = $_POST['adv_guard'];
         } else{
             error('Required field was not field: ADV guard');
         }
 
-        if (!empty($_POST['adv_exit']) || $_POST['adv_exit'] == 0) {
-            $adv_exit = $_POST['adv_exit'];
-            $arr['adv_exit'] = $adv_exit;
+        if ($_POST['adv_exit'] != "") {
+            $arr['adv_exit'] = $_POST['adv_exit'];
         } else{
             error('Required field was not field: ADV euard');
         }
 
-        if (!empty($_POST['adv_guard_bandwidth']) || $_POST['adv_guard_bandwidth'] == 0) {
-            $adv_guard_bandwidth = $_POST['adv_guard_bandwidth'];
-            $arr['adv_guard_bandwidth'] = $adv_guard_bandwidth * pow(10,6);
+        if ($_POST['adv_guard_bandwidth'] != "") {
+            $arr['adv_guard_bandwidth'] = $_POST['adv_guard_bandwidth'] * pow(10,6);
         } else{
             error('Required field was not field: ADV guard bandwidth');
         }
 
-        if (!empty($_POST['adv_exit_bandwidth']) || $_POST['adv_exit_bandwidth'] == 0) {
-            $adv_exit_bandwidth = $_POST['adv_exit_bandwidth'];
-            $arr['adv_exit_bandwidth'] = $adv_exit_bandwidth * pow(10,6);
+        if ($_POST['adv_exit_bandwidth'] != "") {
+            $arr['adv_exit_bandwidth'] = $_POST['adv_exit_bandwidth'] * pow(10,6);
         } else{
             error('Required field was not field: ADV exit bandwidth');
         }
@@ -216,44 +191,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         }
 
     }else if ($simulation_type == 'exit_attack'){
-        if (!empty($_POST['encryption_exit_attack']) || $_POST['encryption_exit_attack'] == 0) {
-            $encryption_exit_attack = $_POST['encryption_exit_attack'];
-            $arr['encryption_exit_attack'] = $encryption_exit_attack;
+        if ($_POST['encryption_exit_attack'] != "") {
+            $arr['encryption_exit_attack'] = $_POST['encryption_exit_attack'];
         } else{
             error('Required field was not field: Encryption');
         }
 
-        if (!empty($_POST['guard_exit_attack']) || $_POST['guard_exit_attack'] == 0) {
-            $guard_exit_attack = $_POST['guard_exit_attack'];
-            $arr['guard_exit_attack'] = $guard_exit_attack;
+        if ($_POST['guard_exit_attack'] != "") {
+            $arr['guard_exit_attack'] = $_POST['guard_exit_attack'];
         } else{
             error('Required field was not field: Guard');
         }
 
-        if (!empty($_POST['exit_exit_attack']) || $_POST['exit_exit_attack'] == 0) {
-            $exit_exit_attack = $_POST['exit_exit_attack'];
-            $arr['exit_exit_attack'] = $exit_exit_attack;
+        if ($_POST['exit_exit_attack'] != "") {
+            $arr['exit_exit_attack'] = $_POST['exit_exit_attack'];
         } else{
             error('Required field was not field: Exit');
         }
 
-        if (!empty($_POST['number_of_simulations_exit_attack']) || $_POST['number_of_simulations_exit_attack'] == 0) {
-            $number_of_simulations_exit_attack = $_POST['number_of_simulations_exit_attack'];
-            $arr['number_of_simulations_exit_attack'] = $number_of_simulations_exit_attack;
+        if ($_POST['number_of_simulations_exit_attack'] != "") {
+            $arr['number_of_simulations_exit_attack'] = $_POST['number_of_simulations_exit_attack'];
         } else{
             error('Required field was not field: Number of simulations');
         }
 
-        if (!empty($_POST['adv_exit_exit_attack']) || $_POST['adv_exit_exit_attack'] == 0) {
-            $adv_exit_exit_attack = $_POST['adv_exit_exit_attack'];
-            $arr['adv_exit_exit_attack'] = $adv_exit_exit_attack;
+        if ($_POST['adv_exit_exit_attack'] != "") {
+            $arr['adv_exit_exit_attack'] = $_POST['adv_exit_exit_attack'];
         } else{
             error('Required field was not field: ADV exit');
         }
 
-        if (!empty($_POST['adv_exit_bandwidth_exit_attack']) || $_POST['adv_exit_bandwidth_exit_attack'] == 0) {
-            $adv_exit_bandwidth_exit_attack = $_POST['adv_exit_bandwidth_exit_attack'];
-            $arr['adv_exit_bandwidth_exit_attack'] = $adv_exit_bandwidth_exit_attack * pow(10,6);
+        if ($_POST['adv_exit_bandwidth_exit_attack'] != "") {
+            $arr['adv_exit_bandwidth_exit_attack'] = $_POST['adv_exit_bandwidth_exit_attack'] * pow(10,6);
         } else{
             error('Required field was not field: ADV exit bandwidth');
         }
@@ -352,7 +321,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     exec($command.' 2> error.log', $op, $ret);
     if($ret != 0) {
         # echo "Error: xx\n";
-        echo "<h3>Error</h3>";
+        echo "<h3>Error 0</h3>";
         echo "<p>There was an error, you can find more information in  error.log</p>";
         foreach ($op as $item) {
             echo $item;
@@ -367,7 +336,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 }
 
 function error($message){
-    echo "<h3>Error</h3>";
+    echo "<h3>Error 1</h3>";
     echo "<p>There was an error, you can find more information in  error.log</p>";
     echo $message;
     exit(0);
