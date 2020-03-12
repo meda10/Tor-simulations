@@ -25,9 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors[] = 'File size must be max 2 MB';
         }
 
-        if (file_exists("conf/" . $file_name)) {
-            unlink("conf/" . $file_name);
-        }
+        unlink_file($file_name);
 
         if (empty($errors) == true) {
             move_uploaded_file($file_tmp, "conf/" . $file_name);
@@ -49,6 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 return 0;
             } else {
                 $config = parse_ini_file($cwd.'/conf/'.$file_name, true, INI_SCANNER_RAW);
+                unlink_file($file_name);
                 create_graph_page($config['general']['simulation_type']);
                 header('Location:graph.html');
             }

@@ -157,6 +157,12 @@ function create_zip(){
     }
 }
 
+function unlink_file($file_name){
+    if (file_exists("conf/" . $file_name)) {
+        unlink("conf/" . $file_name);
+    }
+}
+
 function create_graph_page($sim_type){
     $cwd = getcwd();
     //$graph_file = fopen($cwd."/graph/simulation.dot.svg", "r") or die("Unable to open simulaton file!");
