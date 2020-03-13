@@ -1,0 +1,38 @@
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx_container
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./www/html/:/var/www/html
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  php:
+    # build: ./php/
+    image: meda10/bp_tor_php:latest
+    container_name: php_container
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www/html
+    networks:
+      - app-network
+    expose:
+      - 9000
+    volumes:
+      - ./www/html/:/var/www/html
+      - ./torps/:/home/petr/torps
+      # - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+networks:
+  app-network:
+    driver: bridge

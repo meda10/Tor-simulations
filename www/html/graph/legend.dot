@@ -1,0 +1,31 @@
+digraph test {
+	constraint=false layout=dot rankdir=TB rankstep=0.8
+	size="3.5,5"
+	subgraph cluster_legend {
+		label=Key
+		subgraph cluster_exit_l {
+			label="Exit
+Middle" penwidth=0
+			EX [label="" fillcolor=forestgreen height=0.3 shape=box style=filled width=0.3]
+		}
+		subgraph cluster_middle_l {
+			label=Middle penwidth=0
+			MI [label="" fillcolor=dodgerblue height=0.3 shape=circle style=filled width=0.3]
+		}
+		subgraph cluster_gu_mi_l {
+			label="Guard
+Middle" penwidth=0
+		}
+		subgraph cluster_gu_ex_l {
+			label="Guard
+Exit
+Middle" penwidth=0
+			EX_MI [label="" fillcolor=lawngreen height=0.3 shape=box style=filled width=0.3]
+		}
+		subgraph cluster_guard_l {
+			label="Guard
+Middle" penwidth=0
+			GU [label="" fillcolor=coral2 height=0.3 shape=circle style=filled width=0.3]
+		}
+	}
+}
