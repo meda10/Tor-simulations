@@ -284,7 +284,7 @@ function create_graph_page($sim_type){
                             </div>
                             <div class=\"download\">
                                 <h1>Download Zip</h1>
-                                <form method='post' action='backend.php'>
+                                <form method='post' action='parse_form.php'>
                                     <input class=\"btn btn-primary button\" name=\"download\" type=\"submit\" value=\"Download\">
                                 </form>
                             </div>
