@@ -6,3 +6,7 @@
 /nginx/Dockerfile
 /docker-compose-github.yml
 /docker-compose-old.yml
+/www/html/torps/
+/www/html/test/
+/www/html/graph/
+/www/html/error.log
