@@ -10,3 +10,4 @@
 /www/html/test/
 /www/html/graph/
 /www/html/error.log
+/nginx/.htpasswd
