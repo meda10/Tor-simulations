@@ -11,6 +11,7 @@ services:
     volumes:
       - ./www/html/:/var/www/html
       - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/password:/usr/local/etc
     networks:
       - app-network
 
