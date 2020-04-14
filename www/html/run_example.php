@@ -65,7 +65,12 @@ function run_sim($config_file){
         return 1;
     } else {
         $config = parse_ini_file($cwd.'/conf/examples/'.$config_file, true, INI_SCANNER_RAW);
-        create_graph_page($config['general']['simulation_type']);
+        if($config['general']['simulation_type'] == 'multiple_sim'){
+            $graph = show_graph($config, count($config) - 2);
+        }else{
+            $graph = NULL;
+        }
+        create_graph_page($config['general']['simulation_type'], $graph);
         header('Location:graph.html');
     }
     return 0;

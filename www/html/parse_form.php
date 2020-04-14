@@ -2,15 +2,6 @@
 
 include 'backend.php';
 
-if ( isset( $_GET['submit'] ) ) {
-    $firstname = $_GET['name']; $lastname = $_GET['address'];
-    echo '<h3>Form GET Method</h3>';
-    echo 'Your name is ' . $lastname . ' ' . $firstname; exit;
-}
-
-$simulation_type = $remove_duplicate_paths = $same_bandwidth = "";
-$generate_graph = $create_html  = "";
-
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     create_zip();
     $filename = "simulation.zip";
@@ -32,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
 
     if (!empty($_POST['simulation_type'])) {
         $arr['simulation_type'] = $_POST['simulation_type'];
+        $simulation_type = $arr['simulation_type'];
     }
 
     if (!empty($_POST['remove_duplicate_paths'])) {
@@ -258,58 +250,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                 if($_POST['m_s_encryption'][$i] != NULL){
                     $arr['sim_'.$i]['encryption'] = $_POST['m_s_encryption'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: Encryption');
+                    error('All fields have to be filled, missing field: Encryption');
                 }
                 if($_POST['m_s_identification_occurrence'][$i] != NULL){
                     $arr['sim_'.$i]['identification_occurrence'] = $_POST['m_s_identification_occurrence'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: ID occurrence');
+                    error('All fields have to be filled, missing field: ID occurrence');
                 }
                 if($_POST['m_s_guard'][$i] != NULL){
                     $arr['sim_'.$i]['guard'] = $_POST['m_s_guard'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: Guard');
+                    error('All fields have to be filled, missing field: Guard');
                 }
                 if($_POST['m_s_exit'][$i] != NULL){
                     $arr['sim_'.$i]['exit'] = $_POST['m_s_exit'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: exit');
+                    error('All fields have to be filled, missing field: exit');
                 }
                 if($_POST['m_s_adv_guard'][$i] != NULL){
                     $arr['sim_'.$i]['adv_guard'] = $_POST['m_s_adv_guard'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: ADV guard');
+                    error('All fields have to be filled, missing field: ADV guard');
                 }
                 if($_POST['m_s_adv_exit'][$i] != NULL){
                     $arr['sim_'.$i]['adv_exit'] = $_POST['m_s_adv_exit'][$i];
                 }else{
-                    error('All fields hae to be filled, missing field: ADV Exit');
+                    error('All fields have to be filled, missing field: ADV Exit');
                 }
                 if($_POST['m_s_friendly_guard_bandwidth'][$i] != NULL){
                     $arr['sim_'.$i]['friendly_guard_bandwidth'] = $_POST['m_s_friendly_guard_bandwidth'][$i] * pow(10,6);
                 }else{
-                    error('All fields hae to be filled, missing field: Guard bandwidth');
+                    error('All fields have to be filled, missing field: Guard bandwidth');
                 }
                 if($_POST['m_s_friendly_exit_bandwidth'][$i] != NULL){
                     $arr['sim_'.$i]['friendly_exit_bandwidth'] = $_POST['m_s_friendly_exit_bandwidth'][$i] * pow(10,6);
                 }else{
-                    error('All fields hae to be filled, missing field: Exit bandwidth');
+                    error('All fields have to be filled, missing field: Exit bandwidth');
                 }
                 if($_POST['m_s_adv_guard_bandwidth'][$i]  != NULL){
                     $arr['sim_'.$i]['adv_guard_bandwidth'] = $_POST['m_s_adv_guard_bandwidth'][$i] * pow(10,6);
                 }else{
-                    error('All fields hae to be filled, missing field: ADV guard bandwidth');
+                    error('All fields have to be filled, missing field: ADV guard bandwidth');
                 }
                 if($_POST['m_s_adv_exit_bandwidth'][$i] != NULL){
                     $arr['sim_'.$i]['adv_exit_bandwidth'] = $_POST['m_s_adv_exit_bandwidth'][$i] * pow(10,6);
                 }else{
-                    error('All fields hae to be filled, missing field: ADV exit bandwidth');
+                    error('All fields have to be filled, missing field: ADV exit bandwidth');
                 }
             }
         }
     }
 
-    parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulations);
+    $config = parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulations);
+    # print_r($arr);
     $cwd = getcwd();
     chdir($cwd);
     //echo getcwd();
@@ -330,14 +323,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         # echo $ret;
         return 0;
     }else{
-        create_graph_page($arr['simulation_type']);
+        if($config['general']['simulation_type'] == 'multiple_sim'){
+            $graph = show_graph($config, $number_of_user_simulations);
+        }else{
+            $graph = NULL;
+        }
+        create_graph_page($arr['simulation_type'], $graph);
         header('Location:graph.html');
     }
-}
-
-function error($message){
-    echo "<h3>Error 1</h3>";
-    echo "<p>There was an error, you can find more information in  error.log</p>";
-    echo $message;
-    exit(0);
 }

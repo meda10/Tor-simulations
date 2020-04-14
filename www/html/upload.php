@@ -48,7 +48,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 $config = parse_ini_file($cwd.'/conf/'.$file_name, true, INI_SCANNER_RAW);
                 unlink_file($file_name);
-                create_graph_page($config['general']['simulation_type']);
+                if($config['general']['simulation_type'] == 'multiple_sim'){
+                    $graph = show_graph($config, count($config) - 2);
+                }else{
+                    $graph = NULL;
+                }
+                create_graph_page($config['general']['simulation_type'], $graph);
                 header('Location:graph.html');
             }
 

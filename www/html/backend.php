@@ -141,8 +141,81 @@ function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulation
     if($return_code != true){
         echo "Wrong permissions: can not write to .ini file\n";
     }
+    return $config;
 }
 
+
+function show_graph($config, $number_of_user_simulations){
+    $encryption = [];
+    $identification_occurrence = [];
+    $guard = [];
+    $exit = [];
+    $adv_guard = [];
+    $adv_exit = [];
+    $friendly_guard_bandwidth = [];
+    $friendly_exit_bandwidth = [];
+    $adv_guard_bandwidth = [];
+    $adv_exit_bandwidth = [];
+
+    $grapshs = [];
+
+    for($i = 0; $i < $number_of_user_simulations; $i++){
+        array_push($encryption, $config['sim_'.$i]['encryption']);
+        array_push($identification_occurrence, $config['sim_'.$i]['identification_occurrence']);
+        array_push($guard, $config['sim_'.$i]['guard']);
+        array_push($exit, $config['sim_'.$i]['exit']);
+        array_push($adv_guard, $config['sim_'.$i]['adv_guard']);
+        array_push($adv_exit, $config['sim_'.$i]['adv_exit']);
+        array_push($friendly_guard_bandwidth, $config['sim_'.$i]['friendly_guard_bandwidth'] );
+        array_push($friendly_exit_bandwidth, $config['sim_'.$i]['friendly_exit_bandwidth']);
+        array_push($adv_guard_bandwidth, $config['sim_'.$i]['adv_guard_bandwidth']);
+        array_push($adv_exit_bandwidth, $config['sim_'.$i]['adv_exit_bandwidth']);
+    }
+
+    if(count(array_unique($encryption)) > 1){
+        array_push($grapshs, 'encryption');
+        array_push($grapshs, 'id_encryption');
+    }
+    if(count(array_unique($identification_occurrence)) > 1){
+
+    }
+    if(count(array_unique($guard)) > 1){
+
+    }
+    if(count(array_unique($exit)) > 1){
+        array_push($grapshs, 'correlation_attack_exit');
+        array_push($grapshs, 'id_number_of_exits');
+    }
+    if(count(array_unique($adv_guard)) > 1){
+        array_push($grapshs, 'correlation_attack_guard');
+        array_push($grapshs, 'id_number_of_guards');
+    }
+    if(count(array_unique($adv_exit)) > 1){
+
+    }
+    if(count(array_unique($friendly_guard_bandwidth)) > 1){
+
+    }
+    if(count(array_unique($friendly_exit_bandwidth)) > 1){
+
+    }
+    if(count(array_unique($adv_guard_bandwidth)) > 1){
+        array_push($grapshs, 'guard_bandwidth');
+        array_push($grapshs, 'id_guard_bandwidth');
+    }
+    if(count(array_unique($adv_exit_bandwidth)) > 1){
+        array_push($grapshs, 'exit_bandwidth');
+        array_push($grapshs, 'id_exit_bandwidth');
+    }
+    return $grapshs;
+}
+
+function error($message){
+    echo "<h3>Error 1</h3>";
+    echo "<p>There was an error, you can find more information in  error.log</p>";
+    echo $message;
+    exit(0);
+}
 
 function create_zip(){
     $zip = new ZipArchive;
@@ -163,11 +236,17 @@ function unlink_file($file_name){
     }
 }
 
-function create_graph_page($sim_type){
+function create_graph_page($sim_type, $graph_names){
     $cwd = getcwd();
     //$graph_file = fopen($cwd."/graph/simulation.dot.svg", "r") or die("Unable to open simulaton file!");
     //$legend_file = fopen($cwd."/graph/legend.dot.svg", "r") or die("Unable to open legend file!");
     if($sim_type == 'multiple_sim'){
+        $graph = "<div style='display: flex; flex-flow: wrap;'>";
+        for($i = 0; $i < count($graph_names); $i++){
+            $graph = $graph."<img src=\"graph/".$graph_names[$i].".png\" alt=\"\">";
+        }
+        $graph = $graph."</div>";
+/*
         $graph = "<div style='display: flex; flex-flow: wrap;'>
                   <img src=\"graph/exit_bandwidth.png\" alt=\"Exit bandwidth\">
                   <img src=\"graph/guard_bandwidth.png\" alt=\"Guard bandwidth\">
@@ -182,6 +261,7 @@ function create_graph_page($sim_type){
                   <img src=\"graph/id_number_of_guards.png\" alt=\"\">
                   </div>
                  ";
+*/
         $nav = "<li class=\"nav-item\">
                     <a class=\"nav-link\" id=\"statistic_tab\" data-toggle=\"tab\" href=\"#statistic\" role=\"tab\" aria-controls=\"statistic\" aria-selected=\"false\">Statistic</a>
                 </li>";
