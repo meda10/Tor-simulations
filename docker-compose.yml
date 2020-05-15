@@ -16,8 +16,8 @@ services:
       - app-network
 
   php:
-    # image: meda10/bp_tor_php:latest
-    build: ./php/
+    image: meda10/bp_tor_php:latest
+    # build: ./php/
     container_name: php_container
     restart: unless-stopped
     tty: true
