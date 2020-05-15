@@ -62,7 +62,8 @@ function write_ini_file($file, $array = []) {
 
 
 function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulations){
-    $config = parse_ini_file('/conf/config.ini', true, INI_SCANNER_RAW);
+    $cwd = getcwd();
+    $config = parse_ini_file($cwd.'/conf/config.ini', true, INI_SCANNER_RAW);
 
     $i = 0;
     while ($config['node'.$i] != NULL){
