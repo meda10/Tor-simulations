@@ -32,8 +32,10 @@ class GraphGenerator:
                 self.generate_large_graph()
             elif self.sim_size == 'small':
                 self.generate_simple_graph()
-        elif self.sim_type == 'attack' or self.sim_type == 'exit_attack':
+        elif self.sim_type == 'attack':
             self.generate_attack_graph()
+        elif self.sim_type == 'exit_attack':
+            self.generate_exit_attack_graph()
         elif self.sim_type == 'hidden_service':
             self.generate_hidden_service_graph()
         elif self.sim_type == 'multiple_sim':
@@ -2143,6 +2145,12 @@ class GraphGenerator:
         self.generate_graph_legend('hidden_service')
 
     def generate_attack_graph(self):  # todo alpha by node usage, color by True/Flase
+        guard_node = []
+        middle_node = []
+        exit_node = []
+        layers = []
+        edge_usage_in_layers = {}
+
         graph = Digraph('Attack', format='svg')
 
         graph.attr(layout='neato')
@@ -2152,8 +2160,123 @@ class GraphGenerator:
         graph.attr(splines="true")
 
         pc_icon_path = self.cwd + '/resources/computer.png'
+        server_icon_path = self.cwd + '/resources/SE.svg'
+
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
+        graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
+                   height="1.3", margin="20")
+
+        print(self.paths)
+        for i in range(0, len(self.paths)):
+            layers.append("path{}:".format(i))
+            path0 = ('PC', self.paths[i][0])
+            path1 = (self.paths[i][0], self.paths[i][1])
+            path2 = (self.paths[i][1], self.paths[i][2])
+            path3 = (self.paths[i][2], "SERVER")
+            if path0 not in edge_usage_in_layers:
+                edge_usage_in_layers[path0] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path0].append('path{}'.format(i))
+            if path1 not in edge_usage_in_layers:
+                edge_usage_in_layers[path1] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path1].append('path{}'.format(i))
+            if path2 not in edge_usage_in_layers:
+                edge_usage_in_layers[path2] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path2].append('path{}'.format(i))
+            if path3 not in edge_usage_in_layers:
+                edge_usage_in_layers[path3] = ['path{}'.format(i)]
+            else:
+                edge_usage_in_layers[path3].append('path{}'.format(i))
+
+        if len(layers) != 0:
+            graph.attr(layers=''.join(layers)[:-1])
+
+        for index, r in enumerate(self.routers, start=0):  # todo guard or exit color??
+            try:
+                color = str(self.color[str(r.address)][0])
+                if len(color) == 1:
+                    color = '0{}'.format(color)
+                if 'Guard' in r.flags:
+                    graph.node(str(r.address), label="", style='filled',
+                               fillcolor="#0000FF{}".format(color), shape='box', height='0.3',
+                               width='0.3')
+                elif 'Exit' in r.flags:
+                    graph.node(str(r.address), label="", style='filled',
+                               fillcolor="#0000FF{}".format(color), shape='circle', height='0.3',
+                               width='0.3')
+            except KeyError:
+                if 'Guard' in r.flags:
+                    graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='box',
+                               height='0.3', width='0.3')
+                elif 'Exit' in r.flags:
+                    graph.node(str(r.address), label="", style='filled', fillcolor="#0000FF00", shape='circle',
+                               height='0.3', width='0.3')
+            graph.edge("NODE", str(r.address), style="invis", constraint="false")
+
+        for i in range(1, self.adv_guard_c + 1):
+            if '10.{}.0.0'.format(i) in self.color.keys():
+                alpha = self.color['10.{}.0.0'.format(i)][0]
+                encryption_color = self.color['10.{}.0.0'.format(i)][1]
+                if len(alpha) == 1:
+                    alpha = '0{}'.format(alpha)
+                if len(encryption_color) == 1:
+                    encryption_color = '0{}'.format(encryption_color)
+                graph.node('10.{}.0.0'.format(i), label="", style='filled',
+                            fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='box',
+                            height='0.3', width='0.3')
+            else:
+                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="#FF000000", shape='box',
+                           height='0.3', width='0.3')  # guard was not used
+            graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
+        for i in range(self.adv_guard_c + 1, self.adv_guard_c + 1 + self.adv_exit_c):
+            if '10.{}.0.0'.format(i) in self.color.keys():
+                alpha = self.color['10.{}.0.0'.format(i)][0]
+                encryption_color = self.color['10.{}.0.0'.format(i)][1]
+                if len(alpha) == 1:
+                    alpha = '0{}'.format(alpha)
+                if len(encryption_color) == 1:
+                    encryption_color = '0{}'.format(encryption_color)
+                graph.node('10.{}.0.0'.format(i), label="", style='filled',
+                           fillcolor="#FF{}00{}".format(encryption_color, alpha), shape='circle',
+                           height='0.3', width='0.3')
+            else:
+                graph.node('10.{}.0.0'.format(i), label="", style='filled', fillcolor="#FF000000", shape='circle',
+                           height='0.3', width='0.3')  # exit was not used
+
+            graph.edge("NODE", '10.{}.0.0'.format(i), style="invis", constraint="false")
+
+        graph.edge("NODE", "PC", style="invis", len="0.1", constraint="false")
+        graph.edge("NODE", "SERVER", style="invis", len="1", constraint="false")
+
+
+        for key, value in edge_usage_in_layers.items():
+            graph.edge(key[0], key[1], constraint="false", weight='0', layer=",".join(edge_usage_in_layers[key]))
+
+        try:
+            graph.render('graph/simulation.dot', view=False)
+        except Exception:
+            print('Graphviz: Render Error, Please make shure that you have Graphviz instaled and added to $PATH')
+            sys.exit(1)
+        self.fix_svg_links()
+        self.generate_graph_legend('attack')
+
+    def generate_exit_attack_graph(self):
+        graph = Digraph('Attack', format='svg')
+
+        graph.attr(layout='neato')
+        graph.attr(size="8.5")
+        graph.attr(sep="-0.5")
+        graph.attr(overlap="scalexy")
+        graph.attr(splines="true")
+
+        pc_icon_path = self.cwd + '/resources/computer.png'
+
+        graph.node("NODE", label="", shape="none")
+        graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
+
 
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit color??
             try:

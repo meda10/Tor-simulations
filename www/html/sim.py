@@ -133,7 +133,8 @@ def parse_config_file(file):
             dic['adv_exit_bandwidth'] = config.getint('attack_simulation', 'adv_exit_bandwidth')
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('attack_simulation', 'encryption')
-            dic['identification_occurrence'] = config.getint('attack_simulation', 'identification_occurrence')
+            # dic['identification_occurrence'] = config.getint('attack_simulation', 'identification_occurrence')
+            dic['identification_occurrence'] = 0
         except ValueError as e:
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
@@ -155,7 +156,7 @@ def parse_config_file(file):
             dic['adv_exit_bandwidth'] = config.getint('exit_attack', 'adv_exit_bandwidth')
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('exit_attack', 'encryption')
-            dic['identification_occurrence'] = 0
+            dic['identification_occurrence'] = config.getint('exit_attack', 'identification_occurrence')
         except ValueError as e:
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
@@ -265,7 +266,7 @@ def run_simulation(file):
                                            sim['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count,
                                            sim['encryption'], sim['friendly_guard_bandwidth'],
                                            sim['friendly_exit_bandwidth'], sim['identification_occurrence'],
-                                           sim['adv_guard'], sim['adv_exit'])
+                                           sim['number_of_simulations'], sim['adv_guard'], sim['adv_exit'])
             output_from_all_sims.append(circuits_output)
             loop_count += 1
         if config[0]['generate_graph']:
@@ -285,14 +286,14 @@ def run_simulation(file):
                                        config[0]['adv_exit_bandwidth'], config[0]['simulation_type'], loop_count,
                                        config[0]['encryption'], config[0]['guard_bandwidth_value'],
                                        config[0]['exit_bandwidth_value'], config[0]['identification_occurrence'],
-                                       config[0]['adv_guard'], config[0]['adv_exit'])
+                                       config[0]['number_of_simulations'], config[0]['adv_guard'], config[0]['adv_exit'])
 
     if config[0]['simulation_type'] == 'hidden_service' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0], sim_type=config[0]['simulation_type'])
         exit_code_graph = GraphGenerator.generate_graph(g)      # todo exit code graph
     elif (config[0]['simulation_type'] == 'attack' or config[0]['simulation_type'] == 'exit_attack') and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, adv_guard_c=config[0]['adv_guard'], adv_exit_c=config[0]['adv_exit'],
-                           color=circuits_output[1], sim_type=config[0]['simulation_type'])
+                           color=circuits_output[1], paths=circuits_output[0], sim_type=config[0]['simulation_type'])
         GraphGenerator.generate_graph(g)
     elif config[0]['simulation_type'] == 'path' and config[0]['generate_graph']:
         g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
@@ -348,13 +349,14 @@ def write_descriptor(desc, filename):
 
 
 def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_bandwidth, sim_type, loop_count,
-                 encryption_percentage, guard_bandwidth, exit_bandwidth, identification_occurrence,
+                 encryption_percentage, guard_bandwidth, exit_bandwidth, identification_occurrence, number_of_simulations,
                  adv_guard=None, adv_exit=None):
     circuits = []
     attackers_guards = []
     attackers_exits = []
     attackers_middle = []
     circuit_list = []
+    coralation = []
     color = {}
     node_usage = collections.Counter()
     id_node_usage = collections.Counter()
@@ -376,10 +378,12 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'bad_guard_encrypt': 0,
                                      'bad_middle_encrypt': 0,
                                      'bad_exit_encrypt': 0,
+                                     'bad_exit_unencrypt': 0,
                                      'bad_gu_and_ex_encrypt': 0,
                                      'adv_guard': adv_guard,
                                      'adv_exit': adv_exit,
                                      'encryption': encryption_percentage,
+                                     'number_of_simulations': number_of_simulations,
                                      'identification_occurrence': identification_occurrence,
                                      'adv_guard_bandwidth': round(adv_guard_bandwidth / math.pow(10, 6), 0),
                                      'adv_exit_bandwidth': round(adv_exit_bandwidth / math.pow(10, 6), 0),
@@ -410,13 +414,15 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                 circuits.append(circuit)
 
             # attack nodes
+            # print(encryption_percentage)
             if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
                 encrypted = get_encryption(encryption_percentage)
                 id_included = get_id(identification_occurrence)
+                #print('ID {} enC {}'.format(id_included, encrypted))
                 if encrypted:
                     statistic.update(['encrypted'])
                     encrypted_node_usage.update(circuit)
-                if id_included and sim_type == 'attack' or id_included and sim_type == 'multiple_sim':
+                if id_included and sim_type == 'exit_attack' or id_included and sim_type == 'multiple_sim':
                     statistic.update(['total_id'])
                     id_node_usage.update(circuit)
                 if id_included and not encrypted:
@@ -439,14 +445,17 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     if encrypted:
                         statistic.update(['bad_exit_encrypt'])
                         encrypted_attacker_exit.update(['{}'.format(circuit[2])])
+                    else:
+                        statistic.update(['bad_exit_unencrypt'])
                     attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
 
                 if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
-                    if id_included and not encrypted and sim_type == 'attack' or (id_included and not encrypted and sim_type == 'multiple_sim'):
+                    if id_included and not encrypted and sim_type == 'exit_attack' or (id_included and not encrypted and sim_type == 'multiple_sim'):
                         statistic.update(['not_encrypted_id_stolen'])
                         id_stolen_node_usage.update(circuit)
                 if circuit[0][:3] == '10.' and circuit[1][:3] == '10.' and circuit[2][:3] == '10.':
                     statistic.update(['bad_circuit'])
+                    statistic.update(['bad_gu_and_ex'])
                 elif circuit[2][:3] == '10.' and circuit[0][:3] == '10.':
                     statistic.update(['bad_gu_and_ex'])
                     if encrypted:
@@ -459,6 +468,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
 
     # calculate color for graph
     if sim_type == 'exit_attack':
+        """
         # alpha - % | node usage - node usage max
         # blue - % | encrypted
         dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
@@ -467,8 +477,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
             blue = hex(round((255 * encrypted_usage / 100)))[2:]
             alpha = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
             color[k] = (alpha, blue)
-
-    elif sim_type == 'attack':
+        """
         # add nodes that were not in enemy circuts
         for node in id_node_usage:
             if node not in id_stolen_node_usage.keys():
@@ -487,6 +496,40 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
         for k in node_usage.keys():
             alpha = hex(round((100 * id_stolen_node_usage['{}'.format(k)] / dict_max) * 255 / 100))[2:]
             color[k] = (alpha, '0')
+
+    elif sim_type == 'attack':
+        """
+        # add nodes that were not in enemy circuts
+        for node in id_node_usage:
+            if node not in id_stolen_node_usage.keys():
+                id_stolen_node_usage['{}'.format(node)] = 0  # id_node_usage[node]
+
+        # statistic: enemy nodes - stolen count | friendly nodes - not stolen count
+        for node in id_stolen_node_usage.keys():
+            if node[:3] != '10.':
+                id_stolen_node_usage[node] = id_node_usage[node] - id_stolen_node_usage[node]
+
+        # alpha - % | stolen - stolen max
+        try:
+            dict_max = id_node_usage[max(id_node_usage.items(), key=operator.itemgetter(1))[0]]
+        except ValueError:
+            dict_max = 1
+        for k in node_usage.keys():
+            alpha = hex(round((100 * id_stolen_node_usage['{}'.format(k)] / dict_max) * 255 / 100))[2:]
+            color[k] = (alpha, '0')
+        """
+
+        dict_max = node_usage[max(node_usage.items(), key=operator.itemgetter(1))[0]]
+        for k in node_usage.keys():
+            encrypted_usage = (100 * (encrypted_node_usage['{}'.format(k)])) / node_usage[k]
+            blue = hex(round((255 * encrypted_usage / 100)))[2:]
+            alpha = hex(round((100 * node_usage[k] / dict_max) * 255 / 100))[2:]
+            color[k] = (alpha, "0")
+
+        for circuit in circuits:
+            if circuit[0][:3] == '10.' and circuit[2][:3] == '10.':
+                coralation.append(circuit)
+        circuits = coralation
 
     data = [circuits, color, statistic, node_usage]
     return data
@@ -522,7 +565,7 @@ def create_statistic(loop_count, statistic):
 
 
 def parse_statistics(bandwidth, ip, node_usage, id_node_usage, encrypted_node_usage, id_stolen_node_usage, node_statistics):
-    # node_statistics = {IP: (USAGE, BANDWIDTH MB/s, encryption %, id_usage, id_stolen)}
+    # node_statistics = {IP: (USAGE, BANDWIDTH KB/s, encryption %, id_usage, id_stolen)}
     bandwidth = round(bandwidth / math.pow(10, 6), 0)
     usage = node_usage['{}'.format(ip)]
     id_usage = id_node_usage['{}'.format(ip)]
@@ -699,7 +742,7 @@ def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
 
 def generate_ntor_key():
     """
-    odebrano z leekspin
+    odebrano z leekspin https://github.com/isislovecruft/leekspin
     :return:
     """
     public_ntor_key = None
@@ -1047,7 +1090,7 @@ def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv
     output_file_path = simulation_file
     num_samples = n_samples
     tracefile = Path(path + '/in/users2-processed.traces.pickle')
-    usermodel = 'simple=600000000'
+    usermodel = 'simple=6000000000000000'
     format_arg = 'normal'  # relay-adv
     adv_guard_bw = adv_guard_bandwidth
     adv_exit_bw = adv_exit_bandwidth

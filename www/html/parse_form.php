@@ -3,7 +3,17 @@
 include 'backend.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
-    create_zip();
+
+    if (!empty($_POST['type'])) {
+        $type = $_POST['type'];
+        create_zip($type);
+    } else{
+        $type = 'path';
+        create_zip($type);
+    }
+
+
+
     $filename = "simulation.zip";
     if (file_exists($filename)) {
         header('Content-Type: application/zip');
@@ -121,12 +131,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             error('Required field was not field: Encryption %');
         }
 
-        if ($_POST['identification_occurrence_attack'] != "") {
-            $arr['identification_occurrence_attack'] = $_POST['identification_occurrence_attack'];
-        } else{
-            error('Required field was not field: ID occurrence');
-        }
-
         if ($_POST['guard_attack'] != "") {
             $arr['guard_attack'] = $_POST['guard_attack'];
         } else{
@@ -187,6 +191,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
             $arr['encryption_exit_attack'] = $_POST['encryption_exit_attack'];
         } else{
             error('Required field was not field: Encryption');
+        }
+
+        if ($_POST['identification_occurrence_exit_attack'] != "") {
+            $arr['identification_occurrence_exit_attack'] = $_POST['identification_occurrence_exit_attack'];
+        } else{
+            error('Required field was not field: ID occurrence');
         }
 
         if ($_POST['guard_exit_attack'] != "") {

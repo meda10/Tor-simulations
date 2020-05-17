@@ -93,7 +93,6 @@ function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulation
         $config['hiden_service_simulation']['nodes'] = $arr['nodes_hs'];
     } else if ($arr['simulation_type']  == 'attack'){
         $config['attack_simulation']['encryption'] = $arr['encryption_attack'];
-        $config['attack_simulation']['identification_occurrence'] = $arr['identification_occurrence_attack'];
         $config['attack_simulation']['guard'] = $arr['guard_attack'];
         $config['attack_simulation']['exit'] = $arr['exit_attack'];
         $config['attack_simulation']['number_of_simulations'] = $arr['number_of_simulations_attack'];
@@ -103,6 +102,7 @@ function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulation
         $config['attack_simulation']['adv_exit_bandwidth'] = $arr['adv_exit_bandwidth'];
     } else if ($arr['simulation_type']  == 'exit_attack'){
         $config['exit_attack']['encryption'] = $arr['encryption_exit_attack'];
+        $config['exit_attack']['identification_occurrence'] = $arr['identification_occurrence_exit_attack'];
         $config['exit_attack']['guard'] = $arr['guard_exit_attack'];
         $config['exit_attack']['exit'] = $arr['exit_exit_attack'];
         $config['exit_attack']['number_of_simulations'] = $arr['number_of_simulations_exit_attack'];
@@ -218,16 +218,58 @@ function error($message){
     exit(0);
 }
 
-function create_zip(){
+function create_zip($type){
     $zip = new ZipArchive;
     $res = $zip->open('simulation.zip', ZipArchive::CREATE);
     if ($res === TRUE) {
-        $zip->addFile('picture.html', 'graph.html');
-        $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
-        $zip->addFile('graph/legend.dot.svg', 'legend.svg');
-        $zip->addFile('resources/animation.css');
-        $zip->addFile('resources/animation.js');
-        $zip->close();
+        if($type == 'path'){
+            $zip->addFile('picture.html', 'graph.html');
+            $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
+            $zip->addFile('graph/legend.dot.svg', 'legend.svg');
+            $zip->addFile('resources/animation.css');
+            $zip->addFile('resources/animation.js');
+            $zip->close();
+        }
+        if($type == 'attack'){
+            $zip->addFile('picture.html', 'graph.html');
+            $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
+            # $zip->addFile('graph/legend.dot.svg', 'legend.svg');
+            $zip->addFile('resources/animation.css');
+            $zip->addFile('resources/animation.js');
+            $zip->close();
+        }
+        if($type == 'multiple_sim'){
+            $zip->addFile('picture.html', 'graph.html');
+            $zip->addFile('graph/guard_bandwidth.png', 'guard_bandwidth.png');
+            $zip->addFile('graph/nodes_gu_ex_usage.png', 'nodes_gu_ex_usage.png');
+            $zip->addFile('graph/correlation_attack_exit.png', 'correlation_attack_exit.png');
+            $zip->addFile('graph/correlation_attack_guard.png', 'correlation_attack_guard.png');
+            $zip->addFile('graph/encryption.png', 'encryption.png');
+            $zip->addFile('graph/id_encryption.png', 'id_encryption.png');
+            $zip->addFile('graph/id_exit_bandwidth.png', 'id_exit_bandwidth.png');
+            $zip->addFile('graph/id_guard_bandwidth.png', 'id_guard_bandwidth.png');
+            $zip->addFile('graph/id_number_of_exits.png', 'id_number_of_exits.png');
+            $zip->addFile('graph/id_number_of_guards.png', 'id_number_of_guards.png');
+            $zip->addFile('graph/exit_bandwidth.png', 'exit_bandwidth.png');
+            $zip->close();
+        }
+        if($type == 'exit_attack'){
+            $zip->addFile('picture.html', 'graph.html');
+            $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
+            # $zip->addFile('graph/legend.dot.svg', 'legend.svg');
+            $zip->addFile('resources/animation.css');
+            $zip->addFile('resources/animation.js');
+            $zip->close();
+        }
+        if($type == 'hidden_service'){
+            $zip->addFile('picture.html', 'graph.html');
+            $zip->addFile('graph/simulation.dot.svg', 'simulation.svg');
+            $zip->addFile('graph/legend.dot.svg', 'legend.svg');
+            $zip->addFile('resources/animation.css');
+            $zip->addFile('resources/animation.js');
+            $zip->close();
+        }
+
     }
 }
 
@@ -275,6 +317,9 @@ function create_graph_page($sim_type, $graph_names){
                 </li>
                 <li class=\"nav-item\">
                     <a class=\"nav-link\" id=\"usage_tab\" data-toggle=\"tab\" href=\"#usage\" role=\"tab\" aria-controls=\"usage\" aria-selected=\"false\">Usage</a>
+                </li>
+                <li class=\"nav-item\">
+                    <a class=\"nav-link\" id=\"statistic_tab\" data-toggle=\"tab\" href=\"#statistic\" role=\"tab\" aria-controls=\"statistic\" aria-selected=\"false\">Statistic</a>
                 </li>";
     }
 
@@ -284,14 +329,14 @@ function create_graph_page($sim_type, $graph_names){
     
     if($sim_type == 'attack'){
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
-                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
-                        <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
-                        <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
-    }else{
-        $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
-                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">MB/s</th>
+                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
                         <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
+    }else{
+        $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
+                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
+                        <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
+                        <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
     }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
 
@@ -366,6 +411,7 @@ function create_graph_page($sim_type, $graph_names){
                             <div class=\"download\">
                                 <h1>Download Zip</h1>
                                 <form method='post' action='parse_form.php'>
+                                    <input type=\"hidden\" id=\"type\" name=\"type\" value=\"$sim_type\">
                                     <input class=\"btn btn-primary button\" name=\"download\" type=\"submit\" value=\"Download\">
                                 </form>
                             </div>
@@ -428,23 +474,23 @@ function create_graph_page($sim_type, $graph_names){
                                     <tr>
                                         <th data-field=\"adv_exit\" scope=\"col\">ADV Exit</th>
                                         <th data-field=\"adv_guard\" scope=\"col\">ADV Guard</th>
-                                        <th data-field=\"adv_exit_bandwidth\" scope=\"col\">ADV Exit bandwidth Mb/s</th>
-                                        <th data-field=\"adv_guard_bandwidth\" scope=\"col\">ADV Guard bandwidth Mb/s</th>
-                                        <th data-field=\"exit_bandwidth\" scope=\"col\">Exit bandwidth Mb/s</th>
-                                        <th data-field=\"guard_bandwidth\" scope=\"col\">Guard bandwidth Mb/s</th>
-                                        <th data-field=\"encryption\" scope=\"col\">Encryption %</th>
-                                        <th data-field=\"encrypted\" scope=\"col\">Connections encrypted</th>
+                                        <th data-field=\"adv_exit_bandwidth\" scope=\"col\">ADV Exit: bandwidth (Kb/s)</th>
+                                        <th data-field=\"adv_guard_bandwidth\" scope=\"col\">ADV Guard: bandwidth (Kb/s)</th>
+                                        <th data-field=\"exit_bandwidth\" scope=\"col\">Exit: bandwidth (Kb/s)</th>
+                                        <th data-field=\"guard_bandwidth\" scope=\"col\">Guard: bandwidth (Kb/s)</th>
+                                        <th data-field=\"encryption\" scope=\"col\">Encryption (%)</th>
+                                        <th data-field=\"identification_occurrence\" scope=\"col\">Occurence of ID (%)</th>
+                                        <th data-field=\"number_of_simulations\" scope=\"col\">All circuits</th>
+                                        <th data-field=\"encrypted\" scope=\"col\">Circuits encrypted</th>
                                         <th data-field=\"bad_node\" scope=\"col\">ADV nodes used</th>
                                         <th data-field=\"bad_guard_used\" scope=\"col\">ADV as guard</th>
                                         <th data-field=\"bad_middle_used\" scope=\"col\">ADV as middle</th>
                                         <th data-field=\"bad_exit_used\" scope=\"col\">ADV as exit</th>
-                                        <th data-field=\"bad_gu_and_ex\" scope=\"col\">ADV Guard & Exit correlation</th>
-                                        <th data-field=\"bad_guard_encrypt\" scope=\"col\">ADV as guard encrypted</th>
-                                        <th data-field=\"bad_middle_encrypt\" scope=\"col\">ADV as middle encrypted</th>
-                                        <th data-field=\"bad_exit_encrypt\" scope=\"col\">ADV as exit encrypted </th>
-                                        <th data-field=\"bad_gu_and_ex_encrypt\" scope=\"col\">ADV correlation encrypted</th>                                        
-                                        <th data-field=\"identification_occurrence\" scope=\"col\">Occurence of ID %</th>
-                                        <th data-field=\"id\" scope=\"col\">Total number of ID</th>
+                                        <th data-field=\"bad_gu_and_ex\" scope=\"col\">ADV correlation</th>
+                                        <th data-field=\"bad_exit_encrypt\" scope=\"col\">ADV exit: encrypted comunication</th>
+                                        <th data-field=\"bad_exit_unencrypt\" scope=\"col\">ADV exit: unencrypted comunication</th>
+                                        <th data-field=\"bad_gu_and_ex_encrypt\" scope=\"col\">ADV correlation: encrypted</th>
+                                        <th data-field=\"total_id\" scope=\"col\">Total number of ID</th>
                                         <th data-field=\"not_encrypted_id\" scope=\"col\">Unencrypted ID</th>
                                         <th data-field=\"not_encrypted_id_stolen\" scope=\"col\">Unencrypted ID stolen</th>
                                     </tr>

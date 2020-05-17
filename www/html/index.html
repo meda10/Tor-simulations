@@ -44,7 +44,7 @@
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path" selected>Path</option>
                                 <option value="hidden_service">Hidden service</option>
-                                <option value="attack">Attack</option>
+                                <option value="attack">Correlation attack</option>
                                 <option value="exit_attack">Exit attack</option>
                                 <option value="multiple_sim">Multiple simulations</option>
                             </select>
@@ -64,19 +64,19 @@
                     </div>
                     <div id="bandwidth_value_div" style="display: none">
                         <div class="form-group row">
-                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_bandwidth_value">Bandwidth guard (optional) B/s:</label>
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_bandwidth_value">Bandwidth guard (optional) KB/s:</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="guard_bandwidth_value" min="1" name="guard_bandwidth_value" type="number">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-5 col-form-label col-form-label-sm" for="middle_bandwidth_value">Bandwidth middle (optional) B/s:</label>
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="middle_bandwidth_value">Bandwidth middle (optional) KB/s:</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="middle_bandwidth_value" min="1" name="middle_bandwidth_value" type="number">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit_bandwidth_value">Bandwidth exit (optional) B/s:</label>
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="exit_bandwidth_value">Bandwidth exit (optional) KB/s:</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="exit_bandwidth_value" min="1" name="exit_bandwidth_value" type="number">
                             </div>
@@ -149,12 +149,6 @@
                             </div>
                         </div>
                         <div class="form-group row required">
-                            <label class="col-sm-5 col-form-label col-form-label-sm" for="identification_occurrence_attack">ID occurrence(%):</label>
-                            <div class="col-sm-7">
-                                <input class="form-control form-control-sm second_row" id="identification_occurrence_attack" min="0" name="identification_occurrence_attack" type="number">
-                            </div>
-                        </div>
-                        <div class="form-group row required">
                             <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_attack">Guard:</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="guard_attack" min="0" name="guard_attack" type="number">
@@ -202,6 +196,12 @@
                             <label class="col-sm-5 col-form-label col-form-label-sm" for="encryption_exit_attack">Encryption(%):</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="encryption_exit_attack" min="0" name="encryption_exit_attack" type="number">
+                            </div>
+                        </div>
+                        <div class="form-group row required">
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="identification_occurrence_exit_attack">ID occurrence(%):</label>
+                            <div class="col-sm-7">
+                                <input class="form-control form-control-sm second_row" id="identification_occurrence_exit_attack" min="0" name="identification_occurrence_exit_attack" type="number">
                             </div>
                         </div>
                         <div class="form-group row required">
@@ -265,7 +265,7 @@
                                 <input type="text" name="ip[]" placeholder="IP" class="form-control name_list">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <input type="text" name="bandwidth[]" placeholder="Bandwidth MB/s" class="form-control name_list">
+                                <input type="text" name="bandwidth[]" placeholder="Bandwidth KB/s" class="form-control name_list">
                             </div>
                             <div class="col-md-0 mb-3">
                                 <button type="button" name="add" id="add" class="btn btn-success">+</button>
@@ -297,16 +297,16 @@
                             </div>
                             <div class="form-row">
                                 <div class="col-md-2 mb-2 mt-2">
-                                    <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                    <input type="text" name="m_s_friendly_guard_bandwidth[]" placeholder="F - guard Bandwidth KB/s" class="form-control form-control-sm name_list">
                                 </div>
                                 <div class="col-md-2 mb-2 mt-2">
-                                    <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                    <input type="text" name="m_s_friendly_exit_bandwidth[]" placeholder="F - exit Bandwidth KB/s" class="form-control form-control-sm name_list">
                                 </div>
                                 <div class="col-md-2 mb-2 mt-2">
-                                    <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                    <input type="text" name="m_s_adv_guard_bandwidth[]" placeholder="A - Guard Bandwidth KB/s" class="form-control form-control-sm name_list">
                                 </div>
                                 <div class="col-md-2 mb-2 mt-2">
-                                    <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth MB/s" class="form-control form-control-sm name_list">
+                                    <input type="text" name="m_s_adv_exit_bandwidth[]" placeholder="A - Exit Bandwidth KB/s" class="form-control form-control-sm name_list">
                                 </div>
                                 <div class="col-md-2 mb-2 mt-2">
                                     <input type="text" name="m_s_identification_occurrence[]" placeholder="ID occurence %" class="form-control form-control-sm name_list">
@@ -349,7 +349,7 @@
                         </div>
                         <div id="info_attack" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Attack simulation</h5>
+                                <h5 class="font-weight-bold">Correlation attack simulation</h5>
                                 <p>ID</p>
                             </div>
                         </div>
@@ -409,22 +409,22 @@
                         </div>
                         <div id="example_attack" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Identification occurrence 30%</h5>
-                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
+                                <h5 class="font-weight-bold">Correlation 1</h5>
+                                <p>Simulation with 80 friendly guards, 20 friendly exits, 2 adversary guards 1 one exit.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Identification occurrence 50%</h5>
-                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
+                                <h5 class="font-weight-bold">Correlation 2</h5>
+                                <p>Simulation with 20 friendly guards, 80 friendly exits, 2 adversary guards and 1 exit.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Identification occurrence 80%</h5>
-                                <p>Simulation with 100 friendly nodes and 20 adversary nodes.</p>
+                                <h5 class="font-weight-bold">Correlation 3 </h5>
+                                <p>Simulation with 50 friendly guards, 50 friendly exits, 3 adversary guards and 2 exits.</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -433,21 +433,21 @@
                         <div id="example_exit_attack" style="display: none;">
                             <div class="example">
                                 <h5 class="font-weight-bold">Encryption 20%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 20% encryption</p>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 20% encryption and ID occurrence 20%</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
                                 <h5 class="font-weight-bold">Encryption 50%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 50% encryption</p>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 50% encryption and ID occurrence 20%</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
                                 <h5 class="font-weight-bold">Encryption 80%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits and 80% encryption</p>
+                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 80% encryption and ID occurrence 20%</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
