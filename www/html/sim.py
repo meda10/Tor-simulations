@@ -827,10 +827,10 @@ def make_descriptors(descriptor_entries):
                                                 'fresh-until': '2019-03-04 15:00:00',
                                                 'valid-until': '2019-03-04 17:00:00',
                                                 'consensus-method': '28',
-                                                'bandwidth-weights': 'Wbd=0 Wbe=0 Wbg=4143 Wbm=10000 Wdb=10000 '
+                                                'bandwidth-weights': 'Wbd=10000 Wbe=10000 Wbg=10000 Wbm=10000 Wdb=10000 '
                                                                      'Web=10000 Wed=10000 Wee=10000 Weg=10000 '
-                                                                     'Wem=10000 Wgb=10000 Wgd=0 Wgg=5857 Wgm=5857 '
-                                                                     'Wmb=10000 Wmd=0 Wme=0 Wmg=4143 Wmm=10000',
+                                                                     'Wem=10000 Wgb=10000 Wgd=10000 Wgg=10000 Wgm=10000 '
+                                                                     'Wmb=10000 Wmd=10000 Wme=10000 Wmg=10000 Wmm=10000',
                                                 }, routers=consensus_entries)
     write_descriptor(consensus, 'consensus')
     write_descriptors(server_descriptors, 'server-descriptors')

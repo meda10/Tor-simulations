@@ -2277,7 +2277,6 @@ class GraphGenerator:
         graph.node("NODE", label="", shape="none")
         graph.node("PC", label="", shape="none", image=pc_icon_path, fixedsize="shape", width="0.75", height="1")
 
-
         for index, r in enumerate(self.routers, start=0):  # todo guard or exit color??
             try:
                 color = str(self.color[str(r.address)][0])

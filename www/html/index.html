@@ -43,7 +43,7 @@
                             <select class="form-control form-control-sm second_row" id="simulation_type" name="simulation_type"
                                     onchange="java_script_:show(this.options[this.selectedIndex].value)">
                                 <option value="path" selected>Path</option>
-                                <option value="hidden_service">Hidden service</option>
+                                <option value="hidden_service">Onion service</option>
                                 <option value="attack">Correlation attack</option>
                                 <option value="exit_attack">Exit attack</option>
                                 <option value="multiple_sim">Multiple simulations</option>
@@ -102,7 +102,7 @@
                             </div>
                         </div>
                         <div class="form-group row required">
-                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_exit">Guard exit:</label>
+                            <label class="col-sm-5 col-form-label col-form-label-sm" for="guard_exit">Guard & exit:</label>
                             <div class="col-sm-7">
                                 <input class="form-control form-control-sm second_row" id="guard_exit" min="0" name="guard_exit" type="number">
                             </div>
@@ -343,8 +343,9 @@
                         </div>
                         <div id="info_hidden_service" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Hidden service simulation</h5>
-                                <p>This simulation shows how does connection to hidden service works step by step.</p>
+                                <h5 class="font-weight-bold">Onion service simulation</h5>
+                                <p>This simulation explains how does connection to onion service works step by step.</p>
+                                <p>You will learn about introduction points, rendezvous point and onion services.</p>
                             </div>
                         </div>
                         <div id="info_attack" style="display: none;">

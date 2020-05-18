@@ -332,6 +332,10 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
                         <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
+    }else if($sim_type == 'hidden_service') {
+        $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
+                        <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
+                        <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>";
     }else{
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
@@ -339,6 +343,40 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
     }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
+
+
+    $info = "<h3>How It works</h3>
+    <ol style=\"padding-left: 20px;\">
+        <li>
+            <p>An onion service needs to advertise its existence in the Tor network before clients will be able to contact it.
+            Service randomly picks some relays, builds circuits to them, and asks them to act as introduction points
+            by telling them its public key (Introduction points does not know server's location - IP address).
+            </p>
+        </li>
+        <li>
+            <p>The onion service assembles an onion service descriptor, containing its public key and a summary of each introduction point, and signs this descriptor with its private key.</p>
+        </li>
+        <li>
+            <p>A client that wants to contact an onion service needs to learn about its onion address from directory server. Client  obtains the set of introduction points and the right public key to use.</p>
+        </li>
+        <li>
+            <p>Client creates a circuit to another randomly picked relay and asks it to act as rendezvous point by telling it a one-time secret.</p>
+        </li>
+        <li>
+            <p>Client assembles an introduce message (encrypted to the onion service's public key) including the address of the rendezvous point and the one-time secret. The client sends this message to one of the introduction points.</p>
+        </li>
+        <li>
+            <p>Introduction point delivers message to the onion service. </p>
+        </li>
+        <li>
+            <p>Onion service decrypts the client's message and gets the address of the rendezvous point and the one-time secret. The service creates a circuit to the rendezvous point and sends the one-time secret to it in a rendezvous message.</p>
+        </li>
+        <li>
+            <p>The rendezvous point now relays messages from client to onion service and vice versa.</p>
+        </li>
+    </ol>";
+
+
 
     $html_start = "<!DOCTYPE html>
     <html lang=\"en\">
@@ -409,12 +447,13 @@ function create_graph_page($sim_type, $graph_names){
                             ".$legend."
                             </div>
                             <div class=\"download\">
-                                <h1>Download Zip</h1>
+                                <h3>Download Zip</h1>
                                 <form method='post' action='parse_form.php'>
                                     <input type=\"hidden\" id=\"type\" name=\"type\" value=\"$sim_type\">
                                     <input class=\"btn btn-primary button\" name=\"download\" type=\"submit\" value=\"Download\">
                                 </form>
                             </div>
+                            ".$info."
                         </div>
                         <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
                             <div style='margin-top: 10px'>
