@@ -51,7 +51,6 @@ def parse_config_file(file):
         dic['remove_duplicate_paths'] = config.getboolean('general', 'remove_duplicate_paths')
         dic['generate_graph'] = config.getboolean('general', 'generate_graph')
         dic['create_html'] = config.getboolean('general', 'create_html')
-        dic['path'] = config['general']['path']
         dic['same_bandwidth'] = config.getboolean('general', 'same_bandwidth')
         dic['guard_bandwidth_value'] = None if config['general']['guard_bandwidth_value'] == '' else config.getint('general', 'guard_bandwidth_value')
         dic['exit_bandwidth_value'] = None if config['general']['exit_bandwidth_value'] == '' else config.getint('general', 'exit_bandwidth_value')
@@ -69,6 +68,11 @@ def parse_config_file(file):
         print('There was an error while parsing arguments')
         print("Key Error: {}".format(e))
         sys.exit(5)
+    try:
+        dic['path'] = '/home/petr/torps' if config['general']['path'] == '' else config['general']['path']
+    except KeyError as e:
+        dic['path'] = '/home/petr/torps'
+
 
     if config['general']['simulation_type'] == 'path':
         try:
@@ -228,8 +232,8 @@ def parse_config_file(file):
                     node['name'] = ''
                 node['ip'] = config[n]['ip']
                 node['port'] = config[n]['port']
-                node['bandwidth'] = "{} {} {}".format(config[n]['bandwidth'], config[n]['bandwidth'],
-                                                      config[n]['bandwidth'])
+                node_bandwidth = int(config[n]['bandwidth']) * 1000000 #todo
+                node['bandwidth'] = "{} {} {}".format(node_bandwidth, node_bandwidth, node_bandwidth)
                 all_nodes.append(node)
     except KeyError:
         print('There was an error while parsing arguments')
@@ -358,6 +362,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     circuit_list = []
     coralation = []
     color = {}
+    circuit_counter = -1
     node_usage = collections.Counter()
     id_node_usage = collections.Counter()
     encrypted_node_usage = collections.Counter()
@@ -396,16 +401,17 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
 
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
+            circuit_counter += 1
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
             if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
                 if sim_type == 'exit_attack' and circuit[2][:3] == '10.':
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter}
                 elif sim_type == 'exit_attack' and not circuit[2][:3] == '10.':
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False}
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter}
                 else:
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True}
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True, 'count': circuit_counter}
             else:
-                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False}
+                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter}
             circuit_list.append(circuit_entry)
             node_usage.update(circuit)
             if circuit not in circuits and remove_duplicate_paths:
@@ -672,10 +678,8 @@ def get_multipurpose_nodes(routers, paths, fake_guards):
 
 def generate_router_status_entry(self, flags='Fast Running Stable Valid'):
     """
-    Odebrano ze stem knihovny
-    :param self:
-    :param flags:
-    :return:
+    Upravena funkce knihovnz Stem
+    Source: https://stem.torproject.org/
     """
     if not self.fingerprint:
         raise ValueError('Server descriptor lacks a fingerprint. '
@@ -725,6 +729,7 @@ def generate_port():
 def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
     if same_bandwidth and bandwidth_value is not None:
         # bandwidth = "229311978 259222236 199401720"
+        bandwidth_value = bandwidth_value * 1000000
         bandwidth = "{} {} {}".format(bandwidth_value, bandwidth_value, bandwidth_value)
         return bandwidth
     elif same_bandwidth:
@@ -742,7 +747,10 @@ def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
 
 def generate_ntor_key():
     """
-    odebrano z leekspin https://github.com/isislovecruft/leekspin
+    authors:Isis Lovecruft <isis@torproject.org>
+    licence:MIT licence
+    copyright: © 2013-2016 Isis Lovecruft, The Tor Project, Inc.
+    Source: https://github.com/isislovecruft/leekspin
     :return:
     """
     public_ntor_key = None

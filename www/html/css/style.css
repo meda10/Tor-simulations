@@ -17,8 +17,8 @@ body {
     margin-left: auto;
     margin-right: auto;
     max-width: 1400px;
-    padding-left: 30px;
-    padding-right: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
     border: 1px solid black;
     padding-top: 20px;
     padding-bottom: 20px;
@@ -65,11 +65,11 @@ body {
 }
 
 .left {
-    width: 72%;
+    width: 70%;
 }
 
 .right {
-    width: 28%;
+    width: 30%;
 }
 
 .tabs_graph{
@@ -150,6 +150,11 @@ body {
 
 #tabs_div {
     margin: 14px;
+}
+
+
+#form_tabs_div {
+    margin: 14px 0;
 }
 
 .form {

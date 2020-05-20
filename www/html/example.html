@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="resources/animation.css">
+    <title>Simulator</title>
+</head>
+<body>
+<div class="wrap">
+    <div class="header">
+        <h1><a href="index.html">Simulator</a></h1>
+    </div>
+</div>
+<div class="wrap">
+    <div class="content">
+        <div>
+            <h3>Example .ini file</h3>
+            <h4>Recomendations</h4>
+            <p>Simulator generates node bandwidth between 1 and 2500 KB/s (adjust yours values acordingly)<p>
+            <p>If you simulate pats selection it si not recomendet to generate too many paths reccomendet +-100 ( becouse final graph is interactive its size would be up to 30MB)<p>
+            <p>Small graph in path simulation use max 5 of each eaiteh graph will be too big. Its purouse is demonstration. use large...</p>
+            <pre>
+                <code>
+[general]
+; Type of simulation: path/hidden_service/attack/exit_attack/multiple_sim
+simulation_type = multiple_sim
+; removes duplicit paths: True/False
+remove_duplicate_paths = False
+; All nodes will have same bandwidth: True/False
+same_bandwidth = False
+; Optional - bandwidth value for guard nodes (KB/s)
+guard_bandwidth_value = 500
+; Optional - bandwidth value for exit nodes (KB/s)
+middle_bandwidth_value = 500
+; Optional - bandwidth value for exit nodes (KB/s)
+exit_bandwidth_value = 500
+; generate graph: True/False (in web aplication always true)
+generate_graph = True
+; creates HTML file with animated graph: True/False (in web aplication always true)
+create_html = True
+;Optional - tor path simulator folder: /home/torps (Only if TorPS is not in native location - in web aplication nothing)
+path =
+
+;========================================================
+
+[path_simulation]
+; number of guards, exits and middles
+guard = 0
+middle = 0
+exit = 0
+guard_exit = 0
+number_of_simulations = 500
+; size of simulation: small/large
+simulation_size = large
+; path selection: 3_guards/1_guard/random | default: random
+path_selection = random
+
+;========================================================
+
+[hiden_service_simulation]
+; number of nodes
+nodes = 250
+
+;========================================================
+
+[attack_simulation]
+; How much traffic is encrypted in %
+encryption = 100
+number_of_simulations = 5000
+guard = 10
+exit = 10
+adv_guard = 50
+adv_exit = 50
+; Bandwidth KB/s
+adv_guard_bandwidth = 2000
+adv_exit_bandwidth  = 2000
+
+;========================================================
+
+[exit_attack]
+; How much traffic is encrypted in %
+encryption = 80
+; Chance that messeage contains ID %
+identification_occurrence = 20
+number_of_simulations = 600
+guard = 50
+exit = 30
+adv_exit = 20
+; Bandwidth KB/s
+adv_exit_bandwidth  = 1000
+
+;========================================================
+
+[multiple_sim]
+number_of_simulations = 500
+
+[sim_0]
+encryption = 30
+identification_occurrence = 30
+guard = 15
+exit = 15
+adv_guard = 10
+adv_exit = 10
+friendly_guard_bandwidth = 2000
+friendly_exit_bandwidth = 2000
+adv_guard_bandwidth = 2000
+adv_exit_bandwidth  = 2000
+
+[sim_1]
+encryption = 30
+identification_occurrence = 30
+guard = 15
+exit = 15
+adv_guard = 10
+adv_exit = 10
+friendly_guard_bandwidth = 2000
+friendly_exit_bandwidth = 2000
+adv_guard_bandwidth = 2000
+adv_exit_bandwidth  = 1000
+
+[sim_2]
+encryption = 30
+identification_occurrence = 30
+guard = 15
+exit = 15
+adv_guard = 10
+adv_exit = 10
+friendly_guard_bandwidth = 2000
+friendly_exit_bandwidth = 2000
+adv_guard_bandwidth = 2000
+adv_exit_bandwidth  = 1500
+
+[sim_3]
+encryption = 30
+identification_occurrence = 30
+guard = 15
+exit = 15
+adv_guard = 10
+adv_exit = 10
+friendly_guard_bandwidth = 2000
+friendly_exit_bandwidth = 2000
+adv_guard_bandwidth = 2000
+adv_exit_bandwidth  = 2000
+
+
+;========================================================
+
+[node0]
+; type of node: guard/exit/middle
+type = guard
+name = gu
+ip = 100.0.100.0
+; Bandwidth KB/s
+bandwidth = 2000
+
+[node1]
+type = middle
+name = mid
+ip = 120.0.0.0
+bandwidth = 1500
+
+[node2]
+type = middle
+name = mi_2
+ip = 130.0.0.0
+bandwidth = 1800
+
+[node3]
+type = exit
+name = ex
+ip = 140.0.0.0
+bandwidth = 2300
+
+                </code>
+            </pre>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="js/show.js"></script>
+<script src="js/table_filter.js"></script>
+<script src="js/add_nodes.js"></script>
+<script defer="" src="resources/animation.js"></script>
+</body>
+</html>

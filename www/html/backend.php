@@ -332,17 +332,29 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
                         <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
-    }else if($sim_type == 'hidden_service') {
+        $paths_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
+    }else if($sim_type == 'hidden_service' || $sim_type == 'path') {
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>";
+        $paths_table = "<th data-field=\"count\" data-sortable=\"true\" scope=\"col\">N</th>
+                        <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
     }else{
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
                         <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
+        $paths_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
     }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
+
+
 
 
     $info = "<h3>How It works</h3>
@@ -472,9 +484,7 @@ function create_graph_page($sim_type, $graph_names){
                                    data-url=\"torps/out/simulation/output.json\">
                                 <thead>
                                 <tr>
-                                    <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
-                                    <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
-                                    <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>
+                                    ".$paths_table."
                                 </tr>
                                 </thead>
                             </table>
