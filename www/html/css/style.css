@@ -140,6 +140,12 @@ body {
     max-height: 88vw;
 }
 
+pre {
+    font-size: 13px;
+    width: auto;
+    overflow: auto;
+}
+
 #path table {
     font-size: 11.6px;
 }
