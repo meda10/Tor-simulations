@@ -52,6 +52,28 @@ $(document).ready(function () {
             }
 
         })
+        $('#filter_checkbox_v2').on('change', function(){
+            if(this.checked){
+                $table_2.bootstrapTable('refreshOptions', {
+                    filterOptions: {
+                        filterAlgorithm: "and"
+                    }
+                });
+                $table_2.bootstrapTable('filterBy', {
+                    correlation: true
+                })
+            }else {
+                $table_2.bootstrapTable('refreshOptions', {
+                    filterOptions: {
+                        filterAlgorithm: "and"
+                    }
+                });
+                $table_2.bootstrapTable('filterBy', {
+
+                })
+            }
+
+        })
     });
 
     /*

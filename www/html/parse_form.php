@@ -113,7 +113,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     $arr['node'.$i]['type'] = $_POST['type'][$i];
                     $arr['node'.$i]['name'] = $_POST['name'][$i];
                     $arr['node'.$i]['ip'] = $_POST['ip'][$i];
-                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                    if(is_numeric($_POST['bandwidth'][$i])){
+                        $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                    }else{
+                        echo "<h3>Error 5</h3>";
+                        echo "<p>There was an error, while loading arguents. Check your custom nodes.</p>";
+                        return 5;
+                    }
                 }
             }
         }

@@ -69,8 +69,9 @@ def parse_config_file(file):
         print("Key Error: {}".format(e))
         sys.exit(5)
     try:
-        # dic['path'] = '/home/petr/torps' if config['general']['path'] == '' else config['general']['path']
-        dic['path'] = '/var/www/html/torps'
+        dic['path'] = '/home/petr/torps' if config['general']['path'] == '' else config['general']['path']
+        dic['path'] = '/home/petr/torps'
+        # dic['path'] = '/var/www/html/torps'
     except KeyError as e:
         dic['path'] = '/var/www/html/torps'
 
@@ -230,10 +231,23 @@ def parse_config_file(file):
                     node['name'] = config[n]['name']
                 else:
                     node['name'] = ''
-                node['ip'] = config[n]['ip']
+                try:
+                    socket.inet_aton(config[n]['ip'])
+                    socket.inet_pton(socket.AF_INET, config[n]['ip'])
+                    node['ip'] = config[n]['ip']
+                except socket.error:
+                    print('There was an error while parsing arguments')
+                    print("Value Error: Invalid IP address")
+                    sys.exit(5)
                 node['port'] = config[n]['port']
-                node_bandwidth = int(config[n]['bandwidth']) * 1000000 #todo
-                node['bandwidth'] = "{} {} {}".format(node_bandwidth, node_bandwidth, node_bandwidth)
+                if config[n]['bandwidth'] != '':
+                    try:
+                        node_bandwidth = int(config[n]['bandwidth']) * 1000000  #todo
+                        node['bandwidth'] = "{} {} {}".format(node_bandwidth, node_bandwidth, node_bandwidth)
+                    except ValueError as e:
+                        print('There was an error while parsing arguments')
+                        print("Value Error: {}".format(e))
+                        sys.exit(5)
                 all_nodes.append(node)
     except KeyError:
         print('There was an error while parsing arguments')
@@ -404,14 +418,17 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
             circuit_counter += 1
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
             if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
-                if sim_type == 'exit_attack' and circuit[2][:3] == '10.':
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter}
-                elif sim_type == 'exit_attack' and not circuit[2][:3] == '10.':
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter}
+                if (sim_type == 'exit_attack' or sim_type == 'attack') and circuit[2][:3] == '10.' and circuit[0][:3] == '10.':
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter, 'correlation': True}
+                elif (sim_type == 'exit_attack' or sim_type == 'attack') and circuit[2][:3] == '10.':
+                    print()
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter, 'correlation': False}
+                elif (sim_type == 'exit_attack' or sim_type == 'attack') and not circuit[2][:3] == '10.':
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter, 'correlation': False}
                 else:
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True, 'count': circuit_counter}
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True, 'count': circuit_counter, 'correlation': False}
             else:
-                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter}
+                circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter, 'correlation': False}
             circuit_list.append(circuit_entry)
             node_usage.update(circuit)
             if circuit not in circuits and remove_duplicate_paths:

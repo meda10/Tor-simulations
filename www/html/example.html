@@ -11,19 +11,32 @@
     <title>Simulator</title>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap_header">
     <div class="header">
         <h1><a href="index.html">Simulator</a></h1>
+        <div id="small_menu">
+            <ul class="nav nav-tabs" id="menu_tabs" role="tablist">
+                <li class="nav-item active">
+                    <a class="nav-link" id="home" href="index.html" aria-selected="false">Home</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" id="how_to" href="how_to.html" aria-selected="false">How to use</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="example_file" href="example.html" aria-selected="false">Example config file</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="ccc" href="example.html" aria-selected="false">TODO</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 <div class="wrap">
     <div class="content">
         <div style="width: auto; min-width: 0;">
             <h3>Example .ini file</h3>
-            <h4>Recomendations</h4>
-            <p>Simulator generates node bandwidth between 1 and 2500 KB/s (adjust yours values acordingly)<p>
-            <p>If you simulate pats selection it si not recomendet to generate too many paths reccomendet +-100 ( becouse final graph is interactive its size would be up to 30MB)<p>
-            <p>Small graph in path simulation use max 5 of each eaiteh graph will be too big. Its purouse is demonstration. use large...</p>
+            <p>File suffix: .ini</p>
             <pre>
                 <code>
 [general]
@@ -179,6 +192,13 @@ bandwidth = 2300
                 </code>
             </pre>
         </div>
+    </div>
+</div>
+<div class="wrap">
+    <div class="footer">
+        <ul>
+            <li><li>
+        </ul>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>

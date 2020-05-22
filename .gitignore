@@ -11,3 +11,5 @@
 /www/html/graph/
 /www/html/error.log
 /nginx/.htpasswd
+/.env
+/docker-compose-3.yml

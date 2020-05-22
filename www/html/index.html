@@ -11,9 +11,25 @@
     <title>Simulator</title>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap_header">
     <div class="header">
         <h1><a href="index.html">Simulator</a></h1>
+        <div id="small_menu">
+            <ul class="nav nav-tabs" id="menu_tabs" role="tablist">
+                <li class="nav-item active">
+                    <a class="nav-link" id="home" href="index.html" aria-selected="false">Home</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" id="how_to" href="how_to.html" aria-selected="false">How to use</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="example_file" href="example.html" aria-selected="false">Example config file</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="ccc" href="example.html" aria-selected="false">TODO</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 <div class="wrap">
@@ -26,9 +42,6 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="form_from_file" data-toggle="tab" href="#form_file" role="tab" aria-controls="input_from_file" aria-selected="false">Load from file</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="recoendations_example" href="example.html" aria-selected="false">Recomendations + .ini file example</a>
                     </li>
                 </ul>
             </div>
@@ -59,7 +72,7 @@
                                 <div class="col-sm-7">
                                     <select class="form-control form-control-sm second_row" id="simulation_type" name="simulation_type"
                                             onchange="java_script_:show(this.options[this.selectedIndex].value)">
-                                        <option value="path" selected>Path</option>
+                                        <option value="path" selected>Path selection</option>
                                         <option value="hidden_service">Onion service</option>
                                         <option value="attack">Correlation attack</option>
                                         <option value="exit_attack">Exit attack</option>
@@ -493,6 +506,13 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<div class="wrap">
+    <div class="footer">
+        <ul>
+            <li><li>
+        </ul>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>

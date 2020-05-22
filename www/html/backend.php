@@ -79,7 +79,7 @@ function parse_arguments($arr, $number_of_user_nodes, $number_of_user_simulation
     $config['general']['exit_bandwidth_value'] = $arr['exit_bandwidth_value'];
     $config['general']['generate_graph'] = 'True';
     $config['general']['create_html'] = 'True';
-    $config['general']['path'] = '/home/petr/torps';
+    $config['general']['path'] = '/var/www/html/torps';
 
     if($arr['simulation_type'] == 'path'){
         $config['path_simulation']['guard'] = $arr['guard'];
@@ -332,28 +332,21 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
                         <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
-        $paths_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
-                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
-                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
     }else if($sim_type == 'hidden_service' || $sim_type == 'path') {
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>";
-        $paths_table = "<th data-field=\"count\" data-sortable=\"true\" scope=\"col\">N</th>
-                        <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
-                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
-                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
     }else{
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
                         <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
-        $paths_table = "<th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
-                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
-                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
     }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
-
+    $paths_table = "<th data-field=\"count\" data-sortable=\"true\" scope=\"col\">N</th>
+                        <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
+                        <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>
+                        <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
 
 
 
@@ -470,7 +463,9 @@ function create_graph_page($sim_type, $graph_names){
                         <div class=\"tab-pane fade\" id=\"path\" role=\"tabpanel\" aria-labelledby=\"path_tab\">
                             <div style='margin-top: 10px'>
                                 <label for=\"filter_checkbox_output\">Show only enemy nodes</label>
-                                <input id=\"filter_checkbox_output\" type=\"checkbox\">    
+                                <input id=\"filter_checkbox_output\" type=\"checkbox\">
+                                <label for=\"filter_checkbox_v2\">Show correlation</label>
+                                <input id=\"filter_checkbox_v2\" type=\"checkbox\">
                             </div>
                             <table id=\"output_table_sorted\"                        
                                    class=\"table\"
