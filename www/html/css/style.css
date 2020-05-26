@@ -7,6 +7,12 @@ body {
     color: black;
     text-decoration: none;
 }
+.bold{
+    font-weight: bold;
+}
+#not_path_submit {
+    margin-left: 0;
+}
 
 .header a:hover {
     color: black;

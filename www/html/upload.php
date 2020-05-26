@@ -32,13 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $cwd = getcwd();
             chdir($cwd);
+            set_time_limit(240);
             //$arg = escapeshellarg('-i conf/'.$file_name);
             $command = escapeshellcmd('./sim.py -i "/conf/'.$file_name.'"');
             exec($command.' 2> error.log', $op, $ret);
             if ($ret != 0) {
                 # echo "Error: xx\n";
                 echo "<h3>Error</h3>";
-                echo "<p>There was an error, you can find more information in  error.log</p>";
+                echo "<p>There was an error, you can find more information in error.log</p>";
                 foreach ($op as $item) {
                     echo $item;
                     echo "<br>";
@@ -48,8 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 $config = parse_ini_file($cwd.'/conf/'.$file_name, true, INI_SCANNER_RAW);
                 unlink_file($file_name);
+                $re = '/sim_\d*/m';
+                $sim_number = 0;
+                foreach (array_keys($config) as &$key) {
+                    if (preg_match($re, $key)){
+                        $sim_number = $sim_number + 1;
+                    }
+                }
                 if($config['general']['simulation_type'] == 'multiple_sim'){
-                    $graph = show_graph($config, count($config) - 2);
+                    $graph = show_graph($config, $sim_number);
                 }else{
                     $graph = NULL;
                 }

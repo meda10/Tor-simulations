@@ -49,19 +49,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     }
 
     if (!empty($_POST['guard_bandwidth_value'])) {
-        $arr['guard_bandwidth_value'] = $_POST['guard_bandwidth_value'] * pow(10,6);
+        $arr['guard_bandwidth_value'] = $_POST['guard_bandwidth_value']; #* pow(10,6)
     } else{
         $arr['guard_bandwidth_value'] = '';
     }
 
     if (!empty($_POST['middle_bandwidth_value'])) {
-        $arr['middle_bandwidth_value'] = $_POST['middle_bandwidth_value'] * pow(10,6);
+        $arr['middle_bandwidth_value'] = $_POST['middle_bandwidth_value']; #* pow(10,6)
     } else{
         $arr['middle_bandwidth_value'] = '';
     }
 
     if (!empty($_POST['exit_bandwidth_value'])) {
-        $arr['exit_bandwidth_value'] = $_POST['bandwidth_value'] * pow(10,6);
+        $arr['exit_bandwidth_value'] = $_POST['exit_bandwidth_value']; #* pow(10,6)
     } else{
         $arr['exit_bandwidth_value'] = '';
     }
@@ -114,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     $arr['node'.$i]['name'] = $_POST['name'][$i];
                     $arr['node'.$i]['ip'] = $_POST['ip'][$i];
                     if(is_numeric($_POST['bandwidth'][$i])){
-                        $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                        $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i]; # * pow(10,6)
                     }else{
                         echo "<h3>Error 5</h3>";
                         echo "<p>There was an error, while loading arguents. Check your custom nodes.</p>";
@@ -168,13 +168,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         }
 
         if ($_POST['adv_guard_bandwidth'] != "") {
-            $arr['adv_guard_bandwidth'] = $_POST['adv_guard_bandwidth'] * pow(10,6);
+            $arr['adv_guard_bandwidth'] = $_POST['adv_guard_bandwidth']; # * pow(10,6)
         } else{
             error('Required field was not field: ADV guard bandwidth');
         }
 
         if ($_POST['adv_exit_bandwidth'] != "") {
-            $arr['adv_exit_bandwidth'] = $_POST['adv_exit_bandwidth'] * pow(10,6);
+            $arr['adv_exit_bandwidth'] = $_POST['adv_exit_bandwidth']; #* pow(10,6)
         } else{
             error('Required field was not field: ADV exit bandwidth');
         }
@@ -187,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     $arr['node'.$i]['type'] = $_POST['type'][$i];
                     $arr['node'.$i]['name'] = $_POST['name'][$i];
                     $arr['node'.$i]['ip'] = $_POST['ip'][$i];
-                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i]; #* pow(10,6)
                 }
             }
         }
@@ -230,7 +230,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
         }
 
         if ($_POST['adv_exit_bandwidth_exit_attack'] != "") {
-            $arr['adv_exit_bandwidth_exit_attack'] = $_POST['adv_exit_bandwidth_exit_attack'] * pow(10,6);
+            $arr['adv_exit_bandwidth_exit_attack'] = $_POST['adv_exit_bandwidth_exit_attack']; #* pow(10,6)
         } else{
             error('Required field was not field: ADV exit bandwidth');
         }
@@ -243,7 +243,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     $arr['node'.$i]['type'] = $_POST['type'][$i];
                     $arr['node'.$i]['name'] = $_POST['name'][$i];
                     $arr['node'.$i]['ip'] = $_POST['ip'][$i];
-                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i] * pow(10,6);
+                    $arr['node'.$i]['bandwidth'] = $_POST['bandwidth'][$i]; #* pow(10,6)
                 }
             }
         }
@@ -294,22 +294,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
                     error('All fields have to be filled, missing field: ADV Exit');
                 }
                 if($_POST['m_s_friendly_guard_bandwidth'][$i] != NULL){
-                    $arr['sim_'.$i]['friendly_guard_bandwidth'] = $_POST['m_s_friendly_guard_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['friendly_guard_bandwidth'] = $_POST['m_s_friendly_guard_bandwidth'][$i]; #* pow(10,6)
                 }else{
                     error('All fields have to be filled, missing field: Guard bandwidth');
                 }
                 if($_POST['m_s_friendly_exit_bandwidth'][$i] != NULL){
-                    $arr['sim_'.$i]['friendly_exit_bandwidth'] = $_POST['m_s_friendly_exit_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['friendly_exit_bandwidth'] = $_POST['m_s_friendly_exit_bandwidth'][$i]; #* pow(10,6)
                 }else{
                     error('All fields have to be filled, missing field: Exit bandwidth');
                 }
                 if($_POST['m_s_adv_guard_bandwidth'][$i]  != NULL){
-                    $arr['sim_'.$i]['adv_guard_bandwidth'] = $_POST['m_s_adv_guard_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['adv_guard_bandwidth'] = $_POST['m_s_adv_guard_bandwidth'][$i]; # * pow(10,6)
                 }else{
                     error('All fields have to be filled, missing field: ADV guard bandwidth');
                 }
                 if($_POST['m_s_adv_exit_bandwidth'][$i] != NULL){
-                    $arr['sim_'.$i]['adv_exit_bandwidth'] = $_POST['m_s_adv_exit_bandwidth'][$i] * pow(10,6);
+                    $arr['sim_'.$i]['adv_exit_bandwidth'] = $_POST['m_s_adv_exit_bandwidth'][$i]; #* pow(10,6)
                 }else{
                     error('All fields have to be filled, missing field: ADV exit bandwidth');
                 }
@@ -324,14 +324,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['download'])){
     //echo getcwd();
     $log = "";
     //$command = escapeshellcmd("python3.6 ./sim.py 1> $log 2>&1");
-
+    set_time_limit(240);
     $command = escapeshellcmd('./sim.py');
     //$output = shell_exec($command);
     exec($command.' 2> error.log', $op, $ret);
     if($ret != 0) {
         # echo "Error: xx\n";
         echo "<h3>Error 0</h3>";
-        echo "<p>There was an error, you can find more information in  error.log</p>";
+        echo "<p>There was an error, you can find more information in error.log</p>";
         foreach ($op as $item) {
             echo $item;
             echo "<br>";

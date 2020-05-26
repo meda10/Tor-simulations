@@ -189,7 +189,7 @@ function show_graph($config, $number_of_user_simulations){
     }
     if(count(array_unique($adv_guard)) > 1){
         array_push($grapshs, 'correlation_attack_guard');
-        array_push($grapshs, 'id_number_of_guards');
+        # array_push($grapshs, 'id_number_of_guards');
     }
     if(count(array_unique($adv_exit)) > 1){
 
@@ -202,7 +202,7 @@ function show_graph($config, $number_of_user_simulations){
     }
     if(count(array_unique($adv_guard_bandwidth)) > 1){
         array_push($grapshs, 'guard_bandwidth');
-        array_push($grapshs, 'id_guard_bandwidth');
+        # array_push($grapshs, 'id_guard_bandwidth');
     }
     if(count(array_unique($adv_exit_bandwidth)) > 1){
         array_push($grapshs, 'exit_bandwidth');
@@ -340,6 +340,7 @@ function create_graph_page($sim_type, $graph_names){
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
+                        <th data-field=\"id_stolen_node_usage\" data-sortable=\"true\" scope=\"col\">Stolen</th>
                         <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
     }
     $legend = file_get_contents($cwd."/graph/legend.dot.svg");
@@ -349,38 +350,87 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
 
 
-
-    $info = "<h3>How It works</h3>
-    <ol style=\"padding-left: 20px;\">
-        <li>
-            <p>An onion service needs to advertise its existence in the Tor network before clients will be able to contact it.
-            Service randomly picks some relays, builds circuits to them, and asks them to act as introduction points
-            by telling them its public key (Introduction points does not know server's location - IP address).
-            </p>
-        </li>
-        <li>
-            <p>The onion service assembles an onion service descriptor, containing its public key and a summary of each introduction point, and signs this descriptor with its private key.</p>
-        </li>
-        <li>
-            <p>A client that wants to contact an onion service needs to learn about its onion address from directory server. Client  obtains the set of introduction points and the right public key to use.</p>
-        </li>
-        <li>
-            <p>Client creates a circuit to another randomly picked relay and asks it to act as rendezvous point by telling it a one-time secret.</p>
-        </li>
-        <li>
-            <p>Client assembles an introduce message (encrypted to the onion service's public key) including the address of the rendezvous point and the one-time secret. The client sends this message to one of the introduction points.</p>
-        </li>
-        <li>
-            <p>Introduction point delivers message to the onion service. </p>
-        </li>
-        <li>
-            <p>Onion service decrypts the client's message and gets the address of the rendezvous point and the one-time secret. The service creates a circuit to the rendezvous point and sends the one-time secret to it in a rendezvous message.</p>
-        </li>
-        <li>
-            <p>The rendezvous point now relays messages from client to onion service and vice versa.</p>
-        </li>
-    </ol>";
-
+    if($sim_type == 'hidden_service'){
+        $info = "<h5>How It works</h5>
+        <ol style=\"padding-left: 20px;\">
+            <li>
+                <p>An onion service needs to advertise its existence in the Tor network before clients will be able to contact it.
+                Service randomly picks some relays, builds circuits to them, and asks them to act as introduction points
+                by telling them its public key (Introduction points does not know server's location - IP address).
+                </p>
+            </li>
+            <li>
+                <p>The onion service assembles an onion service descriptor, containing its public key and a summary of
+                each introduction points, and signs this descriptor with its private key.</p>
+            </li>
+            <li>
+                <p>A client that wants to contact an onion service needs to learn about its onion address from directory
+                 server. Client  obtains the set of introduction points and the right public key to use.</p>
+            </li>
+            <li>
+                <p>Client creates a circuit to another randomly picked relay and asks it to act as rendezvous point by
+                telling it a one-time secret.</p>
+            </li>
+            <li>
+                <p>Client assembles an introduction message (encrypted to the onion service's public key) including the
+                address of the rendezvous point and the one-time secret. The client sends this message to one of the
+                introduction points.</p>
+            </li>
+            <li>
+                <p>Introduction point delivers message to the onion service.</p>
+            </li>
+            <li>
+                <p>Onion service decrypts the client's message and gets the address of the rendezvous point and the
+                one-time secret. The service creates a circuit to the rendezvous point and sends the one-time secret
+                to it in a rendezvous message. The rendezvous point notifies the client about successful connection </p>
+            </li>
+            <li>
+                <p>The rendezvous point now relays messages from client to onion service and vice versa.</p>
+            </li>
+        </ol>";
+    } else if ($sim_type == 'path'){
+        $info = "<h5>How It works</h5>
+        <p>In Tor network, traffic is forwarded through randomly selected relays. Message is wrapped with multiple layers of encryption
+        to maintain unlinkability. When message is sent, every relay unwraps one layer of encryption and forwards the message to the next relay in the circuit.
+        Each relay only knows the previous and the next relay in the path, therefore, the first relay, the guard node,
+        is the only one that knows the source of the stream and and the last relay, the exit node, is the only one that knows
+        the destination of the client. The onion router(s) in between only exchange encrypted information. A circuit
+        usually consists of three relays. </p>
+        <h5>Entry guards</h5>
+        <p>
+         The first relay in circuit is called an \"entry guard\" or \"guard\".
+         It is a fast and stable relay that remains the first one in circuit for 2-3 months as a protection against
+         a known anonymity-breaking attack. The rest of the circuit changes with every new website that is visited.
+        </p>
+        <h5>History</h5>
+        <p>
+        In the past Tor network used random selection for every node, later entry guards were introduced and 3 or 4 were used.
+        Nowadays Tor network uses 1 guard for every circuit.
+        </p>
+        ";
+    } else if ($sim_type == 'attack'){
+        $info = "<h5>How It works</h5>
+        <p>Correlation attacks are de-anonymization attacks. It is assumed that the attacker controls both the entry
+        node and the exit node of the circuit between the client and the server. The attacker is looking for a correlation
+        in traffic between the entry node and the exit node, because then he can conclude that the entry node and the
+        exit node participate in the circuit. The entry node knows the client, the exit node knows the server, so the
+        attacker can confirm that the client and the server are communicating.
+        </p>
+        ";
+    } else if ($sim_type == 'exit_attack'){
+        $info = "<h5>How It works</h5>
+        <p> Tor prevents eavesdroppers from learning sites that you visit. However, eavesdroppers can still intercept
+        unencrypted communication. For encrypting your communication it is important to use end-to-end encryption,
+        for example HTTPS protocol. If user does not use proper protocol these data could be visible: </p>
+        <h5>Visible data</h5>
+            <ol>
+                <li>Visited sites</li>
+                <li>Username and password</li>
+                <li>Data</li>
+                <li>Public IP address</li>
+            </ol>
+        ";
+    }
 
 
     $html_start = "<!DOCTYPE html>
@@ -418,9 +468,25 @@ function create_graph_page($sim_type, $graph_names){
         <title>Simulator</title>
     </head>
     <body>
-    <div class=\"wrap\">
+    <div class=\"wrap_header\">
         <div class=\"header\">
             <h1><a href=\"index.html\">Simulator</a></h1>
+            <div id=\"small_menu\">
+                <ul class=\"nav nav-tabs\" id=\"menu_tabs\" role=\"tablist\">
+                    <li class=\"nav-item active\">
+                        <a class=\"nav-link\" id=\"home\" href=\"index.html\" aria-selected=\"false\">Home</a>
+                    </li>
+                    <li class=\"nav-item active\">
+                        <a class=\"nav-link\" id=\"how_to\" href=\"how_to.html\" aria-selected=\"false\">How to use</a>
+                    </li>
+                    <li class=\"nav-item\">
+                        <a class=\"nav-link\" id=\"example_file\" href=\"example.html\" aria-selected=\"false\">Example config file</a>
+                    </li>
+                    <li class=\"nav-item\">
+                        <a class=\"nav-link\" id=\"ccc\" href=\"about_tor.html\" aria-selected=\"false\">About Tor</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class=\"wrap\">
@@ -452,7 +518,7 @@ function create_graph_page($sim_type, $graph_names){
                             ".$legend."
                             </div>
                             <div class=\"download\">
-                                <h3>Download Zip</h1>
+                                <h5>Download Zip</h5>
                                 <form method='post' action='parse_form.php'>
                                     <input type=\"hidden\" id=\"type\" name=\"type\" value=\"$sim_type\">
                                     <input class=\"btn btn-primary button\" name=\"download\" type=\"submit\" value=\"Download\">
@@ -523,22 +589,28 @@ function create_graph_page($sim_type, $graph_names){
                                         <th data-field=\"exit_bandwidth\" scope=\"col\">Exit: bandwidth (Kb/s)</th>
                                         <th data-field=\"guard_bandwidth\" scope=\"col\">Guard: bandwidth (Kb/s)</th>
                                         <th data-field=\"encryption\" scope=\"col\">Encryption (%)</th>
-                                        <th data-field=\"identification_occurrence\" scope=\"col\">Occurence of ID (%)</th>
+                                        <th data-field=\"identification_occurrence\" scope=\"col\">Occurrence of ID (%)</th>
                                         <th data-field=\"number_of_simulations\" scope=\"col\">All circuits</th>
-                                        <th data-field=\"encrypted\" scope=\"col\">Circuits encrypted</th>
+                                        <th  scope=\"col\">-------</th>
                                         <th data-field=\"bad_node\" scope=\"col\">ADV nodes used</th>
                                         <th data-field=\"bad_guard_used\" scope=\"col\">ADV as guard</th>
                                         <th data-field=\"bad_middle_used\" scope=\"col\">ADV as middle</th>
                                         <th data-field=\"bad_exit_used\" scope=\"col\">ADV as exit</th>
                                         <th data-field=\"bad_gu_and_ex\" scope=\"col\">ADV correlation</th>
-                                        <th data-field=\"bad_exit_encrypt\" scope=\"col\">ADV exit: encrypted comunication</th>
-                                        <th data-field=\"bad_exit_unencrypt\" scope=\"col\">ADV exit: unencrypted comunication</th>
-                                        <th data-field=\"bad_gu_and_ex_encrypt\" scope=\"col\">ADV correlation: encrypted</th>
+                                        <th  scope=\"col\">-------</th>
+                                        <th data-field=\"not_encrypted\" scope=\"col\">Circuits not encrypted</th>
+                                        <th data-field=\"encrypted\" scope=\"col\">Circuits encrypted</th>
+                                        <th data-field=\"bad_exit_encrypt\" scope=\"col\">ADV exit: encrypted communication</th>
+                                        <th data-field=\"bad_exit_unencrypt\" scope=\"col\">ADV exit: unencrypted communication</th>
+                                        <th data-field=\"bad_gu_and_ex_encrypt\" scope=\"col\">ADV correlation: encrypted communication</th>
+                                        <th data-field=\"bad_gu_and_ex_unencrypt\" scope=\"col\">ADV correlation: uncrypted communication</th>
+                                        <th  scope=\"col\">-------</th>
                                         <th data-field=\"total_id\" scope=\"col\">Total number of ID</th>
                                         <th data-field=\"not_encrypted_id\" scope=\"col\">Unencrypted ID</th>
                                         <th data-field=\"not_encrypted_id_stolen\" scope=\"col\">Unencrypted ID stolen</th>
                                     </tr>
-                                </thead></table>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                 </div>

@@ -10,7 +10,7 @@ class GraphGenerator:
 
     def __init__(self, routers=None, paths=None, graph_type=None, guard_len=None, exit_len=None, sim_type=None,
                  sim_size=None, guards_to_generate=None, guard_exit=None, adv_guard_c=None, adv_exit_c=None,
-                 color=None, output_from_all_sims=None):
+                 color=None, output_from_all_sims=None, nodes=None):
         self.routers = routers
         self.paths = paths
         self.graph_type = graph_type
@@ -25,6 +25,7 @@ class GraphGenerator:
         self.sim_type = sim_type
         self.sim_size = sim_size
         self.output_from_all_sims = output_from_all_sims
+        self.nodes = nodes
 
     def generate_graph(self):
         if self.sim_type == 'path':
@@ -1817,19 +1818,32 @@ class GraphGenerator:
         guard_count = 0
         exit_count = 0
         fake_guards = 0
+        fake_exits = 0
+        nodes_gu = 0
+        nodes_ex = 0
         fake_guard_to_generate = 0
         color = 'blue'
-        if self.guards_to_generate == '3_guards':
+        if self.guards_to_generate == 'random':
+            fake_guard_to_generate = self.guard_exit - round(self.guard_exit / 2)
+            fake_exit_to_generate = self.guard_exit - fake_guard_to_generate
+        elif self.guards_to_generate == '3_guards':
             fake_guard_to_generate = self.guard_len - 3 + round(self.guard_exit / 2)
             color = 'darkorchid1'
         elif self.guards_to_generate == '1_guard':
             fake_guard_to_generate = self.guard_len - 1 + round(self.guard_exit / 2)
             color = 'darkorchid1'
 
+        for node in self.nodes:
+            if node['type'] == 'guard':
+                nodes_gu = nodes_gu + 1
+            if node['type'] == 'exit':
+                nodes_ex = nodes_ex + 1
+
         for r in self.routers:
             if "Guard" in r.flags:
                 guard_node.append(r.address)
-                if guard_count >= self.guard_len:
+                if guard_count >= self.guard_len + nodes_gu:
+                    fake_guards = fake_guards + 1
                     subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
                                          fontname='Verdana')  # gu_ex
                 else:
@@ -1838,26 +1852,31 @@ class GraphGenerator:
                                          fontsize='10', fontname='Verdana')  # gu
             elif "Exit" in r.flags:
                 exit_node.append(r.address)
-                if exit_count >= self.exit_len:
+                if exit_count >= self.exit_len + nodes_ex:
+                    fake_exits = fake_exits + 1
                     subgraph_exits.node(str(r.address), shape='box', color="blue", fillcolor="white", fontsize='10',
                                         fontname='Verdana')  # gu_ex
                 else:
                     exit_count = exit_count + 1
                     subgraph_exits.node(str(r.address), shape='box', fontsize='10', fontname='Verdana')
             else:
+                middle_node.append(r.address)
+                subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
+                """
                 if fake_guards < fake_guard_to_generate:
                     fake_guards = fake_guards + 1
                     guard_node.append(r.address)
-                    if guard_count >= self.guard_len:  # gu_ex
+                    if guard_count >= self.guard_len + nodes_gu:  # gu_ex
+
                         subgraph_guards.node(str(r.address), shape='box', color="blue", fillcolor="white",
                                              fontsize='10', fontname='Verdana')  # gu_ex
                     else:
                         guard_count = guard_count + 1
+
                         subgraph_guards.node(str(r.address), shape='ellipse', color="blue", fillcolor="white",
                                              fontsize='10', fontname='Verdana')  # gu
                 else:
-                    middle_node.append(r.address)
-                    subgraph_middles.node(str(r.address), shape='ellipse', fontsize='10', fontname='Verdana')
+                """
 
         graph.subgraph(subgraph_pc)
         graph.subgraph(subgraph_guards)
@@ -1942,8 +1961,21 @@ class GraphGenerator:
         graph.attr(concentrate="true")
         fake_guard_to_generate = 0
         fake_guards = 0
+        fake_guard_in_gu_ex = 0
+        fake_guard_in_gu_ex_generated = 0
+        fake_exits = 0
         guard_generated = 0
         exits_generated = 0
+        nodes_gu = 0
+        nodes_ex = 0
+
+        for node in self.nodes:
+            if node['type'] == 'guard':
+                nodes_gu = nodes_gu + 1
+            if node['type'] == 'exit':
+                nodes_ex = nodes_ex + 1
+
+        fake_guard_in_gu_ex = self.guard_exit - round(self.guard_exit / 2)
 
         # generate graph layers and edge usage
         layers = []
@@ -1988,9 +2020,14 @@ class GraphGenerator:
             fill_color = 'darkorchid1'  # coral2 / darkorchid1
         # darkorchid1 forestgreen dodgerblue lawngreen
 
+        # print(fake_guard_to_generate)
+        #sys.exit(1)
+
+
         for index, r in enumerate(self.routers, start=0):
             if "Guard" in r.flags:
-                if guard_generated >= self.guard_len:  # gu_ex
+                if guard_generated >= self.guard_len + nodes_gu:  # gu_ex
+                    # fake_guards = fake_guards + 1
                     graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen'.format(fill_color),
                                shape='box', height='0.3', width='0.3')  # FILL / lawngreen
                 else:
@@ -1998,7 +2035,8 @@ class GraphGenerator:
                     graph.node(str(r.address), label="", style='filled', fillcolor='{}'.format(fill_color),
                                shape='circle', height='0.3', width='0.3')  # FILL / FILL
             elif "Exit" in r.flags:
-                if exits_generated >= self.exit_len:  # gu_ex
+                if exits_generated >= self.exit_len + nodes_ex:  # gu_ex
+                    fake_exits = fake_exits + 1
                     graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen', shape='box',
                                height='0.3', width='0.3')  # BLUE / lawngreen
                 else:
@@ -2006,9 +2044,10 @@ class GraphGenerator:
                     graph.node(str(r.address), label="", style='filled', fillcolor='forestgreen', shape='box',
                                height='0.3', width='0.3')  # WH / forestgreen
             else:
-                if fake_guards < fake_guard_to_generate:
+                if fake_guards <= fake_guard_to_generate and (self.guards_to_generate == '3_guards' or self.guards_to_generate == '1_guard'):
                     fake_guards = fake_guards + 1
-                    if guard_generated >= self.guard_len:  # gu_ex
+                    if fake_guard_in_gu_ex_generated < fake_guard_in_gu_ex:  # gu_ex
+                        fake_guard_in_gu_ex_generated = fake_guard_in_gu_ex_generated + 1
                         graph.node(str(r.address), label="", style='filled', fillcolor='lawngreen',
                                    shape='box', height='0.3', width='0.3')  # BLUE / lawngreen
                     else:
@@ -2016,9 +2055,11 @@ class GraphGenerator:
                         graph.node(str(r.address), label="", style='filled', fillcolor='coral2',
                                    shape='circle', height='0.3', width='0.3')  # BLUE / coral2
                 else:
+                    #print('a')
                     graph.node(str(r.address), label="", style='filled', fillcolor="dodgerblue",
                                shape='circle', height='0.3', width='0.3')  # WH / dodgerblue
 
+        # sys.exit(1)
         # invisible
         for index, r in enumerate(self.routers, start=0):
             graph.edge("NODE", str(r.address), style="invis", constraint="false")
@@ -2167,29 +2208,29 @@ class GraphGenerator:
         graph.node("SERVER", label="", shape="none", image=server_icon_path, imagescale="true", width="1.3",
                    height="1.3", margin="20")
 
-        print(self.paths)
-        for i in range(0, len(self.paths)):
-            layers.append("path{}:".format(i))
-            path0 = ('PC', self.paths[i][0])
-            path1 = (self.paths[i][0], self.paths[i][1])
-            path2 = (self.paths[i][1], self.paths[i][2])
-            path3 = (self.paths[i][2], "SERVER")
-            if path0 not in edge_usage_in_layers:
-                edge_usage_in_layers[path0] = ['path{}'.format(i)]
-            else:
-                edge_usage_in_layers[path0].append('path{}'.format(i))
-            if path1 not in edge_usage_in_layers:
-                edge_usage_in_layers[path1] = ['path{}'.format(i)]
-            else:
-                edge_usage_in_layers[path1].append('path{}'.format(i))
-            if path2 not in edge_usage_in_layers:
-                edge_usage_in_layers[path2] = ['path{}'.format(i)]
-            else:
-                edge_usage_in_layers[path2].append('path{}'.format(i))
-            if path3 not in edge_usage_in_layers:
-                edge_usage_in_layers[path3] = ['path{}'.format(i)]
-            else:
-                edge_usage_in_layers[path3].append('path{}'.format(i))
+        if len(self.paths) < 500:
+            for i in range(0, len(self.paths)):
+                layers.append("path{}:".format(i))
+                path0 = ('PC', self.paths[i][0])
+                path1 = (self.paths[i][0], self.paths[i][1])
+                path2 = (self.paths[i][1], self.paths[i][2])
+                path3 = (self.paths[i][2], "SERVER")
+                if path0 not in edge_usage_in_layers:
+                    edge_usage_in_layers[path0] = ['path{}'.format(i)]
+                else:
+                    edge_usage_in_layers[path0].append('path{}'.format(i))
+                if path1 not in edge_usage_in_layers:
+                    edge_usage_in_layers[path1] = ['path{}'.format(i)]
+                else:
+                    edge_usage_in_layers[path1].append('path{}'.format(i))
+                if path2 not in edge_usage_in_layers:
+                    edge_usage_in_layers[path2] = ['path{}'.format(i)]
+                else:
+                    edge_usage_in_layers[path2].append('path{}'.format(i))
+                if path3 not in edge_usage_in_layers:
+                    edge_usage_in_layers[path3] = ['path{}'.format(i)]
+                else:
+                    edge_usage_in_layers[path3].append('path{}'.format(i))
 
         if len(layers) != 0:
             graph.attr(layers=''.join(layers)[:-1])
@@ -2356,9 +2397,9 @@ class GraphGenerator:
             x.append(sim[2]['adv_exit_bandwidth'])
 
         plt.scatter(x, y, marker='o', c='blue', label='ADV Exit')
-        plt.scatter(x, y1, marker='^', c='red', label='Correlation attack')
+        plt.scatter(x, y1, marker='^', c='red', label='ADV Guard + Exit')
 
-        plt.xlabel('adversary exit bandwidth MB/s')
+        plt.xlabel('adversary exit bandwidth KB/s')
         plt.ylabel('node usage')
         # plt.title('My plot!')
         plt.legend()
@@ -2381,7 +2422,7 @@ class GraphGenerator:
 
         plt.scatter(x, y, marker='o', c='blue', label='ADV Guard')
         plt.scatter(x, y1, marker='^', c='red', label='Correlation attack')
-        plt.xlabel('adversary guard bandwidth MB/s')
+        plt.xlabel('adversary guard bandwidth KB/s')
         plt.ylabel('node usage')
 
         plt.legend()
@@ -2398,12 +2439,12 @@ class GraphGenerator:
 
         for sim in self.output_from_all_sims:
             y.append(sim[2]['bad_exit_used'] - sim[2]['bad_exit_encrypt'])
-            y1.append(sim[2]['bad_guard_used'] - sim[2]['bad_guard_encrypt'])
+            # y1.append(sim[2]['bad_guard_used'] - sim[2]['bad_guard_encrypt'])
             x1.append(sim[2]['bad_gu_and_ex'] - sim[2]['bad_gu_and_ex_encrypt'])
             x.append(sim[2]['encryption'])
 
-        plt.scatter(x, x1, marker='^', c='green', label='ADV Corelation attack')
-        plt.scatter(x, y1, marker='o', c='red', label='ADV Guard')
+        plt.scatter(x, x1, marker='^', c='green', label='ADV Guard + Exit')
+        # plt.scatter(x, y1, marker='o', c='red', label='ADV Guard')
         plt.scatter(x, y, marker='o', c='blue', label='ADV Exit')
         plt.xlabel('Encryption %')
         plt.ylabel('unencrypted node usage')
@@ -2477,9 +2518,9 @@ class GraphGenerator:
             x.append(sim[2]['adv_guard'])
             y.append(sim[2]['bad_gu_and_ex'])
 
-            y1.append(sim[2]['bad_gu_and_ex_encrypt'])
+            # y1.append(sim[2]['bad_gu_and_ex_encrypt'])
 
-        plt.scatter(x, y1, marker='^', c='red', label='Correlation attack encrypted')
+        # plt.scatter(x, y1, marker='^', c='red', label='Correlation attack encrypted')
         plt.scatter(x, y, marker='o', c='blue', label='Correlation attack')
 
         plt.xlabel('number of ADV guards')
@@ -2574,7 +2615,7 @@ class GraphGenerator:
 
         plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
         plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
-        plt.xlabel('adversary exit bandwidth MB/s')
+        plt.xlabel('adversary exit bandwidth KB/s')
         plt.ylabel('number of unencrypted ID\'s')
 
         plt.legend()
@@ -2596,7 +2637,7 @@ class GraphGenerator:
 
         plt.scatter(x, y, marker='o', c='blue', label='Unencrypted ID')
         plt.scatter(x, y1, marker='^', c='red', label='Unencrypted ID stolen')
-        plt.xlabel('adversary guard bandwidth MB/s')
+        plt.xlabel('adversary guard bandwidth KB/s')
         plt.ylabel('number of unencrypted ID\'s')
 
         plt.legend()

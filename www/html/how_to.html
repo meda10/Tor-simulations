@@ -26,7 +26,7 @@
                     <a class="nav-link" id="example_file" href="example.html" aria-selected="false">Example config file</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="ccc" href="example.html" aria-selected="false">TODO</a>
+                    <a class="nav-link" id="ccc" href="about_tor.html" aria-selected="false">About Tor</a>
                 </li>
             </ul>
         </div>
@@ -35,18 +35,93 @@
 <div class="wrap">
     <div class="content">
         <div>
-            <h4>Recomendations</h4>
-            <p>Simulator generates node bandwidth between 1 and 2500 KB/s (adjust yours values acordingly)<p>
-            <p>If you simulate pats selection it si not recomendet to generate too many paths reccomendet +-100 ( becouse final graph is interactive its size would be up to 30MB)<p>
-            <p>Small graph in path simulation use max 5 of each eaiteh graph will be too big. Its purouse is demonstration. use large...</p>
+            <h2><span class="bold">Recommendations</span></h2>
+            <ul style="list-style: none; padding-left: 0px;">
+                <li>
+                    <h5>Path simulation</h5>
+                    <ul>
+                        <li>While using small simulation use five nodes of each at most. Otherwise the graph would lose its structure</li>
+                        <li>While using large simulation use anywhere from 25 to 250 nodes</li>
+                        <li>Number of simulations should not be higher than 120 or the graph size will be too large (up to 40MB) and browser will have problem loading it</li>
+                        <li>For small simulation path selection is always random</li>
+                    </ul>
+                </li>
+                <li>
+                    <h5>Onion service simulation</h5>
+                    <ul>
+                        <li>Maximum size should be around 250 nodes</li>
+                    </ul>
+                </li>
+                <li>
+                    <h5>Correlation attack</h5>
+                    <ul>
+                        <li>Simulator generates node bandwidth between 1 KB/s and 2500 KB/s (adjust your values accordingly)</li>
+                        <li>Number of simulations can be set up to 10 000</li>
+                        <li>Use at least 30 nodes for your simulation</li>
+                    </ul>
+                </li>
+                <li>
+                    <h5>Exit Attack: Eavesdropping on communication</h5>
+                    <ul>
+                        <li>Simulator generates node bandwidth between 1 KB/s and 2500 KB/s (adjust your values accordingly)</li>
+                        <li>Number of simulations can be set up to 10 000</li>
+                        <li>Use at least 30 nodes for your simulation</li>
+                    </ul>
+                </li>
+                <li>
+                    <h5>Multiple simulations</h5>
+                    <ul>
+                        <li>Recommended number of simulations is between six and twelve</li>
+                        <li>Parameter Number of simulations should be around 2 000</li>
+                        <li>If you input too many simulations it will take too long and sometimes your browser may break the connection</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h2><span class="bold">Parameters</span></h2>
+            <h5><span class="bold">General parameters</span></h5>
+            <ul>
+                <li><span class="bold">Simulation type</span> - chooses the type of simulations that will be executed</li>
+                <li><span class="bold">Guard</span> - number of friendly nodes with flag guard</li>
+                <li><span class="bold">Exit</span> - number of friendly nodes with flag exit</li>
+                <li><span class="bold">Middle</span> - number of friendly nodes without flag guard or exit</li>
+                <li><span class="bold">Guard & exit</span> - number of friendly nodes with flag guard and exit</li>
+                <li><span class="bold">Remove duplicate paths</span> - removes paths that already exist</li>
+                <li><span class="bold">Same bandwidth</span> - gives every node same bandwidth (default 500 KB/s)</li>
+                <li><span class="bold">Bandwidth guard (optional) KB/s</span> - gives every guard same bandwidth</li>
+                <li><span class="bold">Bandwidth middle (optional) KB/s</span> - gives every middle same bandwidth</li>
+                <li><span class="bold">Bandwidth exit (optional) KB/s</span> - gives every exit same bandwidth</li>
+                <li><span class="bold">Number of simulations</span> - this is the number of circuits that will be generated</li>
+                <li><span class="bold">Simulation size</span> - selects the size of the graph that will be created (large/small- only for Path simulations)</li>
+                <li><span class="bold">Path selection</span> - chooses which type will be used (random/1 guard/3guard - only for Path simulations)</li>
+                <li><span class="bold">Nodes</span> - number of nodes (splits 50/50 between guard and exit)</li>
+                <li><span class="bold">Encryption(%)</span> - percentage of end-to-end encrypted traffic</li>
+                <li><span class="bold">ID occurrence(%)</span> - percentage of the chance that in given circuit will appear some ID</li>
+                <li><span class="bold">Adversary guard</span> - number of adversary guards</li>
+                <li><span class="bold">Adversary exit</span> - number of adversary exits</li>
+                <li><span class="bold">Adversary guard bandwidth (KB/s)</span> - bandwidth of adversary guards in KB/s</li>
+                <li><span class="bold">Adversary exit bandwidth (KB/s)</span> - bandwidth of adversary exits in KB/s</li>
+            </ul>
+            <h5><span class="bold">Custom nodes</span></h5>
+            <ul>
+                <li><span class="bold">Name</span> - name of the custom node</li>
+                <li><span class="bold">IP</span> - IP address for a custom node</li>
+                <li><span class="bold">Bandwidth (KB/s)</span> - bandwidth in KB/s for a custom node</li>
+            </ul>
+            <h5><span class="bold">Multiple simulations</span></h5>
+            <ul>
+                <li><span class="bold">F-guard</span> - number of friendly nodes with flag guard</li>
+                <li><span class="bold">F-exit</span> - number of friendly nodes with flag exit</li>
+                <li><span class="bold">F-guard bandwidth</span> - bandwidth of friendly guards</li>
+                <li><span class="bold">F-exit bandwidth</span> - bandwidth of friendly exits</li>
+                <li><span class="bold">ADV-guard</span> - number of adversary guards</li>
+                <li><span class="bold">ADV-exit</span> - number of adversary exits</li>
+                <li><span class="bold">A-guard bandwidth</span> - bandwidth of adversary guards in KB/s</li>
+                <li><span class="bold">A-exit bandwidth</span> - bandwidth of adversary exits in KB/s</li>
+                <li><span class="bold">Encryption(%)</span> - percentage of end-to-end encrypted traffic</li>
+                <li><span class="bold">ID occurrence(%)</span> - percentage of the chance that in given circuit will appear some ID</li>
+            </ul>
         </div>
-    </div>
-</div>
-<div class="wrap">
-    <div class="footer">
-        <ul>
-            <li><li>
-        </ul>
     </div>
 </div>
 </body>

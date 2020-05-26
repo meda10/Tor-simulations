@@ -34,6 +34,11 @@ except ImportError:
 
 
 def parse_config_file(file):
+    """
+    Parse configuration file
+    :param file: file
+    :return:
+    """
     config = configparser.ConfigParser(allow_no_value=True)
 
     try:
@@ -64,7 +69,7 @@ def parse_config_file(file):
         print('There was an error while parsing arguments')
         print("Value Error: {}".format(e))
         sys.exit(5)
-    except configparser.NoOptionError as e:
+    except configparser.Error as e:
         print('There was an error while parsing arguments')
         print("Key Error: {}".format(e))
         sys.exit(5)
@@ -74,6 +79,9 @@ def parse_config_file(file):
         # dic['path'] = '/var/www/html/torps'
     except KeyError as e:
         dic['path'] = '/var/www/html/torps'
+        dic['path'] = '/home/petr/torps'
+    #check if cestion exists
+    # config['general']['simulation_type']
 
     if config['general']['simulation_type'] == 'path':
         try:
@@ -94,17 +102,19 @@ def parse_config_file(file):
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
 
         if dic['simulation_size'] == 'small':
             if dic['path_selection'] != 'random':
-                print('Value of path_selection have to be: random')
+                dic['path_selection'] = 'random'
+                # print('Value of path_selection have to be: random for small g')
 
     elif config['general']['simulation_type'] == 'hidden_service':
         try:
+            dic['remove_duplicate_paths'] = False
             dic['guard'] = 0
             dic['middle'] = 0
             dic['exit'] = 0
@@ -121,7 +131,7 @@ def parse_config_file(file):
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
@@ -134,17 +144,24 @@ def parse_config_file(file):
             dic['number_of_simulations'] = config.getint('attack_simulation', 'number_of_simulations')
             dic['adv_exit'] = config.getint('attack_simulation', 'adv_exit')
             dic['adv_guard'] = config.getint('attack_simulation', 'adv_guard')
-            dic['adv_guard_bandwidth'] = config.getint('attack_simulation', 'adv_guard_bandwidth')
-            dic['adv_exit_bandwidth'] = config.getint('attack_simulation', 'adv_exit_bandwidth')
+            try:
+                dic['adv_guard_bandwidth'] = int(config.getint('attack_simulation', 'adv_guard_bandwidth')) * 1000000
+                dic['adv_exit_bandwidth'] = int(config.getint('attack_simulation', 'adv_exit_bandwidth')) * 1000000
+            except (ValueError, configparser.Error) as e:
+                print('There was an error while parsing arguments')
+                print("Value Error: {}".format(e))
+                sys.exit(5)
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('attack_simulation', 'encryption')
+            if dic['encryption'] > 100:
+                dic['encryption'] = 100
             # dic['identification_occurrence'] = config.getint('attack_simulation', 'identification_occurrence')
             dic['identification_occurrence'] = 0
         except ValueError as e:
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
@@ -158,23 +175,33 @@ def parse_config_file(file):
             dic['adv_exit'] = config.getint('exit_attack', 'adv_exit')
             dic['adv_guard'] = 0
             dic['adv_guard_bandwidth'] = 0
-            dic['adv_exit_bandwidth'] = config.getint('exit_attack', 'adv_exit_bandwidth')
+            try:
+                dic['adv_exit_bandwidth'] = int(config.getint('exit_attack', 'adv_exit_bandwidth')) * 1000000
+            except (ValueError, configparser.Error) as e:
+                print('There was an error while parsing arguments')
+                print("Value Error: {}".format(e))
+                sys.exit(5)
             dic['path_selection'] = 'random'
             dic['encryption'] = config.getint('exit_attack', 'encryption')
+            if dic['encryption'] > 100:
+                dic['encryption'] = 100
             dic['identification_occurrence'] = config.getint('exit_attack', 'identification_occurrence')
+            if dic['identification_occurrence'] > 100:
+                dic['identification_occurrence'] = 100
         except ValueError as e:
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
     elif config['general']['simulation_type'] == 'multiple_sim':
         try:
             dic['number_of_simulations'] = config.getint('multiple_sim', 'number_of_simulations')
-            dic['same_bandwidth'] = True
+            dic['same_bandwidth'] = True        # todo
             dic['path_selection'] = 'random'
+            dic['remove_duplicate_paths'] = False
         except ValueError as e:
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
@@ -183,7 +210,7 @@ def parse_config_file(file):
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
@@ -193,6 +220,8 @@ def parse_config_file(file):
                 sim = {}
                 if 'sim_' in s:
                     sim['encryption'] = config.getint(s, 'encryption')
+                    if sim['encryption'] > 100:
+                        sim['encryption'] = 100
                     sim['identification_occurrence'] = config.getint(s, 'identification_occurrence')
                     sim['guard'] = config.getint(s, 'guard')
                     sim['middle'] = 0
@@ -201,8 +230,13 @@ def parse_config_file(file):
                     sim['number_of_simulations'] = config.getint('multiple_sim', 'number_of_simulations')
                     sim['adv_exit'] = config.getint(s, 'adv_exit')
                     sim['adv_guard'] = config.getint(s, 'adv_guard')
-                    sim['adv_guard_bandwidth'] = config.getint(s, 'adv_guard_bandwidth')
-                    sim['adv_exit_bandwidth'] = config.getint(s, 'adv_exit_bandwidth')
+                    try:
+                        sim['adv_guard_bandwidth'] = int(config.getint(s, 'adv_guard_bandwidth')) * 1000000
+                        sim['adv_exit_bandwidth'] = int(config.getint(s, 'adv_exit_bandwidth')) * 1000000
+                    except (ValueError, configparser.Error) as e:
+                        print('There was an error while parsing arguments')
+                        print("Value Error: {}".format(e))
+                        sys.exit(5)
                     sim['friendly_guard_bandwidth'] = config.getint(s, 'friendly_guard_bandwidth')
                     sim['friendly_exit_bandwidth'] = config.getint(s, 'friendly_exit_bandwidth')
                     sim['path_selection'] = 'random'
@@ -215,12 +249,14 @@ def parse_config_file(file):
             print('There was an error while parsing arguments')
             print("Value Error: {}".format(e))
             sys.exit(5)
-        except configparser.NoOptionError as e:
+        except configparser.Error as e:
             print('There was an error while parsing arguments')
             print("Key Error: {}".format(e))
             sys.exit(5)
     else:
-        ...
+        print('There was an error while parsing arguments')
+        print("Key Error: {}".format(config['general']['simulation_type']))
+        sys.exit(5)
 
     try:
         for n in config.sections():
@@ -231,15 +267,16 @@ def parse_config_file(file):
                     node['name'] = config[n]['name']
                 else:
                     node['name'] = ''
-                try:
-                    socket.inet_aton(config[n]['ip'])
-                    socket.inet_pton(socket.AF_INET, config[n]['ip'])
-                    node['ip'] = config[n]['ip']
-                except socket.error:
-                    print('There was an error while parsing arguments')
-                    print("Value Error: Invalid IP address")
-                    sys.exit(5)
-                node['port'] = config[n]['port']
+                if config[n]['ip'] != '':
+                    try:
+                        socket.inet_aton(config[n]['ip'])
+                        socket.inet_pton(socket.AF_INET, config[n]['ip'])
+                        node['ip'] = config[n]['ip']
+                    except socket.error:
+                        print('There was an error while parsing arguments')
+                        print("Value Error: Invalid IP address")
+                        sys.exit(5)
+                node['port'] = 443
                 if config[n]['bandwidth'] != '':
                     try:
                         node_bandwidth = int(config[n]['bandwidth']) * 1000000  #todo
@@ -251,7 +288,7 @@ def parse_config_file(file):
                 all_nodes.append(node)
     except KeyError:
         print('There was an error while parsing arguments')
-        print('Key Error: user defined node must have these parameters: Type, Name, IP, Port, Bandwidth')
+        print('Key Error: user defined node must have these parameters: Type, Name, IP, Bandwidth')
         sys.exit(5)
 
     if config['general']['simulation_type'] != 'multiple_sim':
@@ -267,6 +304,11 @@ def parse_config_file(file):
 
 
 def run_simulation(file):
+    """
+    Pare input file and runs simulations
+    :param file: config file
+    :return:
+    """
     loop_count = 0
     config = parse_config_file(file)
 
@@ -317,13 +359,19 @@ def run_simulation(file):
         g = GraphGenerator(routers=routers, paths=circuits_output[0], guard_exit=config[0]['guard_exit'],
                            guards_to_generate=config[0]['path_selection'], guard_len=config[0]['guard'],
                            exit_len=config[0]['exit'], sim_size=config[0]['simulation_size'],
-                           sim_type=config[0]['simulation_type'])
+                           sim_type=config[0]['simulation_type'], nodes=config[1])
         GraphGenerator.generate_graph(g)
     if config[0]['create_html'] and config[0]['generate_graph']:
         create_html(config[0]['simulation_type'])
 
 
 def write_descriptors(descs, filename):
+    """
+    Writes descriptor to file
+    :param descs: descriptors
+    :param filename: filename
+    :return:
+    """
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/in/server-descriptors-2019-02')
     output_file = Path(cwd + '/torps/in/server-descriptors-2019-02/2019-02-23-12-05-01-server-descriptors')
@@ -340,6 +388,12 @@ def write_descriptors(descs, filename):
 
 
 def write_descriptor(desc, filename):
+    """
+    Writes descriptor to file
+    :param desc: descriptor
+    :param filename: filename
+    :return:
+    """
     cwd = os.getcwd()
     output_folder_desc = Path(cwd + '/torps/in/server-descriptors-2019-02')
     output_folder_cons = Path(cwd + '/torps/in/consensuses-2019-02')
@@ -369,6 +423,26 @@ def write_descriptor(desc, filename):
 def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_bandwidth, sim_type, loop_count,
                  encryption_percentage, guard_bandwidth, exit_bandwidth, identification_occurrence, number_of_simulations,
                  adv_guard=None, adv_exit=None):
+    """
+    Creates statistic for current simulation
+    :param remove_duplicate_paths: True/False
+    :param routers: list of all nodes and their characteristics
+    :param adv_guard_bandwidth: adversary guard bwndwidth
+    :param adv_exit_bandwidth: adversary exit bwndwidth
+    :param sim_type: simulation type
+    :param loop_count: numver of simulation - only for multiple sim
+    :param encryption_percentage: encryption %
+    :param guard_bandwidth: friendly guard bandwidth
+    :param exit_bandwidth: friendyl exit bandwidth
+    :param identification_occurrence: ID occirrence
+    :param number_of_simulations: numver of simulations
+    :param adv_guard: number of adversary guards
+    :param adv_exit: number of adversary exits
+    :return:
+    """
+    if sim_type == 'multiple_sim':
+        remove_duplicate_paths = False
+
     circuits = []
     attackers_guards = []
     attackers_exits = []
@@ -391,6 +465,7 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'bad_node': 0,
                                      'bad_gu_and_ex': 0,
                                      'encrypted': 0,
+                                     'not_encrypted': 0,
                                      'total_id': 0,
                                      'not_encrypted_id': 0,
                                      'not_encrypted_id_stolen': 0,
@@ -399,15 +474,16 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                                      'bad_exit_encrypt': 0,
                                      'bad_exit_unencrypt': 0,
                                      'bad_gu_and_ex_encrypt': 0,
+                                     'bad_gu_and_ex_unencrypt': 0,
                                      'adv_guard': adv_guard,
                                      'adv_exit': adv_exit,
                                      'encryption': encryption_percentage,
-                                     'number_of_simulations': number_of_simulations,
+                                     'number_of_simulations': 0,
                                      'identification_occurrence': identification_occurrence,
                                      'adv_guard_bandwidth': round(adv_guard_bandwidth / math.pow(10, 6), 0),
                                      'adv_exit_bandwidth': round(adv_exit_bandwidth / math.pow(10, 6), 0),
-                                     'guard_bandwidth': None if guard_bandwidth is None else round(guard_bandwidth / math.pow(10, 6), 0),
-                                     'exit_bandwidth': None if exit_bandwidth is None else round(exit_bandwidth / math.pow(10, 6), 0)
+                                     'guard_bandwidth': None if guard_bandwidth is None else guard_bandwidth,
+                                     'exit_bandwidth': None if exit_bandwidth is None else exit_bandwidth
                                      })
     output_file_path = Path(os.getcwd() + '/torps/out/simulation/output')
     with open(output_file_path, 'r+') as file:
@@ -416,12 +492,12 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
     for i in range(0, len(lines)):
         if not lines[i].split()[2].__eq__('Guard'):
             circuit_counter += 1
+            duplicate = False
             circuit = (lines[i].split()[2], lines[i].split()[3], lines[i].split()[4])
             if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
                 if (sim_type == 'exit_attack' or sim_type == 'attack') and circuit[2][:3] == '10.' and circuit[0][:3] == '10.':
-                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter, 'correlation': True}
+                    circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True, 'count': circuit_counter, 'correlation': True}
                 elif (sim_type == 'exit_attack' or sim_type == 'attack') and circuit[2][:3] == '10.':
-                    print()
                     circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True , 'count': circuit_counter, 'correlation': False}
                 elif (sim_type == 'exit_attack' or sim_type == 'attack') and not circuit[2][:3] == '10.':
                     circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter, 'correlation': False}
@@ -429,27 +505,49 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': True, 'count': circuit_counter, 'correlation': False}
             else:
                 circuit_entry = {'guard': circuit[0], 'middle': circuit[1], 'exit': circuit[2], 'affiliation': False, 'count': circuit_counter, 'correlation': False}
-            circuit_list.append(circuit_entry)
-            node_usage.update(circuit)
-            if circuit not in circuits and remove_duplicate_paths:
+            """
+            if (circuit not in circuit_list) and remove_duplicate_paths:
+                circuit_list.append(circuit_entry)
+            else:
+                circuit_list.append(circuit_entry)
+            """
+
+            if (circuit not in circuits) and remove_duplicate_paths:
+                node_usage.update(circuit)
                 circuits.append(circuit)
+                circuit_list.append(circuit_entry)
+                duplicate = False
+                statistic.update(['number_of_simulations'])
+            elif (circuit in circuits) and remove_duplicate_paths:
+                circuit_counter -= 1
+                duplicate = True
             elif not remove_duplicate_paths:
+                node_usage.update(circuit)
                 circuits.append(circuit)
+                circuit_list.append(circuit_entry)
+                duplicate = False
+                statistic.update(['number_of_simulations'])
 
             # attack nodes
             # print(encryption_percentage)
-            if sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim':
+            if (sim_type == 'attack' or sim_type == 'exit_attack' or sim_type == 'multiple_sim') and not duplicate:
                 encrypted = get_encryption(encryption_percentage)
                 id_included = get_id(identification_occurrence)
                 #print('ID {} enC {}'.format(id_included, encrypted))
                 if encrypted:
-                    statistic.update(['encrypted'])
-                    encrypted_node_usage.update(circuit)
-                if id_included and sim_type == 'exit_attack' or id_included and sim_type == 'multiple_sim':
-                    statistic.update(['total_id'])
-                    id_node_usage.update(circuit)
+                    if not duplicate:
+                        statistic.update(['encrypted'])
+                        encrypted_node_usage.update(circuit)
+                else:
+                    if not duplicate:
+                        statistic.update(['not_encrypted'])
+                if (id_included and sim_type == 'exit_attack') or (id_included and sim_type == 'multiple_sim'):
+                    if not duplicate:
+                        statistic.update(['total_id'])
+                        id_node_usage.update(circuit)
                 if id_included and not encrypted:
-                    statistic.update(['not_encrypted_id'])
+                    if not duplicate:
+                        statistic.update(['not_encrypted_id'])
 
                 if circuit[0][:3] == '10.':  # guard
                     statistic.update(['bad_guard_used', 'bad_node'])
@@ -470,12 +568,17 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                         encrypted_attacker_exit.update(['{}'.format(circuit[2])])
                     else:
                         statistic.update(['bad_exit_unencrypt'])
-                    attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
-
-                if circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or circuit[2][:3] == '10.':
-                    if id_included and not encrypted and sim_type == 'exit_attack' or (id_included and not encrypted and sim_type == 'multiple_sim'):
+                    if (id_included and not encrypted and sim_type == 'exit_attack') or (id_included and not encrypted and sim_type == 'multiple_sim'):
                         statistic.update(['not_encrypted_id_stolen'])
                         id_stolen_node_usage.update(circuit)
+                    attackers_exits.append(circuit[2]) if circuit[2] not in attackers_exits else None
+                """
+                if circuit[2][:3] == '10.': # circuit[0][:3] == '10.' or circuit[1][:3] == '10.' or 
+                    # print('--> {} {} {}'.format(id_included, encrypted, sim_type))
+                    if (id_included and not encrypted and sim_type == 'exit_attack') or (id_included and not encrypted and sim_type == 'multiple_sim'):
+                        statistic.update(['not_encrypted_id_stolen'])
+                        id_stolen_node_usage.update(circuit)
+                """
                 if circuit[0][:3] == '10.' and circuit[1][:3] == '10.' and circuit[2][:3] == '10.':
                     statistic.update(['bad_circuit'])
                     statistic.update(['bad_gu_and_ex'])
@@ -483,12 +586,15 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
                     statistic.update(['bad_gu_and_ex'])
                     if encrypted:
                         statistic.update(['bad_gu_and_ex_encrypt'])
+                    else:
+                        statistic.update(['bad_gu_and_ex_unencrypt'])
 
     create_output_json(circuit_list)
     create_statistic(loop_count, statistic)
     create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandwidth, node_usage, encrypted_node_usage,
                           attackers_guards, attackers_exits, attackers_middle, id_node_usage, id_stolen_node_usage)
-
+    # print(statistic)
+    # sys.exit(1)
     # calculate color for graph
     if sim_type == 'exit_attack':
         """
@@ -559,17 +665,34 @@ def get_circuits(remove_duplicate_paths, routers, adv_guard_bandwidth, adv_exit_
 
 
 def write_json(data, path):
+    """
+    Dumps data to JSON
+    :param data: data
+    :param path: Path to file
+    :return:
+    """
     with open(path, 'w') as file:
         json.dump(data, file, indent=4, sort_keys=True)
 
 
 def create_output_json(circuit_list):
+    """
+    Crestes JSON file output.json
+    :param circuit_list: circuits generated by TorPS + addet statistic
+    :return:
+    """
     cwd = os.getcwd()
     output_file_path_json = Path(cwd + '/torps/out/simulation/output.json')
     write_json(circuit_list, output_file_path_json)
 
 
 def create_statistic(loop_count, statistic):
+    """
+    Creates JSON file statistic.json
+    :param loop_count: number of simulations - only for multiple simulations - writes all statistic to one file
+    :param statistic: statistic to write
+    :return:
+    """
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/simulation')
     statistic_file = Path(cwd + '/torps/out/simulation/statistic.json')
@@ -588,7 +711,17 @@ def create_statistic(loop_count, statistic):
 
 
 def parse_statistics(bandwidth, ip, node_usage, id_node_usage, encrypted_node_usage, id_stolen_node_usage, node_statistics):
-    # node_statistics = {IP: (USAGE, BANDWIDTH KB/s, encryption %, id_usage, id_stolen)}
+    """
+    Creates simple statistic for every node
+    :param bandwidth: node bandwidth
+    :param ip: node ip
+    :param node_usage: node usage
+    :param id_node_usage: node usage with ID
+    :param encrypted_node_usage: node usage while encrypted
+    :param id_stolen_node_usage: node usage whie ID stolen
+    :param node_statistics: previous ststistic
+    :return: node_statistics = {IP: (USAGE, BANDWIDTH KB/s, encryption %, id_usage, id_stolen)}
+    """
     bandwidth = round(bandwidth / math.pow(10, 6), 0)
     usage = node_usage['{}'.format(ip)]
     id_usage = id_node_usage['{}'.format(ip)]
@@ -596,19 +729,34 @@ def parse_statistics(bandwidth, ip, node_usage, id_node_usage, encrypted_node_us
     if usage != 0 and id_usage != 0:
         encrypted_usage = (100 * (encrypted_node_usage['{}'.format(ip)])) / usage
         id_stolen_percentage = (100 * (id_stolen_node_usage['{}'.format(ip)])) / id_usage
-        node_statistics['{}'.format(ip)] = (usage, bandwidth, round(encrypted_usage), round(id_stolen_percentage), id_usage)
+        node_statistics['{}'.format(ip)] = (usage, bandwidth, round(encrypted_usage), round(id_stolen_percentage), id_usage, id_stolen_node_usage['{}'.format(ip)])
     elif usage != 0:
         encrypted_usage = (100 * (encrypted_node_usage['{}'.format(ip)])) / usage
-        node_statistics['{}'.format(ip)] = (usage, bandwidth, round(encrypted_usage), 0, id_usage)
+        node_statistics['{}'.format(ip)] = (usage, bandwidth, round(encrypted_usage), 0, id_usage, id_stolen_node_usage['{}'.format(ip)])
     elif id_usage != 0:
         id_stolen_percentage = (100 * (id_stolen_node_usage['{}'.format(ip)])) / id_usage
-        node_statistics['{}'.format(ip)] = (usage, bandwidth, 0, round(id_stolen_percentage), id_usage)
+        node_statistics['{}'.format(ip)] = (usage, bandwidth, 0, round(id_stolen_percentage), id_usage, id_stolen_node_usage['{}'.format(ip)])
 
     return node_statistics
 
 
 def create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandwidth, node_usage, encrypted_node_usage,
                           attackers_guards, attackers_exits, attackers_middle, id_node_usage, id_stolen_node_usage):
+    """
+    Creates JSON file vith statistic to current simulation
+    :param routers: list of all nodes and their characteristics
+    :param sim_type: simulation type
+    :param adv_guard_bandwidth: adversary guard bandwidth
+    :param adv_exit_bandwidth: adversary exit bandwidth
+    :param node_usage: list of node usage
+    :param encrypted_node_usage: list of dode usage while comunication is encrypted
+    :param attackers_guards: list of attackers guards
+    :param attackers_exits: list of attackers exits
+    :param attackers_middle: list of attackers exits
+    :param id_node_usage: counter of node usage with ID
+    :param id_stolen_node_usage: Counter of node usage where enemy stole ID
+    :return:
+    """
     node_statistics = {}
     cwd = os.getcwd()
     output_file = Path(cwd + '/torps/out/simulation/usage.json')
@@ -634,7 +782,7 @@ def create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandw
         for node in node_statistics.keys():
             json_dmp = {'ip': node, 'usage': node_statistics[node][0], 'bandwidth': node_statistics[node][1],
                         'encryption': node_statistics[node][2], 'id_stolen_percentage': node_statistics[node][3],
-                        'id': node_statistics[node][4],
+                        'id': node_statistics[node][4], 'id_stolen_node_usage': node_statistics[node][5],
                         'affiliation': True if re.match(r"10\.[0-9]{1,3}\.0\.0", node) else False}
             new_list.append(json_dmp)
         json.dump(new_list, file, indent=4, sort_keys=True)
@@ -643,6 +791,11 @@ def create_node_statistic(routers, sim_type, adv_guard_bandwidth, adv_exit_bandw
 
 
 def get_encryption(encryption_percentage):
+    """
+    Returns if circuit is encrypted or nit
+    :param encryption_percentage: how much comunication is encrypted in %
+    :return: True/False
+    """
     probability = random.randint(0, 100)
     if probability < encryption_percentage or encryption_percentage == 100:
         return True
@@ -651,6 +804,11 @@ def get_encryption(encryption_percentage):
 
 
 def get_id(id_percentage):
+    """
+    Returns if circuit contains ID
+    :param id_percentage: change that cuircuit contains ID in %
+    :return: True/False
+    """
     probability = random.randint(0, 100)
     if probability < id_percentage or id_percentage == 100:
         return True
@@ -695,7 +853,7 @@ def get_multipurpose_nodes(routers, paths, fake_guards):
 
 def generate_router_status_entry(self, flags='Fast Running Stable Valid'):
     """
-    Upravena funkce knihovnz Stem
+    Eddited function from Stem library
     Source: https://stem.torproject.org/
     """
     if not self.fingerprint:
@@ -731,26 +889,45 @@ def generate_router_status_entry(self, flags='Fast Running Stable Valid'):
 
 
 def generate_nickname():
-    return ('Unnamed%i' % random.randint(0, 100000000000000))[:19]
+    """
+    Generates random name for router
+    :return: name
+    """
+    return 'Unnamed{}'.format(random.randint(0, 100000000000000))[:19]
 
 
 def generate_ipv4_address():
-    return '%i.%i.%i.%i' % (random.randint(11, 255), random.randint(0, 255),
+    """
+    Generates random IP adsress from 11.0.0.0 -> (TorPS uses 10.X.0.0 as enemy nodes)
+    :return: IP address
+    """
+    return '{}.{}.{}.{}'.format(random.randint(11, 255), random.randint(0, 255),
                             random.randint(0, 255), random.randint(0, 255))
 
 
 def generate_port():
-    return '%i' % (random.randint(1, 65535))
+    """
+    Ganerates random port from 1 to 65000
+    :return: port
+    """
+    return '{}'.format(random.randint(1, 65000))
 
 
 def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
+    """
+    Generates bandwidth for nodes, default value between 1 KB/s and 2,5 MB/s
+    :param same_bandwidth: True/False - if True function generates same bandwidth for all nodes default 350000000 B/s
+    :param bandwidth_value: value of bandwidth if same_bandwidth is True
+    :param variance: variance between generated bandwidth
+    :return:
+    """
     if same_bandwidth and bandwidth_value is not None:
         # bandwidth = "229311978 259222236 199401720"
         bandwidth_value = bandwidth_value * 1000000
         bandwidth = "{} {} {}".format(bandwidth_value, bandwidth_value, bandwidth_value)
         return bandwidth
     elif same_bandwidth:
-        bandwidth = "350000000 350000000 350000000"
+        bandwidth = "500000000 500000000 500000000"
         return bandwidth
     observed = random.randint(20 * 2 ** 10, 2 * 2 ** 30)
     percentage = float(variance) / 100.
@@ -782,6 +959,13 @@ def generate_ntor_key():
 
 
 def make_node(x, y, descriptor_entries):
+    """
+    Creates node based on user input
+    :param x:
+    :param y:
+    :param descriptor_entries:
+    :return: node
+    """
     node = []
     server_descriptors = []
     consensus_entries = []
@@ -958,6 +1142,7 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
                 validate_node_entries(node, all_names, all_ip, same_bandwidth, guard_bandwidth_value)
                 guard_node.append(node)
             if node['type'] == 'exit':
+
                 validate_node_entries(node, all_names, all_ip, same_bandwidth, exit_bandwidth_value)
                 exit_node.append(node)
             if node['type'] == 'middle':
@@ -1022,6 +1207,10 @@ def check_params(path_selection, guard_c=0, middle_c=0, exit_c=0, guard_exit_c=0
 
 
 def create_html(sim_type):
+    """
+    Creates html page with simulated graph, graph is interactive thanks to added .js script
+    :param sim_type: type of simulation
+    """
     cwd = os.getcwd()
     
     output_file = Path(cwd + '/picture.html')
@@ -1098,6 +1287,15 @@ def create_html(sim_type):
 
 
 def run_tor_path_simulator(path, adv_guards, adv_exits, adv_guard_bandwidth, adv_exit_bandwidth, n_samples=5):
+    """
+    Runs TorPS
+    :param path: path to TorPS directory
+    :param adv_guards: number of adversary guards
+    :param adv_exits: number of adversar exits
+    :param adv_guard_bandwidth: adversary guard bandwidth
+    :param adv_exit_bandwidth: adversary exit bandwidth
+    :param n_samples: number of simulations
+    """
     cwd = os.getcwd()
     output_folder = Path(cwd + '/torps/out/network-state-2019-02')
     simulation_folder = Path(cwd + '/torps/out/simulation')

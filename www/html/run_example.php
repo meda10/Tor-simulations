@@ -52,12 +52,12 @@ if (isset($_POST['btn'])) {
 function run_sim($config_file){
     $cwd = getcwd();
     chdir($cwd);
-
+    set_time_limit(240);
     $command = escapeshellcmd('./sim.py -i "/conf/examples/'.$config_file.'"');
     exec($command.' 2> error.log', $op, $ret);
     if ($ret != 0) {
         echo "<h3>Error</h3>";
-        echo "<p>There was an error, you can find more information in  error.log</p>";
+        echo "<p>There was an error, you can find more information in error.log</p>";
         foreach ($op as $item) {
             echo $item;
             echo "<br>";

@@ -26,7 +26,7 @@
                     <a class="nav-link" id="example_file" href="example.html" aria-selected="false">Example config file</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="ccc" href="example.html" aria-selected="false">TODO</a>
+                    <a class="nav-link" id="ccc" href="about_tor.html" aria-selected="false">About Tor</a>
                 </li>
             </ul>
         </div>
@@ -278,7 +278,7 @@
                             </div>
                         </fieldset>
                         <fieldset id="add_nodes_path">
-                            <legend class="border_bottom">Nodes</legend>
+                            <legend class="border_bottom">Custom nodes (optional)</legend>
                             <div class="path_node_item" id="dynamic_field">
                                 <div class="form-row">
                                     <div class="col-md-2 mb-3">
@@ -368,64 +368,71 @@
                         <div id="info_path">
                             <div class="example">
                                 <h5 class="font-weight-bold">Path simulation</h5>
-                                <p>This simulation shows</p>
-                                <p>Simulation size</p>
-                                <p>Path selection</p>
+                                <p>This simulation shows selection of path in Tor network, thanks to parameter path selection we can see which approach was used in the past by the Tor network.</p>
+                                <p>Graph shows circuits in Tor network and differentiates nodes according to their position in circuit. Graph is interactive and allows users to switch between individual paths.
+                                There are also tables, first of which shows circuits and their assigned number in the graph. Second table shows individual nodes, their IP address, bandwidth and number of times a node was used in circuit.</p>
                             </div>
                         </div>
                         <div id="info_hidden_service" style="display: none;">
                             <div class="example">
                                 <h5 class="font-weight-bold">Onion service simulation</h5>
-                                <p>This simulation explains how does connection to onion service works step by step.</p>
-                                <p>You will learn about introduction points, rendezvous point and onion services.</p>
+                                <p>This simulation explains step by step how can user connect to onion service. It shows communication between onion service, introduction points and randezvous point.</p>
+                                <p>Graph shows Tor network, for better understanding are important relays marked by pictures. Final graph is interactive and user can see every step individually. </p>
                             </div>
                         </div>
                         <div id="info_attack" style="display: none;">
                             <div class="example">
                                 <h5 class="font-weight-bold">Correlation attack simulation</h5>
-                                <p>ID</p>
+                                <p>This simulations demonstrates how the correlation attack works. For a successful attack, attacker needs to be in control of both guard and exit nodes.</p>
+                                <p>Graph shows circuits in which attacker controlled both guard and exit, graph is interactive and enables user to see paths individually. Color of the nodes is saturated according to how many times was the node used in circuit.
+                                Nodes are also distinct by color, enemy nodes are red and friendly nodes are blue. There are also tables, first of which shows circuits and their assigned number in the graph. Second table shows individual nodes, their IP address, bandwidth, number of times a node was used in circuit and how many end-to-end encrypted communication passed through the node.
+                                Further statistics can be found in tab 'statistics'.</p>
                             </div>
                         </div>
                         <div id="info_exit_attack" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Exit attack simulation</h5>
-                                <p>Encryption</p>
+                                <h5 class="font-weight-bold">Simulation of eavesdropping on exit nodes</h5>
+                                <p>This simulation concentrates on attacker that controls exit relay and eavesdrops on unencrypted communication</p>
+                                <p>Thanks to parameter ID occurrence we can model chances of circuit containing ID that can be stolen. Color of the nodes is saturated according to how many IDs have passed through the given node.
+                                Nodes are also distinct by color, enemy nodes are red and friendly nodes are blue. There are also tables, first of which shows circuits and their assigned number in the graph.
+                                Second table shows individual nodes, their bandwidth, how many IDs have passed through the given node and how many IDs were stolen, both in numbers and percents (when attacker steals ID from exit node, the ID shows as stolen for every node in circuit).
+                                Further statistics can be found in tab 'statistics'.</p>
                             </div>
                         </div>
                         <div id="info_multiple_sim" style="display: none;">
                             <div class="example">
                                 <h5 class="font-weight-bold">Multiple simulation</h5>
-                                <p>This allows run multiple simulations consecutively, you can change parameters and watch how it affects outputs.</p>
-                                <p>Statistics are generated for every simulation</p>
+                                <p>This allows to run multiple simulations consecutively, each of them can have their own parameters that you can change and watch how it affects outputs.
+                                Final graphs and statistics compare results of all simulations.</p>
                             </div>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="example" role="tabpanel" aria-labelledby="example_tab">
                         <div id="example_path">
                             <div class="example">
-                                <h5 class="font-weight-bold">Simple</h5>
-                                <p>Small simulation with random path selection</p>
+                                <h5 class="font-weight-bold">Demonstration of Tors path selection</h5>
+                                <p><span class="bold">Simulation parameters:</span> guards: 5, middle: 5, exit: 5, simulation size: small</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_1" class="btn-sm btn-secondary">Run</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Path selection: 1 Guard</h5>
-                                <p>Large simulation with 1 guard path selection</p>
+                                <h5 class="font-weight-bold">Path selection with one entry guard</h5>
+                                <p><span class="bold">Simulation parameters:</span> nodes: 100, path selection: 1 guard, simulation size: large</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Path selection: 3 Guard</h5>
-                                <p>Large simulation with 3 guard path selection</p>
+                                <h5 class="font-weight-bold">Path selection with three entry guards</h5>
+                                <p><span class="bold">Simulation parameters:</span> nodes: 100, path selection: 3 guards, simulation size: large</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Example 4</h5>
-                                <p>Large simulation with random path selection</p>
+                                <h5 class="font-weight-bold">Random path selection with large graph</h5>
+                                <p><span class="bold">Simulation parameters:</span> nodes: 80, path selection: random, simulation size: large</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="path_example_4" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -434,7 +441,7 @@
                         <div id="example_hidden_service" style="display: none;">
                             <div class="example">
                                 <h5 class="font-weight-bold">Hidden service example</h5>
-                                <p>Simulation with 250 nodes.</p>
+                                <p><span class="bold">Simulation parameters:</span> nodes: 250</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="hidden_service_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -442,22 +449,22 @@
                         </div>
                         <div id="example_attack" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Correlation 1</h5>
-                                <p>Simulation with 80 friendly guards, 20 friendly exits, 2 adversary guards 1 one exit.</p>
+                                <h5 class="font-weight-bold">Correlation attack, simulation one</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 80, friendly exits: 20, adversary guards: 2, adversary exit: 1, bandwidth for both adversary guards and exit: 2000 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Correlation 2</h5>
-                                <p>Simulation with 20 friendly guards, 80 friendly exits, 2 adversary guards and 1 exit.</p>
+                                <h5 class="font-weight-bold">Correlation attack, simulation two</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 20, friendly exits: 80, adversary guards: 2, adversary exit: 1, bandwidth for both adversary guards and exit: 2000 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Correlation 3 </h5>
-                                <p>Simulation with 50 friendly guards, 50 friendly exits, 3 adversary guards and 2 exits.</p>
+                                <h5 class="font-weight-bold">Correlation attack, simulation three </h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 50, friendly exits: 50, adversary guards: 3, adversary exit: 2, bandwidth for both adversary guards and exit: 2000 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -465,22 +472,22 @@
                         </div>
                         <div id="example_exit_attack" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Encryption 20%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 20% encryption and ID occurrence 20%</p>
+                                <h5 class="font-weight-bold">Eavesdropping on communication, encryption 20%</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 35, friendly exits: 35, adversary exits: 2, encryption: 20%, ID occurrence 30%, adversary bandwidth: 2300 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Encryption 50%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 50% encryption and ID occurrence 20%</p>
+                                <h5 class="font-weight-bold">Eavesdropping on communication, encryption 80%</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 35, friendly exits: 35, adversary exits: 2, encryption: 80%, ID occurrence 30%, adversary bandwidth: 2300 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">Encryption 80%</h5>
-                                <p>Simulation with 50 friendly guards and exits, 20 adversary exits, 80% encryption and ID occurrence 20%</p>
+                                <h5 class="font-weight-bold">Eavesdropping on communication, encryption 80%, 4 adversary exits</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards: 35, friendly exits: 35, adversary exits: 4, encryption: 80%, ID occurrence 30%, adversary bandwidth: 1200 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="exit_attack_example_3" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -488,15 +495,15 @@
                         </div>
                         <div id="example_multiple_sim" style="display: none;">
                             <div class="example">
-                                <h5 class="font-weight-bold">Encryption</h5>
-                                <p>Runs 20 simulations every time increasing encryption by 5%</p>
+                                <h5 class="font-weight-bold">Increasing encryption by 10%</h5>
+                                <p><span class="bold">Simulation parameters:</span> encryption: 30%, ID occurrence: 25%, friendly guards & exits: 20, adversary exits: 2, bandwidth of all: 2000 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="multiple_sim_example_1" class="btn-sm btn-secondary">RUN</button>
                                 </form>
                             </div>
                             <div class="example">
-                                <h5 class="font-weight-bold">ADV Guard Bandwidth</h5>
-                                <p>Runs 10 simulations changing value of adversary guard bandwidth.</p>
+                                <h5 class="font-weight-bold">Increasing adversary guard bandwidth by 300 KB/s</h5>
+                                <p><span class="bold">Simulation parameters:</span> friendly guards & exits: 20, adversary guards & exits: 2, bandwidth of all: 2000 KB/s, adversary guard bandwidth: 500 KB/s</p>
                                 <form action="run_example.php" class="form-inline" method="post" enctype="multipart/form-data">
                                     <button name="btn" type="submit" value="multiple_sim_example_2" class="btn-sm btn-secondary">RUN</button>
                                 </form>
@@ -506,13 +513,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="wrap">
-    <div class="footer">
-        <ul>
-            <li><li>
-        </ul>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
