@@ -1,5 +1,3 @@
-// https://www.webslesson.info/2016/02/dynamically-add-remove-input-fields-in-php-with-jquery-ajax.html
-
 $(document).ready(function(){
     var i=1;
     $('#add').click(function(){

@@ -941,8 +941,8 @@ def generate_bandwidth(same_bandwidth, bandwidth_value, variance=30):
 
 def generate_ntor_key():
     """
-    authors:Isis Lovecruft <isis@torproject.org>
-    licence:MIT licence
+    authors: Isis Lovecruft <isis@torproject.org>
+    licence: MIT licence
     copyright: © 2013-2016 Isis Lovecruft, The Tor Project, Inc.
     Source: https://github.com/isislovecruft/leekspin
     :return:

@@ -1,6 +1,9 @@
 <?php
 
-# https://stackoverflow.com/questions/5695145/how-to-read-and-write-to-an-ini-file-with-php
+# -----------------------------------------------------------------
+# author:	Teoman Soygul https://stackoverflow.com/users/628273/teoman-soygul
+# Source:	Stack Overflow https://stackoverflow.com/questions/5695145/how-to-read-and-write-to-an-ini-file-with-php
+# -----------------------------------------------------------------
 function write_ini_file($file, $array = []) {
     if (!is_string($file)) {
         throw new \InvalidArgumentException('Function argument 1 must be a string.');
@@ -176,6 +179,7 @@ function show_graph($config, $number_of_user_simulations){
     if(count(array_unique($encryption)) > 1){
         array_push($grapshs, 'encryption');
         array_push($grapshs, 'id_encryption');
+        array_push($grapshs, 'exit_encryption');
     }
     if(count(array_unique($identification_occurrence)) > 1){
 
@@ -184,15 +188,19 @@ function show_graph($config, $number_of_user_simulations){
 
     }
     if(count(array_unique($exit)) > 1){
-        array_push($grapshs, 'correlation_attack_exit');
-        array_push($grapshs, 'id_number_of_exits');
+        #array_push($grapshs, 'correlation_attack_exit');
+        #array_push($grapshs, 'id_number_of_exits');
+        #array_push($grapshs, 'exit_nodes_node_usage');
     }
     if(count(array_unique($adv_guard)) > 1){
         array_push($grapshs, 'correlation_attack_guard');
+        array_push($grapshs, 'guard_nodes_node_usage');
         # array_push($grapshs, 'id_number_of_guards');
     }
     if(count(array_unique($adv_exit)) > 1){
-
+        array_push($grapshs, 'correlation_attack_exit');
+        array_push($grapshs, 'id_number_of_exits');
+        array_push($grapshs, 'exit_nodes_node_usage');
     }
     if(count(array_unique($friendly_guard_bandwidth)) > 1){
 
@@ -202,11 +210,13 @@ function show_graph($config, $number_of_user_simulations){
     }
     if(count(array_unique($adv_guard_bandwidth)) > 1){
         array_push($grapshs, 'guard_bandwidth');
+        array_push($grapshs, 'correlation_attack_guard_bandwidth');
         # array_push($grapshs, 'id_guard_bandwidth');
     }
     if(count(array_unique($adv_exit_bandwidth)) > 1){
         array_push($grapshs, 'exit_bandwidth');
         array_push($grapshs, 'id_exit_bandwidth');
+        array_push($grapshs, 'correlation_attack_exit_bandwidth');
     }
     return $grapshs;
 }
@@ -251,6 +261,11 @@ function create_zip($type){
             $zip->addFile('graph/id_number_of_exits.png', 'id_number_of_exits.png');
             $zip->addFile('graph/id_number_of_guards.png', 'id_number_of_guards.png');
             $zip->addFile('graph/exit_bandwidth.png', 'exit_bandwidth.png');
+            $zip->addFile('graph/correlation_attack_exit_bandwidth.png', 'correlation_attack_exit_bandwidth.png');
+            $zip->addFile('graph/correlation_attack_guard_bandwidth.png', 'correlation_attack_guard_bandwidth.png');
+            $zip->addFile('graph/exit_encryption.png', 'exit_encryption.png');
+            $zip->addFile('graph/exit_nodes_node_usage.png', 'exit_nodes_node_usage.png');
+            $zip->addFile('graph/guard_nodes_node_usage.png', 'guard_nodes_node_usage.png');
             $zip->close();
         }
         if($type == 'exit_attack'){
@@ -331,19 +346,22 @@ function create_graph_page($sim_type, $graph_names){
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>
-                        <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp.</th>";
+                        <th data-field=\"encryption\" data-sortable=\"true\" scope=\"col\">Encryp %</th>";
+        $legend = file_get_contents($cwd."/graph/attack_legend.svg");
+
     }else if($sim_type == 'hidden_service' || $sim_type == 'path') {
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"usage\" data-sortable=\"true\" scope=\"col\">Usage</th>";
+        $legend = file_get_contents($cwd."/graph/legend.dot.svg");
     }else{
         $usage_table = "<th data-field=\"ip\" data-sortable=\"true\" scope=\"col\">IP</th>
                         <th data-field=\"bandwidth\" data-sortable=\"true\" scope=\"col\">KB/s</th>
                         <th data-field=\"id\" data-sortable=\"true\" scope=\"col\">ID's</th>
                         <th data-field=\"id_stolen_node_usage\" data-sortable=\"true\" scope=\"col\">Stolen</th>
                         <th data-field=\"id_stolen_percentage\" data-sortable=\"true\" scope=\"col\">Stolen %</th>";
+        $legend = file_get_contents($cwd."/graph/exit_legend.svg");
     }
-    $legend = file_get_contents($cwd."/graph/legend.dot.svg");
     $paths_table = "<th data-field=\"count\" data-sortable=\"true\" scope=\"col\">N</th>
                         <th data-field=\"guard\" data-sortable=\"true\" scope=\"col\">Guard</th>
                         <th data-field=\"middle\" data-sortable=\"true\" scope=\"col\">Middle</th>

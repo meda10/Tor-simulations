@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# -----------------------------------------------------------------
+# authors:	Isis Lovecruft <isis@torproject.org>
+# licence:	MIT licence, see LICENSE file for details
+# copyright:	© 2013-2016 Isis Lovecruft, The Tor Project, Inc.
+# -----------------------------------------------------------------
 
 """Functionality for creating and working with NTOR keys.
 For a description of the NTOR handshake protocol, as well as its requisite

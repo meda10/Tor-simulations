@@ -11,16 +11,3 @@ Docker container inherits file permissions
 Config file  can be found in /Tor-simulations/nginx/config.d/default.conf
 
 
-
-
-An image that includes Shadow along with the Tor plugin is available at [https://security.cs.georgetown.edu/shadow-docker-images/shadow-tor.tar.gz](https://security.cs.georgetown.edu/shadow-docker-images/shadow-tor.tar.gz).
-
-To use these images:
-
-1. Download the desired image (see above URLs).
-2. Load it via: ```gunzip -c shadow-standalone.tar.gz | docker load```
-3. Run it via: ```docker run -t -i -u shadow shadow-standalone /bin/bash```
-
-(Replace *shadow-standalone* with *shadow-tor* if you are using the image with the Tor plugin.)
-
-The **shadow** user has sudo access.  Its password is ***shadow***.

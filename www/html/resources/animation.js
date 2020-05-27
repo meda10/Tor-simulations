@@ -1,3 +1,8 @@
+// -----------------------------------------------------------------
+// authors: Ing. Libor Polčák Ph.D.
+// Source:	http://www.fit.vutbr.cz/~ipolcak/toranim/toranim.html#2
+// -----------------------------------------------------------------
+
 function show_layer(num) {
 	var layers = document.querySelectorAll("svg g.layer");
 	if (layers.length > 0) {
