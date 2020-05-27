@@ -74,13 +74,13 @@ def parse_config_file(file):
         print("Key Error: {}".format(e))
         sys.exit(5)
     try:
-        dic['path'] = '/home/petr/torps' if config['general']['path'] == '' else config['general']['path']
-        dic['path'] = '/home/petr/torps'
-        # dic['path'] = '/var/www/html/torps'
+        # dic['path'] = '/home/petr/torps' if config['general']['path'] == '' else config['general']['path']
+        # dic['path'] = '/home/petr/torps'
+        dic['path'] = '/var/www/html/torps'
     except KeyError as e:
         dic['path'] = '/var/www/html/torps'
-        dic['path'] = '/home/petr/torps'
-    #check if cestion exists
+        # dic['path'] = '/home/petr/torps'
+    # check if cestion exists
     # config['general']['simulation_type']
 
     if config['general']['simulation_type'] == 'path':
