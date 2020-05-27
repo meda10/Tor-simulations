@@ -368,7 +368,7 @@ function create_graph_page($sim_type, $graph_names){
                         <th data-field=\"exit\" data-sortable=\"true\" scope=\"col\">Exit</th>";
 
     if($sim_type == 'multiple_sim'){
-        $legend = ""
+        $legend = "";
     }
 
     if($sim_type == 'hidden_service'){
