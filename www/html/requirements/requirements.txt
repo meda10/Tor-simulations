@@ -1,5 +1,5 @@
 cffi==1.13.2
-cryptography==2.8
+cryptography==3.2
 cycler==0.10.0
 graphviz==0.13.2
 kiwisolver==1.1.0
